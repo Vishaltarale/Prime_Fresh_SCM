@@ -7,17 +7,8 @@ from UOM.models import UOMConversionMatrix
 from product_Items.models import Product
 from UOM.models import UOM,UOMConversionMatrix
 
-def Order_dash(request):
-    if 'user_email' in request.session:
-        user_email = request.session['user_email']
-        data = Order.objects(created_by=user_email)  # Store email in `created_by`
-        return render(request, "Order_dash.html", {'Orders': data})
-    else:
-        return redirect("Users:login_user")
 
-from django.core.serializers.json import DjangoJSONEncoder
-import json
-from Location.models import Warehouse
+
 
 def Create_order(request):
     if request.session.get('user_email'):
