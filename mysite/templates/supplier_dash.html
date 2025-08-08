@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Suppliers | SCM Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-6 md:ml-[260px] mt-[80px]">
+  <div class="bg-white shadow-lg rounded-xl p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Supplier Dashboard</h1>
+
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div class="bg-blue-50 p-4 rounded-lg shadow-sm">
+        <h2 class="text-lg font-semibold text-blue-800">Total Suppliers</h2>
+        <p class="text-3xl font-bold text-blue-900 mt-2">{{ total_suppliers }}</p>
+      </div>
+      <div class="bg-green-50 p-4 rounded-lg shadow-sm">
+        <h2 class="text-lg font-semibold text-green-800">Active Suppliers</h2>
+        <p class="text-3xl font-bold text-green-900 mt-2">{{ active_suppliers }}</p>
+      </div>
+      <div class="bg-red-50 p-4 rounded-lg shadow-sm">
+        <h2 class="text-lg font-semibold text-red-800">Inactive Suppliers</h2>
+        <p class="text-3xl font-bold text-red-900 mt-2">{{ inactive_suppliers }}</p>
+      </div>
+    </div>
+
+    <!-- Supplier Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-left border border-gray-200">
+        <thead class="bg-gray-100 text-gray-700">
+          <tr>
+            <th class="p-3 border">Name</th>
+            <th class="p-3 border">Company</th>
+            <th class="p-3 border">Email</th>
+            <th class="p-3 border">Phone</th>
+            <th class="p-3 border">Status</th>
+            <th class="p-3 border">Recent Orders</th>
+            <th class="p-3 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for supplier in suppliers %}
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 border font-medium">{{ supplier.supplier_name }}</td>
+            <td class="p-3 border">{{ supplier.company_name }}</td>
+            <td class="p-3 border">{{ supplier.email }}</td>
+            <td class="p-3 border">{{ supplier.phone }}</td>
+            <td class="p-3 border">
+              {% if supplier.status == "Active" %}
+                <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Active</span>
+              {% else %}
+                <span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="p-3 border">{{ supplier.recent_orders|default:"0" }}</td>
+            <td class="p-3 border space-x-2">
+              <a href="" class="text-blue-600 hover:underline">View</a>
+              <a href="" class="text-yellow-600 hover:underline">Edit</a>
+              <a href="" class="text-red-600 hover:underline"
+                onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center p-4 text-gray-500">No suppliers found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

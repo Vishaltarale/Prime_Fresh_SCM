@@ -1,0 +1,155 @@
+{% extends 'adminbase.html' %}
+
+{% block content %}
+<div class="p-6">
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-gray-800">Admin Dashboard</h2>
+    <p class="text-gray-500 mt-2">Overview of current SCM system activity.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+
+    <!-- Employees Card -->
+    <a href="{% url 'mysite:list_entity' 'employee' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-blue-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-blue-100 rounded-full">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5.121 17.804A3 3 0 017 17h10a3 3 0 012.879 2.121M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Employees</h4>
+            <p class="text-2xl font-bold text-blue-700">{{ employee_count }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Customers Card -->
+    <a href="{% url 'mysite:list_entity' 'customer' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-purple-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-purple-100 rounded-full">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-2.13a4 4 0 10-8 0 4 4 0 008 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Customers</h4>
+            <p class="text-2xl font-bold text-purple-700">{{ customer_count }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Suppliers Card -->
+    <a href="{% url 'mysite:list_entity' 'supplier' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-green-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-green-100 rounded-full">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Suppliers</h4>
+            <p class="text-2xl font-bold text-green-700">{{ supplier_count }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Farmers Card -->
+    <a href="{% url 'mysite:list_entity' 'farmer' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-yellow-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-yellow-100 rounded-full">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16 7a4 4 0 00-8 0v1a4 4 0 01-4 4v5h16v-5a4 4 0 01-4-4V7z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Farmers</h4>
+            <p class="text-2xl font-bold text-yellow-700">{{ farmer_count }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Offices Card -->
+    <a href="{% url 'mysite:list_entity' 'office' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-indigo-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-indigo-100 rounded-full">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Offices</h4>
+            <p class="text-2xl font-bold text-indigo-700">{{ office_count }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Warehouses Card -->
+    <a href="{% url 'mysite:list_entity' 'warehouse' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-rose-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-rose-100 rounded-full">
+            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Warehouses</h4>
+            <p class="text-2xl font-bold text-rose-700">{{ warehouse_count }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="{% url 'mysite:list_entity' 'Product' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-rose-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-rose-100 rounded-full">
+            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Stock</h4>
+            <p class="text-2xl font-bold text-rose-700">{{ products }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    {% comment %} orders  {% endcomment %}
+    <a href="{% url 'Orders:admin_customer_orders' %}" class="block">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-md transition-all border border-rose-100">
+        <div class="flex items-center space-x-4">
+          <div class="p-3 bg-rose-100 rounded-full">
+            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="text-gray-500">Customer Orders</h4>
+            <p class="text-2xl font-bold text-rose-700">{{ orders }}</p>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!-- navbar.html -->
+<header class="bg-white shadow-custom p-4 pl-[260px] fixed top-0 left-0 right-0 z-40 flex justify-between items-center">
+        <div class="flex flex-col md:flex-row md:items-center w-full justify-between">
+            <div class="md:w-1/2 mb-2 md:mb-0">
+            <h2 id="pageTitle" class="text-secondary  md:ml-5 text-lg font-semibold">Supply Chain Dashboard</h2>
+            <p id="pageSubtitle" class="text-sm md:ml-5 text-gray-500">Welcome back, {{request.session.user_email}}</p>
+            </div>
+            <div class="md:w-1/2 text-right flex items-center justify-end gap-2">
+            <button id="profileDropdownBtn" class="flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-white focus:outline-none">
+                <i class="fas fa-user"> {{ request.session.user_email|cut:"@"|slice:":-9" }}</i>
+                <span class="hidden md:inline"></span>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="profileDropdownMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                <a href="{% url 'Users:user_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-user-circle w-5 mr-2"></i> Profile
+                </a>
+                <a href="{% url 'Users:user_logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                <i class="fas fa-sign-out-alt w-5 mr-2"></i> Logout
+                </a>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const profileBtn = document.getElementById('profileDropdownBtn');
+    const dropdownMenu = document.getElementById('profileDropdownMenu');
+
+    profileBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#profileDropdownBtn')) {
+        dropdownMenu.classList.add('hidden');
+      }
+    });
+  });
+</script>

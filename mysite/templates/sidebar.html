@@ -1,0 +1,54 @@
+<!-- Mobile Toggle Button -->
+<button class="md:hidden fixed top-4 left-4 z-[1001] bg-primary text-white p-2 rounded-md" id="sidebarToggle" aria-label="Toggle sidebar">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="bg-sidebar-bg min-h-screen fixed top-0 left-0 w-[260px] transition-sidebar duration-300 ease-in-out z-[1000] overflow-y-auto md:translate-x-0 -translate-x-full">
+  <div class="p-6 border-b border-white/10">
+    <h4 class="text-white font-semibold flex items-center gap-2">
+      <i class="fas fa-cube"></i> SCM Dashboard
+    </h4>
+  </div>
+  <nav class="py-4">
+    <ul class="flex flex-col space-y-2">
+      <li><a href="{% url 'mysite:index' %}" class="nav-link"><i class="fas fa-boxes w-5 mr-2.5 text-center"></i> Dashboard</a></li>
+      <li><a href="{% url 'mysite:inventory' %}" class="nav-link"><i class="fas fa-warehouse w-5 mr-2.5 text-center"></i> Inventory</a></li>
+      <li><a href="{% url 'Orders:Order_dash' %}" class="nav-link"><i class="fas fa-shopping-cart w-5 mr-2.5 text-center"></i> Orders</a></li>
+      <li><a href="{% url "mysite:supplier_dash" %}" class="nav-link"><i class="fas fa-truck w-5 mr-2.5 text-center"></i> Suppliers</a></li>
+      <li><a href="{% url 'Location:location_dash' %}" class="nav-link"><i class="fas fa-warehouse w-5 mr-2.5 text-center"></i> Warehouse</a></li>
+      <li><a href="{% url 'Location:reports' %}" class="nav-link"><i class="fas fa-chart-bar w-5 mr-2.5 text-center"></i> Reports</a></li>
+      <li><a href="{% url 'Settings:settings' %}" class="nav-link"><i class="fas fa-cog w-5 mr-2.5 text-center"></i> Settings</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Tailwind CSS Styling -->
+<style type="text/tailwindcss">
+  @layer components {
+    .nav-link {
+      @apply text-white/80 py-3 px-6 flex items-center no-underline transition-all duration-300 ease-in-out bg-transparent w-full;
+    }
+    .nav-link:hover {
+      @apply bg-sidebar-hover text-white;
+    }
+    .nav-link.active {
+      @apply bg-primary text-white;
+    }
+    .nav-link:focus {
+      @apply outline outline-2 outline-primary outline-offset-2;
+    }
+  }
+</style>
+
+<!-- Sidebar Toggle Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+    });
+  });
+</script>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SCM Dashboard{% endblock %}</title>
+
+    <!-- Tailwind & Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#6f42c1', hover: '#5a359a' },
+                        sidebar: { bg: '#2c3e50', hover: '#34495e' },
+                        secondary: '#495057',
+                        'bg-light': '#f8f9fa',
+                    },
+                    borderRadius: { custom: '10px' },
+                    boxShadow: {
+                        custom: '0 2px 10px rgba(0,0,0,0.1)',
+                        notification: '0 4px 12px rgba(0,0,0,0.15)',
+                    },
+                    width: { sidebar: '260px' },
+                    transitionProperty: { custom: 'all' },
+                }
+            }
+        }
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-100">
+    {% if messages %}
+    <div class="fixed top-5 right-5 z-50 space-y-4">
+        {% for message in messages %}
+        <div class="flash-message px-4 py-3 rounded-md shadow-notification transition-opacity duration-500 ease-out
+            {% if message.tags == 'success' %}bg-green-500 text-white
+            {% elif message.tags == 'error' %}bg-red-500 text-white
+            {% elif message.tags == 'warning' %}bg-yellow-400 text-black
+            {% else %}bg-blue-500 text-white{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <button class="md:hidden fixed top-4 left-4 z-[1001] bg-primary text-white p-2 rounded-md" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    {% include "sidebar.html" %}
+
+    <div class="ml-sidebar transition-all duration-300 ease-in-out">
+        {% if request.resolver_match.view_name == 'mysite:index' or request.resolver_match.view_name == 'Customer:Customer_register' %}
+            {% include "mysite/templates/navbar.html" %}
+        {% elif request.resolver_match.view_name == 'Orders:Order_dash' or request.resolver_match.view_name == 'Orders:Create_order' %}
+            {% include "Orders/templates/navbar.html" %}
+        {% endif %}
+
+        <main class="p-4 md:p-6">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('translate-x-0');
+        });
+
+        document.addEventListener('click', function (e) {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                sidebar.classList.remove('translate-x-0');
+            }
+        });
+
+        // Navbar page title handler
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbar = {
+                updatePageTitle: function (title, subtitle = '') {
+                    const titleElement = document.getElementById('pageTitle');
+                    const subtitleElement = document.getElementById('pageSubtitle');
+                    if (titleElement) titleElement.textContent = title;
+                    if (subtitleElement) subtitleElement.textContent = subtitle;
+                }
+            };
+
+            document.addEventListener('sidebarSectionChange', (e) => {
+                const section = e.detail.section;
+                const titles = {
+                    dashboard: 'Supply Chain Dashboard',
+                    inventory: 'Inventory Management',
+                    orders: 'Order Management',
+                    suppliers: 'Supplier Management',
+                    warehouse: 'Warehouse Management',
+                    reports: 'Reports & Analytics',
+                    settings: 'System Settings'
+                };
+                const subtitles = {
+                    dashboard: 'Welcome back, Manager',
+                    inventory: 'Manage your inventory items',
+                    orders: 'Track and manage orders',
+                    suppliers: 'Manage supplier relationships',
+                    warehouse: 'Warehouse operations',
+                    reports: 'View reports and analytics',
+                    settings: 'Configure system settings'
+                };
+                navbar.updatePageTitle(titles[section] || 'SCM Dashboard', subtitles[section] || '');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                const alerts = document.querySelectorAll('.flash-message');
+                alerts.forEach(alert => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.6s ease-out';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 600);
+                });
+            }, 3000); 
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

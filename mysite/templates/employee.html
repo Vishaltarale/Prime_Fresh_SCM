@@ -1,0 +1,68 @@
+{% extends 'adminbase.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow">
+  <h2 class="text-2xl font-bold mb-6 text-blue-700">Employee Registration</h2>
+
+  <form action="{% url 'mysite:employee_register' %}" method="POST" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Full Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+        <input type="text" name="full_name" required
+               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" name="email" required
+               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+
+      <!-- Phone -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+        <input type="text" name="phone" required
+               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+
+      <!-- Role -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Role</label>
+        <select name="role" required
+                class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="">Select Role</option>
+          <option value="Admin">Admin</option>
+          <option value="Inventory Officer">Inventory Officer</option>
+          <option value="Warehouse Manager">Warehouse Manager</option>
+        </select>
+      </div>
+
+      <!-- Joining Date -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Joining Date</label>
+        <input type="date" name="joining_date" required
+               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+
+      <!-- Address -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Address</label>
+        <input type="text" name="address"
+               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="pt-4">
+      <button type="submit"
+              class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow">
+        Register Employee
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

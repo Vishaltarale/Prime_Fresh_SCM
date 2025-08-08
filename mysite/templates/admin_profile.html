@@ -1,0 +1,43 @@
+{% extends "adminbase.html" %}
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-10 px-6">
+  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+    
+    <!-- Profile Header -->
+    <div class="flex items-center gap-6 mb-8">
+      <img src="https://i.pravatar.cc/100" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-blue-300 shadow-sm">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">{{ data.username|title }}</h2>
+        <p class="text-gray-500">{{ data.email }}</p>
+      </div>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="space-y-4 text-sm text-gray-700">
+      <div class="flex justify-between border-b pb-2">
+        <span class="font-medium">Username:</span>
+        <span>{{ data.username }}</span>
+      </div>
+      <div class="flex justify-between border-b pb-2">
+        <span class="font-medium">Email:</span>
+        <span>{{ data.email }}</span>
+      </div>
+      <div class="flex justify-between border-b pb-2">
+        <span class="font-medium">Role:</span>
+        <span>Administrator</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-8 flex justify-end gap-4">
+      <a href="{% url 'mysite:admin_logout' %}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm shadow">
+        Logout
+      </a>
+      <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm shadow">
+        Edit Profile
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

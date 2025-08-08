@@ -1,0 +1,25 @@
+<!-- custom_tag.html -->
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-gray-300 text-sm bg-white rounded-lg overflow-hidden shadow">
+    <thead class="bg-gray-100">
+      <tr>
+        {% for head in headers %}
+        <th class="border px-4 py-2 text-left font-semibold text-gray-700">{{ head }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="hover:bg-gray-50">
+        {% for cell in row %}
+        <td class="border px-4 py-2">{{ cell }}</td>
+        {% endfor %}
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="{{ headers|length }}" class="text-center py-4 text-gray-500">No data available.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

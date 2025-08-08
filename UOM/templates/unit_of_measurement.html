@@ -1,0 +1,33 @@
+{% extends 'adminbase.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow">
+  <h2 class="text-2xl font-bold text-cyan-700 mb-6">Add Unit of Measurement (UOM)</h2>
+
+  <form action="{% url 'UOM:uom_register' %}" method="POST" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- UOM Name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">UOM Name</label>
+      <input type="text" name="name" required placeholder="e.g., KG, LTR"
+             class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-cyan-400">
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Description</label>
+      <textarea name="description" rows="2" placeholder="e.g., Kilogram, Litre"
+                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-cyan-400"></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="pt-4">
+      <button type="submit"
+              class="px-6 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 transition shadow">
+        Save UOM
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

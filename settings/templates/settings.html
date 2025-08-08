@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Settings | SCM Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-6 md:ml-[260px] mt-[10px]">
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Settings</h1>
+
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 mb-6">
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="settingsTabs">
+        <li class="me-2">
+          <button data-tab="company" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Company Info</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="users" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Users</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="permissions" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Permissions</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="uom" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">UOM</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="warehouse" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Warehouses</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="compliance" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Compliance</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="preferences" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Preferences</button>
+        </li>
+        <li class="me-2">
+          <button data-tab="backup" class="tab-btn inline-block p-4 rounded-t-lg text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-500">Backup</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="company" class="tab-content">
+      <h2 class="text-xl font-semibold mb-4">Company Info</h2>
+      <form>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Company Name" class="form-input">
+          <input type="text" placeholder="GSTIN" class="form-input">
+          <input type="text" placeholder="Phone Number" class="form-input">
+          <input type="email" placeholder="Email Address" class="form-input">
+          <textarea placeholder="Company Address" class="form-input col-span-2"></textarea>
+        </div>
+        <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+      </form>
+    </div>
+
+    <div id="users" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">User Management</h2>
+      <p class="text-gray-600">Add or manage users with roles.</p>
+    </div>
+
+    <div id="permissions" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">Role Permissions</h2>
+      <p class="text-gray-600">Control what users can see or do per module.</p>
+    </div>
+
+    <div id="uom" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">Units of Measurement</h2>
+      <p class="text-gray-600">Define or edit UOM and conversion matrix.</p>
+    </div>
+
+    <div id="warehouse" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">Warehouses</h2>
+      <p class="text-gray-600">Manage available storage locations.</p>
+    </div>
+
+    <div id="compliance" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">Tax & Compliance</h2>
+      <p class="text-gray-600">Configure GST, HSN codes, and tax formats.</p>
+    </div>
+
+    <div id="preferences" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">System Preferences</h2>
+      <p class="text-gray-600">Date format, currency, invoice prefix, etc.</p>
+    </div>
+
+    <div id="backup" class="tab-content hidden">
+      <h2 class="text-xl font-semibold mb-4">Backup & Restore</h2>
+      <p class="text-gray-600">Download backups or restore system state.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .form-input {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    width: 100%;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .tab-btn.active {
+    color: #2563eb;
+    border-color: #2563eb;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    function setActiveTab(tabId) {
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabId) {
+          btn.classList.add('active');
+        }
+      });
+
+      tabContents.forEach(content => {
+        if (content.id === tabId) {
+          content.classList.remove('hidden');
+          content.classList.add('active');
+        } else {
+          content.classList.add('hidden');
+          content.classList.remove('active');
+        }
+      });
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        setActiveTab(tabId);
+      });
+    });
+
+    // Set default tab
+    setActiveTab('company');
+  });
+</script>
+{% endblock %}

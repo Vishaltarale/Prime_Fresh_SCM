@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-6 md:ml-[260px] mt-[80px]">
+  <div class="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto">
+    <h2 class="text-2xl font-semibold mb-6 text-gray-800 text-center">Create New Order</h2>
+
+    <form method="POST" action="{% url 'Orders:Order_save' %}" id="orderForm">
+      {% csrf_token %}
+      
+      <!-- Customer Info -->
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Customer Name</label>
+        <select name="customer_name" required
+          class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300">
+          <option value="" disabled selected>Select a customer</option>
+          {% for customer in Customers %}
+            <option value="{{ customer.full_name }}">{{ customer.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-gray-700 font-medium mb-1">Delivery Address</label>
+        <textarea name="delivery_address" rows="3" required
+          class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"></textarea>
+      </div>
+
+      <!-- Warehouse selection -->
+      <div class="mb-4">
+      <label class="block text-gray-700 font-medium mb-1">Warehouse Location</label>
+      <select name="warehouse_id" id="warehouseDropdown" onchange="filterProductsByWarehouse()" required
+        class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300">
+        <option value="" disabled selected>Select a warehouse</option>
+        {% for warehouse in warehouses %}
+          <option value="{{ warehouse.id }}">{{ warehouse.warehouse_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+      <!-- Product Items -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Order Items</label>
+        <div id="itemsContainer" class="space-y-4">
+          <!-- Item Row -->
+          <div class="flex flex-wrap gap-3 item-row">
+           <select name="product_name[]" onchange="updateProductDetails(this)" required
+            class="product-select w-[32%] border border-gray-300 rounded-md px-3 py-2">
+            <option value="" disabled selected>Select a product</option>
+            {% for item in inventory %}
+              <option value="{{ item.name }}">{{ item.name }}</option>
+            {% endfor %}
+          </select>
+
+            <input type="number" name="quantity[]" placeholder="Qty" min="1" required
+              class="w-[15%] border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300">
+
+            <select name="uom[]" required
+              class="w-[15%] border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300">
+              <option value="" disabled selected>UOM</option>
+              {% for item in inventory %}
+                <option value="{{ item.uom.name }}">{{ item.uom.name }}</option>
+              {% endfor %}
+            </select>
+
+            <input type="number" name="price[]" placeholder="Price" step="0.01" min="0" required
+              class="w-[20%] border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300">
+
+            <button type="button" onclick="removeRow(this)"
+              class="text-red-500 hover:text-red-700 font-medium text-sm">Remove</button>
+          </div>
+        </div>
+
+        <button type="button" onclick="addProductRow()"
+          class="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 text-sm">+ Add Another Product</button>
+      </div>
+
+      <!-- Total -->
+      <div class="mt-6 text-right">
+        <label class="block text-gray-700 font-medium mb-1">Total Amount:</label>
+        <p id="totalAmount" class="text-xl font-semibold text-gray-800">₹0.00</p>
+      </div>
+
+      <!-- Submit -->
+      <div class="mt-6">
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-200">Place Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function addProductRow() {
+    const container = document.getElementById('itemsContainer');
+    const row = document.createElement('div');
+    row.className = 'flex flex-wrap gap-3 item-row';
+    row.innerHTML = `
+          <select name="product_name[]" onchange="updateProductDetails(this)" required
+            class="product-select w-[32%] border border-gray-300 rounded-md px-3 py-2">
+            <option value="" disabled selected>Select a product</option>
+            {% for item in inventory %}
+              <option value="{{ item.name }}">{{ item.name }}</option>
+            {% endfor %}
+          </select>
+
+      <input type="number" name="quantity[]" placeholder="Qty" min="1" required
+        class="w-[15%] border border-gray-300 rounded-md px-3 py-2">
+
+      <select name="uom[]" required
+        class="w-[15%] border border-gray-300 rounded-md px-3 py-2">
+        <option value="" disabled selected>UOM</option>
+        {% for item in inventory %}
+          <option value="{{ item.uom.name }}">{{ item.uom.name }}</option>
+        {% endfor %}
+      </select>
+
+      <input type="number" name="price[]" placeholder="Price" step="0.01" min="0" required
+        class="w-[20%] border border-gray-300 rounded-md px-3 py-2">
+
+      <button type="button" onclick="removeRow(this)"
+        class="text-red-500 hover:text-red-700 font-medium text-sm">Remove</button>
+    `;
+    container.appendChild(row);
+    calculateTotal();
+  }
+
+  function removeRow(button) {
+    const row = button.parentElement;
+    row.remove();
+    calculateTotal();
+  }
+
+  document.getElementById('orderForm').addEventListener('input', calculateTotal);
+
+  function calculateTotal() {
+    const prices = document.querySelectorAll('input[name="price[]"]');
+    const quantities = document.querySelectorAll('input[name="quantity[]"]');
+    let total = 0;
+    prices.forEach((price, index) => {
+      const qty = parseFloat(quantities[index].value) || 0;
+      const cost = parseFloat(price.value) || 0;
+      total += qty * cost;
+    });
+    document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
+  }
+
+
+function updateProductDetails(selectElement) {
+  const selectedProduct = selectElement.value;
+  const row = selectElement.closest('.item-row');
+
+  const priceInput = row.querySelector('input[name="price[]"]');
+  const uomSelect = row.querySelector('select[name="uom[]"]');
+
+  const product = productData.find(p => p.name === selectedProduct);
+
+  if (product) {
+    priceInput.value = product.price;
+
+    // Auto-select UOM
+    for (let option of uomSelect.options) {
+      if (option.value === product.uom) {
+        option.selected = true;
+        break;
+      }
+    }
+
+    calculateTotal();
+  }
+}
+
+  const productData = {{ product_json|safe }};
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'adminbase.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow">
+  <h2 class="text-2xl font-bold text-indigo-700 mb-6">Add New Product</h2>
+
+  <form action="{% url 'product_Items:product_register' %}" method="POST" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Product Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Product Name</label>
+        <input type="text" name="name" required
+               class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-400">
+      </div>
+
+      <!-- SKU -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">SKU</label>
+        <input type="text" name="sku" required
+               class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-400">
+      </div>
+
+      <!-- Category -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Category</label>
+        <select name="category" required
+                class="mt-1 block w-full px-4 py-2 border rounded-md bg-white focus:ring-2 focus:ring-indigo-400">
+          <option value="">Select Category</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Subcategory -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Subcategory</label>
+        <select name="subcategory" required
+                class="mt-1 block w-full px-4 py-2 border rounded-md bg-white focus:ring-2 focus:ring-indigo-400">
+          <option value="">Select Subcategory</option>
+          {% for sub in subcategories %}
+            <option value="{{ sub.id }}">{{ sub.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- UOM -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">From Unit</label>
+        <select name="from_uom" required>
+          <option value="">-- Select UOM --</option>
+          {% for unit in uoms %}
+            <option value="{{ unit.id }}">{{ unit.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Price -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Price Per Unit</label>
+        <input type="number" name="price_per_unit" step="0.01" required
+               class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-400">
+      </div>
+<div>
+  <label class="block text-sm font-medium text-gray-700">Warehouse</label>
+  <select name="warehouse" required
+          class="mt-1 block w-full px-4 py-2 border rounded-md bg-white focus:ring-2 focus:ring-indigo-400">
+    <option value="">-- Select Warehouse --</option>
+    {% for warehouse in warehouses %}
+      <option value="{{ warehouse.id }}">{{ warehouse.warehouse_name }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+
+<!-- Add From (Supplier / Farmer) -->
+<div class="md:col-span-2">
+  <label class="block text-sm font-medium text-gray-700 mb-1">Add From</label>
+  <div class="flex gap-6">
+    <label class="inline-flex items-center">
+      <input type="radio" name="source_type" value="supplier" onchange="toggleSourceDropdown()" required
+             class="form-radio text-indigo-600">
+      <span class="ml-2 text-gray-700">Supplier</span>
+    </label>
+    <label class="inline-flex items-center">
+      <input type="radio" name="source_type" value="farmer" onchange="toggleSourceDropdown()"
+             class="form-radio text-indigo-600">
+      <span class="ml-2 text-gray-700">Farmer</span>
+    </label>
+  </div>
+</div>
+
+<!-- Dynamic Source Dropdown (Supplier / Farmer) -->
+<div class="md:col-span-2" id="supplierDropdown" style="display:none;">
+  <label class="block text-sm font-medium text-gray-700 mt-4">Select Supplier</label>
+  <select name="supplier_id"
+          class="mt-1 block w-full px-4 py-2 border rounded-md bg-white focus:ring-2 focus:ring-indigo-400">
+    <option value="">-- Choose Supplier --</option>
+    {% for s in suppliers %}
+      <option value="{{ s.id }}">{{ s.supplier_name }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="md:col-span-2" id="farmerDropdown" style="display:none;">
+  <label class="block text-sm font-medium text-gray-700 mt-4">Select Farmer</label>
+  <select name="farmer_id"
+          class="mt-1 block w-full px-4 py-2 border rounded-md bg-white focus:ring-2 focus:ring-indigo-400">
+    <option value="">-- Choose Farmer --</option>
+    {% for f in farmers %}
+      <option value="{{ f.id }}">{{ f.full_name }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+
+      <!-- Quantity -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Quantity Available</label>
+        <input type="number" name="quantity_available" required
+               class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-400">
+      </div>
+
+      <!-- Description -->
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea name="description" rows="3"
+                  class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-400"></textarea>
+      </div>
+    </div>
+
+    <div class="pt-4">
+      <button type="submit"
+              class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition shadow">
+        Save Product
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function toggleSourceDropdown() {
+    const supplierDropdown = document.getElementById('supplierDropdown');
+    const farmerDropdown = document.getElementById('farmerDropdown');
+    const selected = document.querySelector('input[name="source_type"]:checked').value;
+
+    if (selected === 'supplier') {
+      supplierDropdown.style.display = 'block';
+      farmerDropdown.style.display = 'none';
+    } else if (selected === 'farmer') {
+      farmerDropdown.style.display = 'block';
+      supplierDropdown.style.display = 'none';
+    }
+  }
+</script>
+{% endblock %}

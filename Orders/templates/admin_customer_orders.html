@@ -1,0 +1,56 @@
+{% extends "adminbase.html" %}
+{% block content %}
+<div class="p-6 md:ml-[10px] mt-[10px]">  <!-- Adjust margins to fit with sidebar & navbar -->
+  <div class="bg-white shadow-md rounded-lg p-6 w-full">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">Recent Orders</h2>
+      <a href="#" class="text-purple-600 hover:underline text-sm font-medium">View All</a>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left font-semibold text-gray-600">Customer</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-600">Date</th>
+            <th class="px-6 py-3 text-left font-semibold text-gray-600">Status</th>
+            <th class="px-6 py-3 text-right font-semibold text-gray-600">Amount</th>
+            <th class="px-6 py-3 text-right font-semibold text-gray-600">Created_by</th>
+            <th class="px-6 py-3 text-right font-semibold text-gray-600">Delivery Address</th>
+            <th class="px-6 py-3 text-right font-semibold text-gray-600">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          <!-- Example row -->
+           {% for order in Orders %}
+          <tr>
+            <td class="px-6 py-4 text-gray-700">{{order.customer_name}}</td>
+            <td class="px-6 py-4 text-gray-600">{{order.order_date}}</td>
+            <td class="px-6 py-4">
+              {% if order.status == 'Pending' %}
+              <span class="bg-yellow-100 text-black-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{order.status}}</span>
+              {% elif order.status == 'Completed' %}
+              <span class="bg-green-100 text-black-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{order.status}}</span>
+              {% elif order.status == 'Processing' %}
+              <span class="bg-blue-100 text-black-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{order.status}}</span>
+              {% elif order.status == 'Cancelled' %}
+              <span class="bg-red-100 text-black-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{order.status}}</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-right text-gray-800 font-semibold">{{order.total_amount}}</td>
+            <td class="px-6 py-4 text-right text-gray-800 font-semibold">{{order.created_by}}</td>
+            <td class="px-6 py-4 text-right text-gray-800 font-semibold">{{order.delivery_address}}</td>
+            <td class="px-6 py-4 text-right">
+              <a href="orderedit?id={{order.id}}" class="text-blue-600 hover:underline text-sm font-medium">Accept</a>
+              <a href="orderdelete?id={{order.id}}" class="text-blue-600 hover:underline text-sm font-medium">Reject</a>
+              <a href="generate_invoice?id={{order.id}}" class="text-blue-600 hover:underline text-sm font-medium">Invoice</a>
+           </td>
+          </tr>
+          {% endfor %}
+          <!-- Add more rows dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

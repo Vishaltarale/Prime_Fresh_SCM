@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex min-h-screen bg-gray-50">
+    <div class="flex-1 md:ml-64 transition-all duration-300">
+        <div class="p-6">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 py-4 px-6 rounded-lg mb-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">Inventory Dashboard</h1>
+                </div>
+            </header>
+
+            <!-- Inventory Table -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">Current Stock</h2>
+                    <input type="text" placeholder="Search Products..." class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring focus:ring-primary" />
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-600 border-b">
+                                <th class="py-2 px-4">Product</th>
+                                <th class="py-2 px-4">Warehouse</th>
+                                <th class="py-2 px-4">SKU</th>
+                                <th class="py-2 px-4">Category</th>
+                                <th class="py-2 px-4">Subcategory</th>
+                                <th class="py-2 px-4">UOM</th>
+                                <th class="py-2 px-4">Quantity</th>
+                                <th class="py-2 px-4">Price Per Unit</th>
+                                <th class="py-2 px-4">Created At</th>
+                                <th class="py-2 px-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                        {% for product in products %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 px-4">{{ product.name }}</td>
+                                <td class="py-2 px-4">{{ product.warehouse.warehouse_name }}</td>
+                                <td class="py-2 px-4">{{ product.sku }}</td>
+                                <td class="py-2 px-4">{{ product.category.name }}</td>
+                                <td class="py-2 px-4">{{ product.subcategory.name }}</td>
+                                <td class="py-2 px-4">{{ product.uom.name }}</td>
+                                <td class="py-2 px-4">{{ product.quantity_available }}</td>
+                                <td class="py-2 px-4">₹{{ product.price_per_unit }}</td>
+                                <td class="py-2 px-4">{{ product.created_at|date:"Y-m-d H:i" }}</td>
+                                <td class="py-2 px-4">
+                                    {% if product.quantity_available <= 0 %}
+                                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Out of Stock</span>
+                                    {% elif product.quantity_available < 50 %}
+                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Low Stock</span>
+                                    {% else %}
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Available</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Dynamic Category-wise Totals -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                {% for category, total in category_totals.items %}
+                <div class="bg-white shadow rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-gray-600">Total {{ category }} Available</h3>
+                    <p class="text-2xl font-bold text-indigo-600">{{ total }} kg</p>
+                </div>
+                {% empty %}
+                <div class="text-gray-500 text-sm">No inventory data available.</div>
+                {% endfor %}
+            </div>
+
+            <!-- Events and Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                <div class="space-y-4 bg-white shadow rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Recent Inventory Events</h3>
+                    {% for event in events %}
+                    <div class="flex items-start">
+                        <div class="{{ event.type|yesno:'bg-red-100,bg-yellow-100,bg-blue-100,bg-green-100' }} p-2 rounded-full mr-3">
+                            <i class="{{ event.icon }} text-{{ event.type }}-500"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium">{{ event.title }}</p>
+                            <p class="text-sm text-gray-500">{{ event.message }}</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ event.time }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-gray-500">No recent activity.</p>
+                    {% endfor %}
+                </div>
+
+                {% if chart %}
+                <div class="bg-white shadow-lg rounded-2xl p-6 flex items-center justify-center">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Inventory Distribution Chart</h3>
+                        <img src="data:image/png;base64,{{ chart }}" alt="Inventory Pie Chart" class="w-64 h-64 object-contain mx-auto">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof sidebar !== 'undefined') {
+        sidebar.setActiveSection('inventory');
+    }
+    if (typeof navbar !== 'undefined') {
+        navbar.updatePageTitle('Inventory Management', 'Track your inventory category-wise');
+    }
+});
+</script>
+{% endblock %}

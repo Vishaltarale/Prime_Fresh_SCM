@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SCM Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex bg-gray-100 min-h-screen font-sans">
+
+  {% include 'adminsidebar.html' %}
+
+  <div class="flex-1">
+    {% include 'adminnavbar.html' %}
+
+    <!-- Main content -->
+    <main class="p-6">
+      {% block content %}
+      <!-- Page content will go here -->
+      {% endblock %}
+    </main>
+  </div>
+
+</body>
+</html>

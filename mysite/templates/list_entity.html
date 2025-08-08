@@ -1,0 +1,48 @@
+{% extends 'adminbase.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="p-6">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ title }}</h2>
+
+  <!-- Responsive Table Wrapper -->
+  <div class="overflow-x-auto rounded-lg shadow border border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200 text-sm text-left text-gray-700 bg-white">
+      <thead class="bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <tr>
+          {% for col in headers %}
+            <th scope="col" class="px-4 py-3 whitespace-nowrap">{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        {% for obj in data %}
+        <tr class="hover:bg-gray-50 transition">
+          {% for field in fields %}
+            {% if field == 'actions' %}
+              <td class="px-4 py-3 whitespace-nowrap">
+                {% if request.resolver_match.view_name == 'Orders:orderedit' %}
+                  <a href="{% url 'Orders:orderedit' entity=obj.id %}" class="text-blue-600 hover:underline mr-2">Edit</a>
+                  <a href="{% url 'Orders:orderdelete' entity=obj.id %}" class="text-red-600 hover:underline" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                {% else %}
+                  <a href="{% url 'mysite:edit_entity' entity obj.id %}" class="text-blue-600 hover:underline mr-2">Edit</a>
+                  <a href="{% url 'mysite:delete_entity' entity obj.id %}" class="text-red-600 hover:underline" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                {% endif %}
+              </td>
+            {% else %}
+              <td class="px-4 py-3 whitespace-nowrap">{{ obj|get_attribute:field }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="{{ headers|length }}" class="text-center py-4 text-gray-400">
+            No {{ title|lower }} found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 via-indigo-100 to-purple-100 min-h-screen flex items-center justify-center font-sans">
+
+  <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 border border-gray-200 fade-in-up">
+    <div class="text-center mb-6">
+      <h2 class="text-3xl font-bold text-gray-800">User Registration</h2>
+      <p class="text-gray-500 text-sm mt-1">Create your account</p>
+    </div>
+
+    <form method="POST" action="{% url 'Users:user_register' %}" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Full Name -->
+      <div class="relative">
+        <input type="text" name="full_name" id="full_name" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Full Name" />
+        <label for="full_name"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                      peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                      peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Full Name
+        </label>
+      </div>
+
+      <!-- Email -->
+      <div class="relative">
+        <input type="email" name="email" id="email" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Email" />
+        <label for="email"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                      peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                      peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Email
+        </label>
+      </div>
+
+      <!-- Phone -->
+      <div class="relative">
+        <input type="tel" name="phone" id="phone" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Phone Number" />
+        <label for="phone"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                      peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                      peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Phone
+        </label>
+      </div>
+
+      <!-- Password -->
+      <div class="relative">
+        <input type="password" name="password1" id="password1" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Password" />
+        <label for="password1"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                      peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                      peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Password
+        </label>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="relative">
+        <input type="password" name="password2" id="password2" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Confirm Password" />
+        <label for="password2"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all 
+                      peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
+                      peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Confirm Password
+        </label>
+      </div>
+
+      <div>
+        <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-300 transform hover:scale-105 shadow-md">
+          Register
+        </button>
+      </div>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-gray-500">
+      Already have an account?
+      <a href="{% url 'Users:login_user' %}" class="text-indigo-600 hover:underline font-medium">Login</a>
+    </p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+<nav class="bg-white shadow-md fixed top-0 left-0 right-0 z-40 h-[70px] px-6 flex items-center justify-between md:ml-[260px]">
+  <!-- Left section: Title -->
+  <div class="flex items-center gap-3">
+    <i class="fas fa-clipboard-list text-purple-600 text-xl"></i>
+    <h1 class="text-lg font-semibold text-gray-800">Order Management</h1>
+  </div>
+
+  <!-- Right section: Actions -->
+  <div class="flex items-center gap-4">
+    {% if request.resolver_match.view_name == 'Orders:Order_dash' %}
+    <a href="{% url 'Orders:Create_order' %}" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700 transition duration-200">
+      <i class="fas fa-plus mr-2"></i>New Order
+    </a>
+    {% endif %}
+
+    {% if not request.resolver_match.view_name == 'Orders:Order_dash' %}
+    <a href="{% url 'Orders:Order_dash' %}" class="text-sm text-gray-700 hover:text-purple-600 font-medium">
+      Dashboard
+    </a>
+    {% endif %}
+
+
+  </div>
+</nav>
