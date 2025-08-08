@@ -302,3 +302,4 @@ def generate_invoice_pdf(request, order_id):
     return response
 
 
+
