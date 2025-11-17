@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Orders | SCM Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-4 md:p-6 lg:ml-[260px] mt-[60px] md:mt-[80px] bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+  <!-- Animated Background -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
+  </div>
+
+  <div class="relative z-10">
+    <!-- Header Section -->
+    <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div class="mb-4 lg:mb-0">
+          <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            📦 Sales Orders
+          </h1>
+          <p class="text-gray-600 mt-2">
+            {% if user_role == 'Admin' %}
+              Managing all system orders
+            {% elif user_role == 'Sales_Manager' %}
+              Managing customer and your orders
+            {% else %}
+              Your order history
+            {% endif %}
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+          {% if user_role == "Admin" or user_role == "Sales_Manager" %}
+          <a href="{% url 'Orders:transport_challan_view' %}" 
+             class="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Transport Challans
+          </a>
+          {% endif %}
+          
+          {% if user_role == "Admin" or user_role == "Sales_Manager" or user_role == "Customer" %}
+          <a href="{% url 'Orders:Create_order' %}" 
+             class="inline-flex items-center justify-center bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create Order
+          </a>
+          {% endif %}
+          
+          <div class="relative">
+            <input type="text" id="searchInput" placeholder="Search orders..." 
+                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full">
+            <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Total Orders Card -->
+      <div class="bg-white/80 backdrop-blur-lg rounded-xl p-4 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600">Total Orders</p>
+            <p class="text-2xl font-bold text-gray-800">
+              {{ orders|length }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <span class="text-blue-600 text-xl">📊</span>
+          </div>
+        </div>
+        <div class="mt-2">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full" 
+                 style="width: {% if orders|length > 0 %}{% widthratio completed_count orders|length 100 %}{% else %}0{% endif %}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Orders Card -->
+      <div class="bg-white/80 backdrop-blur-lg rounded-xl p-4 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600">Pending</p>
+            <p class="text-2xl font-bold text-yellow-600">
+              {{ pending_count }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <span class="text-yellow-600 text-xl">⏳</span>
+          </div>
+        </div>
+        <div class="mt-2">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-yellow-500 h-2 rounded-full" 
+                 style="width: {% if orders|length > 0 %}{% widthratio pending_count orders|length 100 %}{% else %}0{% endif %}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed Orders Card -->
+      <div class="bg-white/80 backdrop-blur-lg rounded-xl p-4 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600">Completed</p>
+            <p class="text-2xl font-bold text-green-600">
+              {{ completed_count }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <span class="text-green-600 text-xl">✅</span>
+          </div>
+        </div>
+        <div class="mt-2">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-600 h-2 rounded-full" 
+                 style="width: {% if orders|length > 0 %}{% widthratio completed_count orders|length 100 %}{% else %}0{% endif %}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Card -->
+      <div class="bg-white/80 backdrop-blur-lg rounded-xl p-4 shadow-lg border border-white/20 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600">Total Revenue</p>
+            <p class="text-2xl font-bold text-purple-600">
+              ₹{{ revenue|floatformat:2 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <span class="text-purple-600 text-xl">💰</span>
+          </div>
+        </div>
+        <div class="mt-2">
+          <p class="text-xs text-gray-500">From completed orders</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Table Section -->
+    <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+      <!-- Table Header -->
+      <div class="px-6 py-4 border-b border-gray-200/50">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2 sm:mb-0">
+            {% if user_role == 'Admin' %}
+              All Orders ({{ orders|length }})
+            {% elif user_role == 'Sales_Manager' %}
+              Customer & Your Orders ({{ orders|length }})
+            {% else %}
+              Your Orders ({{ orders|length }})
+            {% endif %}
+          </h2>
+          <div class="flex space-x-2">
+            <select id="statusFilter" class="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="all">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+              <option value="Processing">Processing</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <button id="filterBtn" class="bg-blue-600 text-white rounded-lg px-3 py-1 text-sm hover:bg-blue-700 transition-colors">
+              Filter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Cards View -->
+      <div class="block lg:hidden p-4 space-y-4" id="mobileView">
+        {% for order in orders %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4 hover:shadow-xl transition-shadow duration-300 order-card" 
+             data-status="{{ order.status|lower }}" data-customer="{{ order.customer_name|lower }}">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <h3 class="font-semibold text-gray-800">{{ order.customer_name }}</h3>
+              <p class="text-sm text-gray-500">{{ order.order_date|date:"M d, Y" }}</p>
+              <p class="text-xs text-gray-400 mt-1">Created by: {{ order.created_by }}</p>
+            </div>
+            <span class="status-badge {% if order.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif order.status == 'Completed' %}bg-green-100 text-green-800{% elif order.status == 'Processing' %}bg-blue-100 text-blue-800{% else %}bg-red-100 text-red-800{% endif %} text-xs font-medium px-2 py-1 rounded-full">
+              {{ order.status }}
+            </span>
+          </div>
+          
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Amount:</span>
+              <span class="font-semibold">₹{{ order.total_amount|floatformat:2 }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Warehouse:</span>
+              <span>{{ order.warehouse.warehouse_name }}</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Products:</span>
+              <div class="mt-1 space-y-1">
+                {% for item in order.items %}
+                <div class="text-xs bg-gray-50 rounded px-2 py-1 border border-gray-100">
+                  <span class="font-medium">{{ item.product_name }}</span>
+                  <span class="text-gray-400">({{ item.quantity }} {{ item.uom }})</span>
+                  {% if item.sku %}
+                  <span class="text-gray-400 block text-xs">SKU: {{ item.sku }}</span>
+                  {% endif %}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% if order.delivery_address %}
+            <div class="pt-2 border-t border-gray-100">
+              <span class="text-gray-600">Delivery:</span>
+              <p class="text-xs text-gray-500 mt-1 truncate">{{ order.delivery_address }}</p>
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="flex space-x-2 mt-4 pt-3 border-t border-gray-100">
+            <a href="orderedit?id={{order.id}}" class="flex-1 text-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg py-2 text-sm font-medium transition-colors flex items-center justify-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              Edit
+            </a>
+            <a href="orderdelete?id={{order.id}}" class="flex-1 text-center bg-red-50 text-red-600 hover:bg-red-100 rounded-lg py-2 text-sm font-medium transition-colors flex items-center justify-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              Cancel
+            </a>
+            <a href="ordertransportchallen?id={{order.id}}" class="flex-1 text-center bg-green-50 text-green-600 hover:bg-green-100 rounded-lg py-2 text-sm font-medium transition-colors flex items-center justify-center">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Challan
+            </a>
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12">
+          <div class="text-6xl mb-4 text-gray-300">📦</div>
+          <h3 class="text-lg font-semibold text-gray-600 mb-2">No orders found</h3>
+          <p class="text-gray-500 mb-6">{% if user_role == 'Customer' %}You haven't placed any orders yet.{% else %}No orders match your current criteria.{% endif %}</p>
+          {% if user_role == "Admin" or user_role == "Sales_Manager" or user_role == "Customer" %}
+          <a href="{% url 'Orders:Create_order' %}" 
+             class="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create Your First Order
+          </a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Desktop Table View -->
+      <div class="hidden lg:block overflow-x-auto" id="desktopView">
+        <table class="w-full">
+          <thead class="bg-gray-50/80 border-b border-gray-200/50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Warehouse</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Delivery Address</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Created By</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Products</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200/50" id="ordersTableBody">
+            {% for order in orders %}
+            <tr class="hover:bg-gray-50/50 transition-colors duration-200 order-row" 
+                data-status="{{ order.status|lower }}" data-customer="{{ order.customer_name|lower }}">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="font-medium text-gray-900">{{ order.customer_name }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                {{ order.order_date|date:"M d, Y" }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-badge {% if order.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elif order.status == 'Completed' %}bg-green-100 text-green-800{% elif order.status == 'Processing' %}bg-blue-100 text-blue-800{% else %}bg-red-100 text-red-800{% endif %}">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-gray-900">
+                ₹{{ order.total_amount|floatformat:2 }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                {{ order.warehouse.warehouse_name }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="{{ order.delivery_address }}">
+                {{ order.delivery_address|default:"-" }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                {{ order.created_by }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-600">
+                <div class="max-w-xs">
+                  {% for item in order.items %}
+                  <div class="mb-1 last:mb-0">
+                    <span class="font-medium">{{ item.product_name }}</span>
+                    <span class="text-gray-400">({{ item.quantity }} {{ item.uom }})</span>
+                    {% if item.sku %}
+                    <br><span class="text-xs text-gray-500">SKU: {{ item.sku }}</span>
+                    {% endif %}
+                  </div>
+                  {% empty %}
+                  <span class="text-gray-400 italic">No products</span>
+                  {% endfor %}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                  <a href="orderedit?id={{order.id}}" class="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded hover:bg-blue-50" title="Edit Order">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                  </a>
+                  <a href="orderdelete?id={{order.id}}" class="text-red-600 hover:text-red-900 transition-colors p-1 rounded hover:bg-red-50" title="Cancel Order">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </a>
+                  {% if request.session.user_role == "Sales_Manager" or request.session.user_role == "Admin" %}
+                  <a href="ordertransportchallen?id={{order.id}}" class="text-green-600 hover:text-green-900 transition-colors p-1 rounded hover:bg-green-50" title="Transport Challan">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="px-6 py-12 text-center">
+                <div class="text-gray-400">
+                  <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                  </svg>
+                  <h3 class="text-lg font-semibold mb-2 text-gray-600">No orders found</h3>
+                  <p class="text-gray-500 mb-6">{% if user_role == 'Customer' %}You haven't placed any orders yet.{% else %}No orders match your current criteria.{% endif %}</p>
+                  {% if user_role == "Admin" or user_role == "Sales_Manager" or user_role == "Customer" %}
+                  <a href="{% url 'Orders:Create_order' %}" 
+                     class="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Create Your First Order
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Mobile optimizations */
+@media (max-width: 1024px) {
+  .lg\:ml-\[260px\] {
+    margin-left: 0;
+  }
+}
+
+/* Hover effects */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Focus states for accessibility */
+a:focus, button:focus, select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Status badge animations */
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Card hover effects */
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Loading animation */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize animations
+  initializeAnimations();
+  
+  // Initialize search functionality
+  initializeSearch();
+  
+  // Initialize filter functionality
+  initializeFilters();
+  
+  // Add interactive animations to cards and rows
+  addInteractiveAnimations();
+});
+
+function initializeAnimations() {
+  // Add fade-in animation to cards and rows
+  const cards = document.querySelectorAll('.order-card, .order-row');
+  cards.forEach((card, index) => {
+    card.classList.add('fade-in');
+    card.style.animationDelay = `${index * 0.1}s`;
+  });
+
+  // Add loading animation to stats cards
+  const statsCards = document.querySelectorAll('.bg-white\\/80');
+  statsCards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.2}s`;
+  });
+}
+
+function initializeSearch() {
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      const searchTerm = e.target.value.toLowerCase().trim();
+      
+      searchTimeout = setTimeout(() => {
+        filterOrders(searchTerm, 'search');
+      }, 300);
+    });
+  }
+}
+
+function initializeFilters() {
+  const filterBtn = document.getElementById('filterBtn');
+  const statusFilter = document.getElementById('statusFilter');
+  
+  if (filterBtn && statusFilter) {
+    filterBtn.addEventListener('click', function() {
+      const status = statusFilter.value.toLowerCase();
+      filterOrders(status, 'status');
+    });
+  }
+}
+
+function filterOrders(filterValue, filterType) {
+  const mobileCards = document.querySelectorAll('#mobileView .order-card');
+  const desktopRows = document.querySelectorAll('#desktopView .order-row');
+  
+  let visibleCount = 0;
+  
+  // Filter mobile cards
+  mobileCards.forEach(card => {
+    let shouldShow = true;
+    
+    if (filterType === 'search' && filterValue) {
+      const customerName = card.getAttribute('data-customer');
+      shouldShow = customerName.includes(filterValue);
+    } else if (filterType === 'status' && filterValue !== 'all') {
+      const status = card.getAttribute('data-status');
+      shouldShow = status === filterValue;
+    }
+    
+    if (shouldShow) {
+      card.style.display = 'block';
+      visibleCount++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+  
+  // Filter desktop rows
+  desktopRows.forEach(row => {
+    let shouldShow = true;
+    
+    if (filterType === 'search' && filterValue) {
+      const customerName = row.getAttribute('data-customer');
+      shouldShow = customerName.includes(filterValue);
+    } else if (filterType === 'status' && filterValue !== 'all') {
+      const status = row.getAttribute('data-status');
+      shouldShow = status === filterValue;
+    }
+    
+    if (shouldShow) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  
+  // Show/hide empty state
+  const emptyStates = document.querySelectorAll('.text-center.py-8, .text-center.py-12');
+  emptyStates.forEach(state => {
+    if (visibleCount === 0 && filterValue) {
+      state.style.display = 'block';
+      state.innerHTML = `
+        <div class="text-6xl mb-4 text-gray-300">🔍</div>
+        <h3 class="text-lg font-semibold text-gray-600 mb-2">No matching orders</h3>
+        <p class="text-gray-500">No orders found matching your search criteria.</p>
+      `;
+    } else if (visibleCount === 0) {
+      state.style.display = 'block';
+    } else {
+      state.style.display = 'none';
+    }
+  });
+}
+
+function addInteractiveAnimations() {
+  // Add hover effects to action buttons
+  const actionButtons = document.querySelectorAll('a[href*="orderedit"], a[href*="orderdelete"], a[href*="ordertransportchallen"]');
+  actionButtons.forEach(button => {
+    button.addEventListener('mouseenter', function() {
+      this.classList.add('hover-lift');
+    });
+    
+    button.addEventListener('mouseleave', function() {
+      this.classList.remove('hover-lift');
+    });
+  });
+  
+  // Add click animations to stats cards
+  const statsCards = document.querySelectorAll('.bg-white\\/80');
+  statsCards.forEach(card => {
+    card.addEventListener('click', function() {
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        this.style.transform = '';
+      }, 150);
+    });
+  });
+}
+
+// Export functions for potential reuse
+window.OrderDashboard = {
+  filterOrders,
+  initializeSearch,
+  initializeFilters
+};
+</script>
+{% endblock %}

@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+{% load math_extras %}
+{% block content %}
+
+<div class="p-4 md:p-6 md:ml-[260px] mt-[80px]">
+  <div class="bg-white shadow-xl rounded-2xl overflow-hidden max-w-7xl mx-auto">
+    
+    <!-- Enhanced Header with Stats -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-6 text-white">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold">Purchase Orders</h1>
+          <p class="text-blue-100 mt-2">Manage and track all purchase orders</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="bg-blue-500/30 backdrop-blur-sm px-4 py-2 rounded-lg">
+            <span class="block text-sm font-medium">Total Orders</span>
+            <span class="block text-xl font-bold" id="totalOrdersCount">{{ purchase_orders|length }}</span>
+          </div>
+          <div class="bg-blue-500/30 backdrop-blur-sm px-4 py-2 rounded-lg">
+            <span class="block text-sm font-medium">Showing</span>
+            <span class="block text-xl font-bold" id="showingOrdersCount">{{ purchase_orders|length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message (if any) -->
+    {% if error_message %}
+    <div class="px-6 py-4 bg-red-50 border-l-4 border-red-400">
+      <div class="flex">
+        <div class="ml-3">
+          <p class="text-sm text-red-700">{{ error_message }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Status Filter Tabs with Counts -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <div class="flex flex-wrap gap-2">
+        <button onclick="filterByStatus('all')" 
+                class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-200 transition-all duration-200" 
+                data-status="all">
+          All <span class="ml-2 px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full" id="count-all">{{ purchase_orders|length }}</span>
+        </button>
+        <button onclick="filterByStatus('Pending')" 
+                class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all duration-200" 
+                data-status="Pending">
+          Pending <span class="ml-2 px-2 py-1 text-xs bg-yellow-200 text-yellow-800 rounded-full" id="count-pending">0</span>
+        </button>
+        <button onclick="filterByStatus('Shipped')" 
+                class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all duration-200" 
+                data-status="Shipped">
+          Shipped <span class="ml-2 px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full" id="count-shipped">0</span>
+        </button>
+        <button onclick="filterByStatus('Received')" 
+                class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all duration-200" 
+                data-status="Received">
+          Received <span class="ml-2 px-2 py-1 text-xs bg-green-200 text-green-800 rounded-full" id="count-received">0</span>
+        </button>
+        <button onclick="filterByStatus('Cancelled')" 
+                class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all duration-200" 
+                data-status="Cancelled">
+          Cancelled <span class="ml-2 px-2 py-1 text-xs bg-red-200 text-red-800 rounded-full" id="count-cancelled">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="px-6 py-4 bg-white border-b border-gray-200">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <input type="text" 
+                 id="searchInput" 
+                 placeholder="Search by PO ID, supplier name, or farmer name..." 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                 onkeyup="searchOrders()">
+        </div>
+        <button onclick="clearFilters()" 
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium">
+          Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- No Results Message -->
+    <div id="noResultsMessage" class="hidden px-6 py-12 text-center bg-gray-50">
+      <div class="flex flex-col items-center justify-center text-gray-400">
+        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.291-1.007-5.691-2.566M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <p class="text-lg font-medium text-gray-500">No purchase orders match your criteria</p>
+        <p class="mt-1">Try adjusting your filters or search term</p>
+      </div>
+    </div>
+
+    <!-- Desktop Table View (Hidden on Mobile) -->
+    <div class="hidden lg:block overflow-x-auto">
+      <table class="w-full min-w-full">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="py-4 px-4 text-left font-semibold text-gray-700 text-sm">PO Details</th>
+            <th class="py-4 px-4 text-left font-semibold text-gray-700 text-sm">Supplier/Farmer</th>
+            <th class="py-4 px-4 text-left font-semibold text-gray-700 text-sm">Warehouse</th>
+            <th class="py-4 px-4 text-left font-semibold text-gray-700 text-sm">Status</th>
+            <th class="py-4 px-4 text-right font-semibold text-gray-700 text-sm">Total</th>
+            <th class="py-4 px-4 text-center font-semibold text-gray-700 text-sm">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100" id="desktopOrdersTable">
+          {% for po in purchase_orders %}
+          <tr class="po-row hover:bg-gray-50 transition-colors duration-200" 
+              data-status="{{ po.status|default:'Unknown' }}" 
+              data-po-id="{{ po.id }}" 
+              data-supplier="{{ po.supplier.supplier_name|default:'N/A'|lower }}" 
+              data-farmer="{{ po.farmer.full_name|default:'N/A'|lower }}">
+            
+            <!-- PO Details -->
+            <td class="py-4 px-4">
+              <div class="flex items-center gap-3">
+                <div class="bg-blue-100 text-blue-700 p-2 rounded-lg">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                </div>
+                <div>
+                  <span class="font-semibold text-gray-900">PO #{{ po.id }}</span>
+                  <div class="text-xs text-gray-500 mt-1">
+                    {{ po.created_at|date:"M d, Y H:i" }}
+                  </div>
+                </div>
+              </div>
+            </td>
+            
+            <!-- Supplier/Farmer -->
+            <td class="py-4 px-4">
+              <div class="flex flex-col">
+                <span class="font-medium text-gray-900">
+                  {% if po.supplier %}
+                    {{ po.supplier.supplier_name }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </span>
+                <span class="text-sm text-gray-500 mt-1">
+                  {% if po.farmer %}
+                    {{ po.farmer.full_name }}
+                  {% else %}
+                    N/A
+                  {% endif %}
+                </span>
+              </div>
+            </td>
+            
+            <!-- Warehouse -->
+            <td class="py-4 px-4">
+              <span class="text-gray-600">
+                {% if po.warehouse %}
+                  {{ po.warehouse.warehouse_name }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </span>
+            </td>
+            
+            <!-- Status -->
+            <td class="py-4 px-4">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                {% if po.status == 'Pending' %} bg-yellow-100 text-yellow-800
+                {% elif po.status == 'Shipped' %} bg-blue-100 text-blue-800
+                {% elif po.status == 'Received' %} bg-green-100 text-green-800
+                {% elif po.status == 'Cancelled' %} bg-red-100 text-red-800
+                {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                <span class="w-2 h-2 rounded-full mr-2
+                  {% if po.status == 'Pending' %} bg-yellow-500
+                  {% elif po.status == 'Shipped' %} bg-blue-500
+                  {% elif po.status == 'Received' %} bg-green-500
+                  {% elif po.status == 'Cancelled' %} bg-red-500
+                  {% else %} bg-gray-500 {% endif %}"></span>
+                {{ po.status|default:"Unknown" }}
+              </span>
+            </td>
+            
+            <!-- Grand Total -->
+            <td class="py-4 px-4 text-right">
+              <span class="font-bold text-gray-900 text-lg">₹{{ po.total_amount|floatformat:2|default:"0.00" }}</span>
+            </td>
+            
+            <!-- Actions -->
+            <td class="py-4 px-4">
+              {% if po.status == "Cancelled" %}
+                <div class="text-red-600 font-medium text-center py-2">Cancelled</div>
+              {% else %}
+                <div class="flex space-x-2 justify-center">
+                  <!-- Cancel Button -->
+                  <form action="{% url 'Purchase:purchase_order_cancel' po.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-150"
+                            onclick="return confirm('Are you sure you want to cancel this Purchase Order?');">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                      Cancel
+                    </button>
+                  </form>
+                  
+                  <!-- Update Button -->
+                  <form action="{% url 'Purchase:purchase_order_update' po.id %}" method="POST">
+                    {% csrf_token %}      
+                    <button type="submit"
+                            class="flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors duration-150"
+                            onclick="return confirm('Are you sure you want to Update this Purchase Order?');">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                      Update
+                    </button>
+                  </form>
+                  
+                  <!-- Send Mail Button -->
+                  <a href="{% url 'Purchase:po_sent_mail' po.id %}"
+                    class="flex items-center justify-center gap-1 px-3 py-2 text-sm rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors duration-150">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Send Mail
+                  </a>
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr id="desktopEmptyState">
+            <td colspan="6" class="py-12 text-center">
+              <div class="flex flex-col items-center justify-center text-gray-400">
+                <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-lg font-medium text-gray-500">No purchase orders found</p>
+                <p class="mt-1">Create your first purchase order to get started</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Card View (Hidden on Desktop) -->
+    <div class="lg:hidden space-y-4 p-4" id="mobileOrdersContainer">
+      {% for po in purchase_orders %}
+      <div class="po-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+           data-status="{{ po.status|default:'Unknown' }}" 
+           data-po-id="{{ po.id }}" 
+           data-supplier="{{ po.supplier.supplier_name|default:'N/A'|lower }}" 
+           data-farmer="{{ po.farmer.full_name|default:'N/A'|lower }}">
+        
+        <!-- Card Header -->
+        <div class="p-4 border-b border-gray-100">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+              <div class="bg-blue-100 text-blue-700 p-2 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900 text-lg">PO #{{ po.id }}</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ po.created_at|date:"M d, Y H:i" }}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-gray-900 text-xl">₹{{ po.total_amount|floatformat:2|default:"0.00" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="p-4 space-y-3">
+          <!-- Status -->
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-medium text-gray-700">Status</span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+              {% if po.status == 'Pending' %} bg-yellow-100 text-yellow-800
+              {% elif po.status == 'Shipped' %} bg-blue-100 text-blue-800
+              {% elif po.status == 'Received' %} bg-green-100 text-green-800
+              {% elif po.status == 'Cancelled' %} bg-red-100 text-red-800
+              {% else %} bg-gray-100 text-gray-800 {% endif %}">
+              <span class="w-2 h-2 rounded-full mr-2
+                {% if po.status == 'Pending' %} bg-yellow-500
+                {% elif po.status == 'Shipped' %} bg-blue-500
+                {% elif po.status == 'Received' %} bg-green-500
+                {% elif po.status == 'Cancelled' %} bg-red-500
+                {% else %} bg-gray-500 {% endif %}"></span>
+              {{ po.status|default:"Unknown" }}
+            </span>
+          </div>
+
+          <!-- Supplier/Farmer -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span class="text-sm font-medium text-gray-700 block mb-1">Supplier</span>
+              <span class="text-sm text-gray-900">
+                {% if po.supplier %}
+                  {{ po.supplier.supplier_name }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </span>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-gray-700 block mb-1">Farmer</span>
+              <span class="text-sm text-gray-900">
+                {% if po.farmer %}
+                  {{ po.farmer.full_name }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+          <!-- Warehouse -->
+          <div>
+            <span class="text-sm font-medium text-gray-700 block mb-1">Warehouse</span>
+            <span class="text-sm text-gray-900">
+              {% if po.warehouse %}
+                {{ po.warehouse.warehouse_name }}
+              {% else %}
+                N/A
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Footer - Actions -->
+        <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+          {% if po.status == "Cancelled" %}
+            <div class="text-center py-2">
+              <span class="text-red-600 font-medium">Cancelled</span>
+            </div>
+          {% else %}
+            <div class="grid grid-cols-3 gap-2">
+              <!-- Cancel Button -->
+               
+              <form action="{% url 'Purchase:purchase_order_cancel' po.id %}" method="post" class="w-full">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full flex flex-col items-center justify-center gap-1 px-2 py-2 text-xs rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-150"
+                        onclick="return confirm('Are you sure you want to cancel this Purchase Order?');">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <span>Cancel</span>
+                </button>
+              </form>
+              
+              <!-- Update Button -->
+               {% if request.session.user_role == "Purchase_Manager" %}
+              <form action="{% url 'Purchase:purchase_order_update' po.id %}" method="POST" class="w-full">
+                {% csrf_token %}      
+                <button type="submit"
+                        class="w-full flex flex-col items-center justify-center gap-1 px-2 py-2 text-xs rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors duration-150"
+                        onclick="return confirm('Are you sure you want to Update this Purchase Order?');">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  <span>Update</span>
+                </button>
+              </form>
+              {% endif %}
+              
+              <!-- Send Mail Button -->
+              <a href="{% url 'Purchase:po_sent_mail' po.id %}"
+                class="w-full flex flex-col items-center justify-center gap-1 px-2 py-2 text-xs rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <span>Send Mail</span>
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div id="mobileEmptyState" class="text-center py-12">
+        <div class="flex flex-col items-center justify-center text-gray-400">
+          <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          <p class="text-lg font-medium text-gray-500">No purchase orders found</p>
+          <p class="mt-1 text-sm">Create your first purchase order to get started</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination (if needed) -->
+    {% if purchase_orders.has_other_pages %}
+    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="text-sm text-gray-700">
+          Showing {{ purchase_orders.start_index }} to {{ purchase_orders.end_index }} of {{ purchase_orders.paginator.count }} entries
+        </div>
+        <div class="flex space-x-1">
+          {% if purchase_orders.has_previous %}
+            <a href="?page={{ purchase_orders.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50 transition">Previous</a>
+          {% endif %}
+          
+          {% for i in purchase_orders.paginator.page_range %}
+            {% if purchase_orders.number == i %}
+              <span class="px-3 py-2 bg-blue-600 border border-blue-600 rounded-md text-sm font-medium text-white">{{ i }}</span>
+            {% else %}
+              <a href="?page={{ i }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50 transition">{{ i }}</a>
+            {% endif %}
+          {% endfor %}
+          
+          {% if purchase_orders.has_next %}
+            <a href="?page={{ purchase_orders.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-50 transition">Next</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize status counts
+    updateStatusCounts();
+});
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function filterByStatus(status) {
+    currentFilter = status;
+    applyFilters();
+    
+    // Update active button styling
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-100', 'text-blue-700', 'border-blue-200');
+        btn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-200');
+    });
+    
+    const activeBtn = document.querySelector(`[data-status="${status}"]`);
+    activeBtn.classList.add('active', 'bg-blue-100', 'text-blue-700', 'border-blue-200');
+    activeBtn.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-200');
+}
+
+function searchOrders() {
+    currentSearch = document.getElementById('searchInput').value.toLowerCase();
+    applyFilters();
+}
+
+function applyFilters() {
+    // Filter desktop table rows
+    const desktopRows = document.querySelectorAll('#desktopOrdersTable .po-row');
+    const mobileCards = document.querySelectorAll('#mobileOrdersContainer .po-card');
+    const noResultsMsg = document.getElementById('noResultsMessage');
+    const desktopEmptyState = document.getElementById('desktopEmptyState');
+    const mobileEmptyState = document.getElementById('mobileEmptyState');
+    
+    let visibleCount = 0;
+    
+    // Filter desktop rows
+    desktopRows.forEach(row => {
+        const status = row.dataset.status;
+        const poId = row.dataset.poId.toLowerCase();
+        const supplier = row.dataset.supplier;
+        const farmer = row.dataset.farmer;
+        
+        const matchesStatus = currentFilter === 'all' || status === currentFilter;
+        const matchesSearch = currentSearch === '' || 
+                            poId.includes(currentSearch) || 
+                            supplier.includes(currentSearch) || 
+                            farmer.includes(currentSearch);
+        
+        if (matchesStatus && matchesSearch) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Filter mobile cards
+    mobileCards.forEach(card => {
+        const status = card.dataset.status;
+        const poId = card.dataset.poId.toLowerCase();
+        const supplier = card.dataset.supplier;
+        const farmer = card.dataset.farmer;
+        
+        const matchesStatus = currentFilter === 'all' || status === currentFilter;
+        const matchesSearch = currentSearch === '' || 
+                            poId.includes(currentSearch) || 
+                            supplier.includes(currentSearch) || 
+                            farmer.includes(currentSearch);
+        
+        if (matchesStatus && matchesSearch) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message and empty states
+    if (visibleCount === 0 && (desktopRows.length > 0 || mobileCards.length > 0)) {
+        noResultsMsg.classList.remove('hidden');
+        if (desktopEmptyState) desktopEmptyState.style.display = 'none';
+        if (mobileEmptyState) mobileEmptyState.style.display = 'none';
+    } else {
+        noResultsMsg.classList.add('hidden');
+        if (desktopRows.length === 0 && desktopEmptyState) {
+            desktopEmptyState.style.display = '';
+        }
+        if (mobileCards.length === 0 && mobileEmptyState) {
+            mobileEmptyState.style.display = '';
+        }
+    }
+    
+    // Update showing count
+    document.getElementById('showingOrdersCount').textContent = visibleCount;
+}
+
+function clearFilters() {
+    currentFilter = 'all';
+    currentSearch = '';
+    
+    document.getElementById('searchInput').value = '';
+    
+    // Reset all filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-100', 'text-blue-700', 'border-blue-200');
+        btn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-200');
+    });
+    
+    // Set "All" as active
+    const allBtn = document.querySelector('[data-status="all"]');
+    allBtn.classList.add('active', 'bg-blue-100', 'text-blue-700', 'border-blue-200');
+    allBtn.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-200');
+    
+    applyFilters();
+}
+
+function updateStatusCounts() {
+    const desktopRows = document.querySelectorAll('#desktopOrdersTable .po-row');
+    const counts = {
+        all: desktopRows.length,
+        pending: 0,
+        shipped: 0,
+        received: 0,
+        cancelled: 0
+    };
+    
+    desktopRows.forEach(row => {
+        const status = row.dataset.status.toLowerCase();
+        if (counts.hasOwnProperty(status)) {
+            counts[status]++;
+        }
+    });
+    
+    // Update count displays
+    document.getElementById('count-all').textContent = counts.all;
+    document.getElementById('count-pending').textContent = counts.pending;
+    document.getElementById('count-shipped').textContent = counts.shipped;
+    document.getElementById('count-received').textContent = counts.received;
+    document.getElementById('count-cancelled').textContent = counts.cancelled;
+}
+
+// Add hover effects for better UX
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+        if (!this.classList.contains('active')) {
+            this.classList.add('transform', 'scale-105');
+        }
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.classList.remove('transform', 'scale-105');
+    });
+});
+
+// Add pulse animation to active filter
+setInterval(() => {
+    const activeBtn = document.querySelector('.filter-btn.active');
+    if (activeBtn) {
+        activeBtn.classList.add('animate-pulse');
+        setTimeout(() => {
+            activeBtn.classList.remove('animate-pulse');
+        }, 1000);
+    }
+}, 3000);
+</script>
+
+<style>
+/* Custom animations and transitions */
+.filter-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filter-btn.active {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.po-row {
+    transition: all 0.3s ease;
+}
+
+.po-row:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.po-card {
+    transition: all 0.3s ease;
+}
+
+.po-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading animation for filter changes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Custom scrollbar for better UX */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .po-card {
+        margin-bottom: 1rem;
+    }
+    
+    .filter-btn {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
+}
+
+/* Tablet optimizations */
+@media (max-width: 1024px) and (min-width: 641px) {
+    .po-card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+{% endblock content %}

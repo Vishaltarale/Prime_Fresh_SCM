@@ -1,0 +1,9 @@
+{% if messages %}
+  <div class="max-w-4xl mx-auto mb-4">
+    {% for message in messages %}
+      <div class="px-4 py-2 rounded text-white {% if message.tags == 'success' %}bg-green-500{% else %}bg-red-500{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

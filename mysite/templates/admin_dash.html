@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .number-animation {
+    animation: countUp 0.8s ease-out;
+  }
+  
+  @keyframes countUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .icon-bounce {
+    animation: bounce 2s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40%, 43% {
+      transform: translateY(-8px);
+    }
+    70% {
+      transform: translateY(-4px);
+    }
+    90% {
+      transform: translateY(-2px);
+    }
+  }
+</style>
+
+<div class="md:ml-[260px] mt-[0px] p-3 sm:p-4 md:p-6 bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+  <div class="mb-6 sm:mb-8 md:mb-12">
+    <div class="gradient-bg rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-white">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">Admin Dashboard</h1>
+      <p class="text-blue-100 text-sm sm:text-base md:text-lg">Welcome back! Here's what's happening in your SCM system today.</p>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+
+    {% if request.session.user_role == "Sales_Manager" or request.session.user_role == "Admin" %}
+    <!-- Customers Card -->
+    <a href="{% url 'mysite:list_entity' 'customer' %}" class="block">
+      <div class="card-hover bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-l-4 border-purple-500">
+        <div class="p-4 sm:p-5 md:p-6">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="p-3 sm:p-4 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg sm:rounded-xl">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wide">Customers</h3>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-800 number-animation mt-1 sm:mt-2">{{ customer_count }}</p>
+          <div class="mt-3 sm:mt-4 flex items-center text-green-600">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-xs sm:text-sm font-medium">Growing base</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endif %}
+
+    {% if request.session.user_role == "Purchase_Manager" or request.session.user_role == "Admin" %}
+    <!-- Suppliers Card -->
+    <a href="{% url 'mysite:list_entity' 'supplier' %}" class="block">
+      <div class="card-hover bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-l-4 border-emerald-500">
+        <div class="p-4 sm:p-5 md:p-6">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="p-3 sm:p-4 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg sm:rounded-xl">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wide">Suppliers</h3>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-800 number-animation mt-1 sm:mt-2">{{ supplier_count }}</p>
+          <div class="mt-3 sm:mt-4 flex items-center text-blue-600">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-xs sm:text-sm font-medium">Trusted partners</span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Farmers Card -->
+    <a href="{% url 'mysite:list_entity' 'farmer' %}" class="block">
+      <div class="card-hover bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-l-4 border-orange-500">
+        <div class="p-4 sm:p-5 md:p-6">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg sm:rounded-xl">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wide">Farmers</h3>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-800 number-animation mt-1 sm:mt-2">{{ farmer_count }}</p>
+          <div class="mt-3 sm:mt-4 flex items-center text-green-600">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-xs sm:text-sm font-medium">Network growth</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endif %}
+
+
+    {% if request.session.user_role == "Inventory_Manager" or request.session.user_role == "Admin" %}
+    <!-- Offices Card -->
+    <a href="{% url 'mysite:list_entity' 'office' %}" class="block">
+      <div class="card-hover bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-l-4 border-indigo-500">
+        <div class="p-4 sm:p-5 md:p-6">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="p-3 sm:p-4 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg sm:rounded-xl">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wide">Offices</h3>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-800 number-animation mt-1 sm:mt-2">{{ office_count }}</p>
+          <div class="mt-3 sm:mt-4 flex items-center text-purple-600">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-xs sm:text-sm font-medium">All operational</span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Warehouses Card -->
+    <a href="{% url 'mysite:list_entity' 'warehouse' %}" class="block">
+      <div class="card-hover bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-l-4 border-pink-500">
+        <div class="p-4 sm:p-5 md:p-6">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 rounded-lg sm:rounded-xl">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wide">Warehouses</h3>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-800 number-animation mt-1 sm:mt-2">{{ warehouse_count }}</p>
+          <div class="mt-3 sm:mt-4 flex items-center text-yellow-600">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-xs sm:text-sm font-medium">Storage capacity</span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Stock Card -->
+    <a href="{% url 'mysite:list_entity' 'Product' %}" class="block">
+      <div class="card-hover bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-l-4 border-teal-500">
+        <div class="p-4 sm:p-5 md:p-6">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div class="p-3 sm:p-4 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg sm:rounded-xl">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wide">Stock Items</h3>
+          <p class="text-2xl sm:text-3xl font-bold text-gray-800 number-animation mt-1 sm:mt-2">{{ products }}</p>
+          <div class="mt-3 sm:mt-4 flex items-center text-blue-600">
+            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-xs sm:text-sm font-medium">Inventory status</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endif %}
+
+  </div>
+
+  <!-- Quick Actions Section -->
+  <div class="mt-8 sm:mt-10 md:mt-12">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Quick Actions</h2>
+    <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      
+      <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer">
+        <div class="text-blue-600 mb-3 sm:mb-4">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-800 text-sm sm:text-base text-center">Add New Employee</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 text-center">Register new team member</p>
+      </div>
+      
+      <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer">
+        <div class="text-green-600 mb-3 sm:mb-4">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-800 text-sm sm:text-base text-center">Generate Report</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 text-center">Create system analytics</p>
+      </div>
+      
+      <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer">
+        <div class="text-purple-600 mb-3 sm:mb-4">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-800 text-sm sm:text-base text-center">System Settings</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 text-center">Configure preferences</p>
+      </div>
+      
+      <div class="p-4 sm:p-5 md:p-6 bg-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer">
+        <div class="text-orange-600 mb-3 sm:mb-4">
+          <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-800 text-sm sm:text-base text-center">Help & Support</h3>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2 text-center">Get assistance</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

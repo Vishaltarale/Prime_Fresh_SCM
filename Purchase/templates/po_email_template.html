@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; }
+    .container { padding: 20px; background: #f9f9f9; border-radius: 8px; }
+    h2 { color: #2563eb; }
+    p { margin-bottom: 10px; }
+    .footer { margin-top: 20px; font-size: 12px; color: #777; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Hello {{ recipient_name }},</h2>
+    <p>Please find attached your Purchase Order from <strong>{{ company_name }}</strong>.</p>
+    <p><strong>PO ID:</strong> {{ po.id }}</p>
+    <p><strong>Status:</strong> {{ po.status }}</p>
+    <p>Thank you for your business.</p>
+
+    <div class="footer">
+      This is a system-generated email. For queries, contact {{ company_name }}.
+    </div>
+  </div>
+</body>
+</html>

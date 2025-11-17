@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-8xl mx-auto bg-white p-4 md:p-6 lg:p-8 rounded-lg shadow md:ml-[260px] mt-[10px]">
+  <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-gray-800">RFQ Responses</h2>
+
+  <!-- Error Message (if any) -->
+  {% if error_message %}
+  <div class="mb-4 md:mb-6 px-4 py-3 bg-red-50 border-l-4 border-red-400 rounded">
+    <div class="flex">
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ error_message }}</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Desktop Table View (Hidden on Mobile) -->
+  <div class="hidden lg:block overflow-x-auto">
+    <table class="w-full border border-gray-200 text-sm">
+      <thead>
+        <tr class="bg-gray-100 text-left">
+          <th class="border p-3 font-semibold text-gray-700">RFQ ID</th>
+          <th class="border p-3 font-semibold text-gray-700">Supplier/Farmer</th>
+          <th class="border p-3 font-semibold text-gray-700">Response</th>
+          <th class="border p-3 font-semibold text-gray-700">Attachments</th>
+          <th class="border p-3 font-semibold text-gray-700">Received At</th>
+          <th class="border p-3 font-semibold text-gray-700 text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for response in responses %}
+        <tr class="hover:bg-gray-50 transition-colors duration-200">
+          <td class="border p-3 font-medium text-gray-700">
+            {% if response.rfq %}
+              {{ response.rfq.id }}
+            {% else %}
+              <span class="text-red-500 italic">RFQ Not Found</span>
+            {% endif %}
+          </td>
+          
+          <td class="border p-3 text-gray-600">
+            {{ response.sender_email|default:"Unknown" }}
+          </td>
+          
+          <td class="border p-3 whitespace-pre-wrap text-gray-700 max-w-xs">
+            {{ response.message|default:"No message"|truncatewords:30 }}
+          </td>
+          
+          <td class="border p-3">
+            {% if response.attachments %}
+              <ul class="list-disc pl-4 space-y-1">
+                {% for file in response.attachments %}
+                  <li>
+                    <a href="{{ MEDIA_URL }}{{ file }}" 
+                       class="text-blue-600 hover:underline text-sm" 
+                       target="_blank">
+                      {{ file|cut:"rfq_attachments/" }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="text-gray-400 italic text-sm">No attachments</span>
+            {% endif %}
+          </td>
+          
+          <td class="border p-3 text-gray-600">
+            {{ response.received_at|default:"Unknown" }}
+          </td>
+
+          <td class="border p-3 text-center">
+            {% if response.rfq %}
+              <div class="flex flex-col gap-2">
+                <a href="{% url 'Purchase:po' response.rfq.id %}" 
+                  class="inline-flex items-center justify-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  Create PO
+                </a>
+                <a href="cancel_pur_ord?rfq_id={{ response.rfq.id }}" 
+                  class="inline-flex items-center justify-center px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  Cancel
+                </a>
+              </div>
+            {% else %}
+              <span class="text-red-500 italic text-sm">RFQ Missing</span>
+            {% endif %}
+          </td>
+        </tr> 
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center p-8 text-gray-500">
+            <div class="flex flex-col items-center justify-center">
+              <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+              </svg>
+              <p class="text-lg font-medium text-gray-400">No responses yet</p>
+              <p class="text-sm text-gray-400 mt-1">RFQ responses will appear here when received</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card View (Hidden on Desktop) -->
+  <div class="lg:hidden space-y-4">
+    {% for response in responses %}
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+      <!-- Card Header -->
+      <div class="p-4 border-b border-gray-100">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-semibold text-gray-800 text-lg">
+              {% if response.rfq %}
+                RFQ #{{ response.rfq.id }}
+              {% else %}
+                <span class="text-red-500 italic">RFQ Not Found</span>
+              {% endif %}
+            </h3>
+            <p class="text-sm text-gray-600 mt-1">{{ response.sender_email|default:"Unknown" }}</p>
+          </div>
+          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            {{ response.received_at|default:"Unknown" }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card Body -->
+      <div class="p-4 space-y-4">
+        <!-- Response Message -->
+        <div>
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Response Message</h4>
+          <div class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+            <p class="text-sm text-gray-700 whitespace-pre-wrap">
+              {{ response.message|default:"No message" }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Attachments -->
+        <div>
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Attachments</h4>
+          {% if response.attachments %}
+            <div class="space-y-2">
+              {% for file in response.attachments %}
+                <div class="flex items-center gap-2 bg-blue-50 rounded-lg p-2">
+                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                  </svg>
+                  <a href="{{ MEDIA_URL }}{{ file }}" 
+                     class="text-blue-600 hover:underline text-sm truncate flex-1" 
+                     target="_blank">
+                    {{ file|cut:"rfq_attachments/" }}
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <span class="text-gray-400 italic text-sm">No attachments</span>
+          {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-2">
+          {% if response.rfq %}
+            <div class="grid grid-cols-2 gap-3">
+              <a href="{% url 'Purchase:po' response.rfq.id %}" 
+                class="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Create PO
+              </a>
+              <a href="cancel_pur_ord?rfq_id={{ response.rfq.id }}" 
+                class="flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Cancel
+              </a>
+            </div>
+          {% else %}
+            <div class="text-center py-2">
+              <span class="text-red-500 italic text-sm">RFQ Missing - Cannot Create PO</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center">
+      <svg class="w-16 h-16 mb-4 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+      </svg>
+      <p class="text-lg font-medium text-gray-400 mb-2">No responses yet</p>
+      <p class="text-sm text-gray-400">RFQ responses will appear here when received</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Additional Info Section -->
+  {% if responses %}
+  <div class="mt-6 p-4 md:p-6 bg-blue-50 rounded-lg border border-blue-100">
+    <h3 class="text-lg font-semibold text-blue-800 mb-3 md:mb-4">Response Summary</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 text-sm">
+      <div class="text-center bg-white rounded-lg p-3 md:p-4 shadow-sm">
+        <span class="block text-2xl md:text-3xl font-bold text-blue-600">{{ responses|length }}</span>
+        <span class="text-blue-700 font-medium">Total Responses</span>
+      </div>
+      <div class="text-center bg-white rounded-lg p-3 md:p-4 shadow-sm">
+        <span class="block text-2xl md:text-3xl font-bold text-green-600">
+          {% with completed_count=0 %}
+            {% for response in responses %}
+              {% if response.rfq and response.rfq.status == 'Completed' %}
+                {% with completed_count=completed_count|add:1 %}{% endwith %}
+              {% endif %}
+            {% endfor %}
+            {{ completed_count }}
+          {% endwith %}
+        </span>
+        <span class="text-green-700 font-medium">Completed</span>
+      </div>
+      <div class="text-center bg-white rounded-lg p-3 md:p-4 shadow-sm">
+        <span class="block text-2xl md:text-3xl font-bold text-yellow-600">
+          {% with pending_count=0 %}
+            {% for response in responses %}
+              {% if response.rfq and response.rfq.status != 'Completed' %}
+                {% with pending_count=pending_count|add:1 %}{% endwith %}
+              {% endif %}
+            {% endfor %}
+            {{ pending_count }}
+          {% endwith %}
+        </span>
+        <span class="text-yellow-700 font-medium">Pending</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Loading overlay for when fetch_rfq_emails() is running -->
+<div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg mx-4 max-w-sm w-full">
+    <div class="flex items-center space-x-3">
+      <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-gray-700 font-medium">Fetching latest responses...</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Show loading overlay when page loads (since fetch_rfq_emails() runs)
+document.addEventListener('DOMContentLoaded', function() {
+  // You can uncomment this if you want to show loading state
+  // document.getElementById('loadingOverlay').classList.remove('hidden');
+  
+  // Hide loading after a short delay (adjust as needed)
+  setTimeout(() => {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }, 2000);
+});
+
+// Add some interactive enhancements for mobile cards
+document.querySelectorAll('.lg\\:hidden .bg-white.border').forEach(card => {
+  card.addEventListener('mouseenter', function() {
+    this.style.transform = 'translateY(-2px)';
+    this.style.transition = 'all 0.2s ease';
+  });
+  
+  card.addEventListener('mouseleave', function() {
+    this.style.transform = 'translateY(0)';
+  });
+});
+
+// Add click animation for action buttons
+document.querySelectorAll('a[href*="Purchase:po"], a[href*="cancel_pur_ord"]').forEach(button => {
+  button.addEventListener('click', function(e) {
+    // Add ripple effect
+    const ripple = document.createElement('span');
+    const rect = this.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+    
+    ripple.style.cssText = `
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}px;
+      top: ${y}px;
+    `;
+    
+    this.style.position = 'relative';
+    this.style.overflow = 'hidden';
+    this.appendChild(ripple);
+    
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  });
+});
+
+// Add keyboard navigation for accessibility
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+});
+</script>
+
+<style>
+/* Custom styles for better UX */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+.transition-colors {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for message area */
+.bg-gray-50.rounded-lg.p-3.max-h-32.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bg-gray-50.rounded-lg.p-3.max-h-32.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.bg-gray-50.rounded-lg.p-3.max-h-32.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.bg-gray-50.rounded-lg.p-3.max-h-32.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .max-w-8xl {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .bg-white.rounded-lg.shadow {
+    border-radius: 0.5rem;
+    margin: 0.5rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .lg\\:hidden .bg-white.border {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .lg\\:hidden {
+    display: none !important;
+  }
+  
+  .hidden.lg\\:block {
+    display: table !important;
+  }
+  
+  .bg-blue-50 {
+    background-color: white !important;
+    border: 1px solid #000 !important;
+  }
+}
+</style>
+
+{% endblock %}

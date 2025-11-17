@@ -1,0 +1,379 @@
+<!-- custom_tag.html -->
+<div class="table-container">
+  <!-- Desktop Table View -->
+  <div class="hidden md:block">
+    <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            {% for head in headers %}
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              {{ head }}
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for row in rows %}
+          <tr class="hover:bg-gray-50 transition-colors duration-150">
+            {% for cell in row %}
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ cell }}
+            </td>
+            {% endfor %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{{ headers|length }}" class="px-6 py-8 text-center text-sm text-gray-500">
+              <div class="flex flex-col items-center justify-center">
+                <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span class="text-lg font-medium text-gray-600">No data available</span>
+                <p class="text-gray-500 mt-1">There are no records to display at the moment.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Card View -->
+  <div class="md:hidden space-y-4">
+    {% for row in rows %}
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+      <div class="p-4">
+        <div class="grid grid-cols-1 gap-3">
+          {% for cell in row %}
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 sm:mb-0">
+              {{ headers.forloop.counter0 }}
+            </span>
+            <span class="text-sm text-gray-900 font-medium truncate">
+              {{ cell }}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 rounded-b-lg">
+        <div class="flex items-center justify-between text-xs text-gray-500">
+          <span>Record {{ forloop.counter }}</span>
+          <span class="flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            View details
+          </span>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+      <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-600 mb-2">No data available</h3>
+      <p class="text-gray-500">There are no records to display at the moment.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Table Footer (Pagination/Info) -->
+  {% if rows %}
+  <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="text-sm text-gray-700">
+      Showing <span class="font-semibold">{{ rows|length }}</span> records
+    </div>
+    <div class="flex items-center space-x-2">
+      <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+        Previous
+      </button>
+      <span class="text-sm text-gray-700">Page 1 of 1</span>
+      <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+        Next
+      </button>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.table-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Smooth animations */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Mobile card hover effects */
+@media (min-width: 768px) {
+  .md\\:hidden .bg-white:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* Custom scrollbar for desktop table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Staggered animation for mobile cards */
+@media (max-width: 767px) {
+  .space-y-4 > * {
+    animation: slideInUp 0.5s ease-out;
+    animation-fill-mode: both;
+  }
+  
+  .space-y-4 > *:nth-child(1) { animation-delay: 0.1s; }
+  .space-y-4 > *:nth-child(2) { animation-delay: 0.2s; }
+  .space-y-4 > *:nth-child(3) { animation-delay: 0.3s; }
+  .space-y-4 > *:nth-child(4) { animation-delay: 0.4s; }
+  .space-y-4 > *:nth-child(5) { animation-delay: 0.5s; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for accessibility */
+button:focus, a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Print styles */
+@media print {
+  .table-container {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+  
+  .md\\:hidden {
+    display: none !important;
+  }
+  
+  .hidden.md\\:block {
+    display: block !important;
+  }
+  
+  .bg-gray-50 {
+    background-color: #f9f9f9 !important;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .table-container {
+    color-scheme: dark;
+  }
+  
+  .bg-white {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+  }
+  
+  .bg-gray-50 {
+    background-color: #374151 !important;
+  }
+  
+  .text-gray-700, .text-gray-900 {
+    color: #f9fafb !important;
+  }
+  
+  .text-gray-500 {
+    color: #d1d5db !important;
+  }
+  
+  .border-gray-200, .border-gray-300 {
+    border-color: #4b5563 !important;
+  }
+  
+  .divide-gray-200 > * + * {
+    border-color: #4b5563 !important;
+  }
+  
+  .hover\\:bg-gray-50:hover {
+    background-color: #374151 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-gray-200, .border-gray-300 {
+    border-color: #000 !important;
+    border-width: 2px;
+  }
+  
+  .text-gray-500 {
+    color: #000 !important;
+    font-weight: 600;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all, .hover\\:bg-gray-50, .hover\\:shadow-md {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .space-y-4 > * {
+    animation: none !important;
+  }
+}
+
+/* Large text support */
+@media (prefers-reduced-motion: reduce) and (prefers-contrast: high) {
+  .text-sm {
+    font-size: 1.125rem !important;
+  }
+  
+  .text-xs {
+    font-size: 1rem !important;
+  }
+}
+</style>
+
+<script>
+// Enhanced interactivity for the table
+document.addEventListener('DOMContentLoaded', function() {
+  const tableContainer = document.querySelector('.table-container');
+  
+  if (!tableContainer) return;
+  
+  // Add row selection functionality for desktop table
+  const desktopRows = tableContainer.querySelectorAll('tbody tr');
+  desktopRows.forEach(row => {
+    row.addEventListener('click', function(e) {
+      // Remove selection from other rows
+      desktopRows.forEach(r => r.classList.remove('bg-blue-50', 'border-l-4', 'border-l-blue-500'));
+      
+      // Add selection to clicked row
+      this.classList.add('bg-blue-50', 'border-l-4', 'border-l-blue-500');
+      
+      // Dispatch custom event for external handling
+      const event = new CustomEvent('tableRowSelect', {
+        detail: {
+          row: this,
+          rowIndex: Array.from(desktopRows).indexOf(this),
+          cells: Array.from(this.cells).map(cell => cell.textContent.trim())
+        }
+      });
+      tableContainer.dispatchEvent(event);
+    });
+  });
+  
+  // Add mobile card interactions
+  const mobileCards = tableContainer.querySelectorAll('.md\\:hidden > .bg-white');
+  mobileCards.forEach((card, index) => {
+    card.addEventListener('click', function(e) {
+      // Add visual feedback
+      this.classList.add('bg-blue-50', 'border-blue-300');
+      
+      // Remove feedback after animation
+      setTimeout(() => {
+        this.classList.remove('bg-blue-50', 'border-blue-300');
+      }, 300);
+      
+      // Dispatch custom event
+      const event = new CustomEvent('tableCardSelect', {
+        detail: {
+          card: this,
+          cardIndex: index,
+          recordIndex: index
+        }
+      });
+      tableContainer.dispatchEvent(event);
+    });
+    
+    // Add touch feedback for mobile
+    card.addEventListener('touchstart', function() {
+      this.classList.add('scale-95');
+    });
+    
+    card.addEventListener('touchend', function() {
+      this.classList.remove('scale-95');
+    });
+  });
+  
+  // Handle responsive behavior on window resize
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const event = new CustomEvent('tableLayoutChange', {
+        detail: {
+          isMobile: window.innerWidth < 768,
+          container: tableContainer
+        }
+      });
+      tableContainer.dispatchEvent(event);
+    }, 250);
+  });
+  
+  // Export functionality
+  tableContainer.addEventListener('tableExport', function(e) {
+    const format = e.detail.format; // 'csv', 'pdf', 'excel'
+    const data = {
+      headers: {{ headers|safe }},
+      rows: {{ rows|safe }}
+    };
+    
+    // Implementation would depend on your backend/frontend setup
+    console.log('Export requested:', format, data);
+  });
+});
+
+// Utility function to refresh table data
+function refreshTableData(newData) {
+  const event = new CustomEvent('tableDataRefresh', {
+    detail: {
+      data: newData,
+      timestamp: new Date().toISOString()
+    }
+  });
+  document.querySelector('.table-container').dispatchEvent(event);
+}
+
+// Utility function to filter table
+function filterTable(searchTerm) {
+  const event = new CustomEvent('tableFilter', {
+    detail: {
+      searchTerm: searchTerm,
+      filterType: 'text'
+    }
+  });
+  document.querySelector('.table-container').dispatchEvent(event);
+}
+</script>

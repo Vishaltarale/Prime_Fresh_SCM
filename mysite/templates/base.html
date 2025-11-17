@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SCM Dashboard{% endblock %}</title>
+
+    <!-- Tailwind & Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#6f42c1', hover: '#5a359a' },
+                        sidebar: { bg: '#2c3e50', hover: '#34495e' },
+                        secondary: '#495057',
+                        'bg-light': '#f8f9fa',
+                    },
+                    borderRadius: { custom: '10px' },
+                    boxShadow: {
+                        custom: '0 2px 10px rgba(0,0,0,0.1)',
+                        notification: '0 4px 12px rgba(0,0,0,0.15)',
+                    },
+                    width: { sidebar: '260px' },
+                    transitionProperty: { custom: 'all' },
+                }
+            }
+        }
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-100 overflow-x-hidden">
+    {% if messages %}
+    <div class="fixed top-20 md:top-5 right-3 md:right-5 z-[60] space-y-3 max-w-[calc(100vw-1.5rem)] sm:max-w-md">
+        {% for message in messages %}
+        <div class="flash-message px-3 py-2 sm:px-4 sm:py-3 rounded-md shadow-notification transition-opacity duration-500 ease-out text-sm sm:text-base
+            {% if message.tags == 'success' %}bg-green-500 text-white
+            {% elif message.tags == 'error' %}bg-red-500 text-white
+            {% elif message.tags == 'warning' %}bg-yellow-400 text-black
+            {% else %}bg-blue-500 text-white{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% include "sidebar.html" %}
+
+    <div class="transition-all duration-300 ease-in-out md:ml-sidebar min-h-screen">
+        {% if request.resolver_match.view_name == 'mysite:index' or request.resolver_match.view_name == 'Customer:Customer_register' %}
+            {% include "mysite/templates/navbar.html" %}
+        {% elif request.resolver_match.view_name == 'Orders:Order_dash' or request.resolver_match.view_name == 'Orders:Create_order' %}
+            {% include "Orders/templates/navbar.html" %}
+        {% endif %}
+
+        <main class="p-3 sm:p-4 md:p-6 pt-16 md:pt-6">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        // Navbar page title handler
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbar = {
+                updatePageTitle: function (title, subtitle = '') {
+                    const titleElement = document.getElementById('pageTitle');
+                    const subtitleElement = document.getElementById('pageSubtitle');
+                    if (titleElement) titleElement.textContent = title;
+                    if (subtitleElement) subtitleElement.textContent = subtitle;
+                }
+            };
+
+            document.addEventListener('sidebarSectionChange', (e) => {
+                const section = e.detail.section;
+                const titles = {
+                    dashboard: 'Supply Chain Dashboard',
+                    inventory: 'Inventory Management',
+                    orders: 'Order Management',
+                    suppliers: 'Supplier Management',
+                    warehouse: 'Warehouse Management',
+                    reports: 'Reports & Analytics',
+                    settings: 'System Settings'
+                };
+                const subtitles = {
+                    dashboard: 'Welcome back, Manager',
+                    inventory: 'Manage your inventory items',
+                    orders: 'Track and manage orders',
+                    suppliers: 'Manage supplier relationships',
+                    warehouse: 'Warehouse operations',
+                    reports: 'View reports and analytics',
+                    settings: 'Configure system settings'
+                };
+                navbar.updatePageTitle(titles[section] || 'SCM Dashboard', subtitles[section] || '');
+            });
+        });
+
+        // Flash message auto-dismiss
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                const alerts = document.querySelectorAll('.flash-message');
+                alerts.forEach(alert => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.6s ease-out';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 600);
+                });
+            }, 3000); 
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,721 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen md:ml-80 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+  <!-- Background Elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-emerald-400/10 to-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto relative z-10">
+    <!-- Main Profile Card -->
+    <div class="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/50 overflow-hidden animate-fadeInScale">
+      
+      <!-- Cover Background -->
+      <div class="h-24 sm:h-32 md:h-40 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 relative">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        <!-- Decorative Elements -->
+        <div class="absolute top-4 right-4 w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full animate-pulse"></div>
+        <div class="absolute top-6 right-12 sm:top-8 sm:right-16 w-8 h-8 sm:w-12 sm:h-12 bg-white/5 rounded-full animate-pulse delay-1000"></div>
+      </div>
+
+      <div class="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
+        <!-- Profile Header -->
+        <div class="relative -mt-12 sm:-mt-16 md:-mt-20 mb-6 sm:mb-8">
+          <div class="flex flex-col items-center text-center">
+            <!-- Profile Picture -->
+            <div class="relative group mb-4">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-2xl bg-gradient-to-br from-blue-400 to-blue-600 overflow-hidden relative">
+                <img src="https://i.pravatar.cc/150?seed={{ request.session.user_email }}" 
+                     alt="Profile Picture" 
+                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                <div class="absolute inset-0 bg-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <i class="fas fa-camera text-white text-lg sm:text-xl"></i>
+                </div>
+              </div>
+              <!-- Online Status -->
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-green-500 rounded-full border-2 border-white shadow-lg">
+                <div class="w-full h-full bg-green-400 rounded-full animate-ping"></div>
+              </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="text-center">
+              <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                {{ data.username|title|default:request.session.user_email|cut:'@'|title }}
+              </h1>
+              <p class="text-gray-600 mb-3 flex items-center justify-center gap-2 text-sm sm:text-base">
+                <i class="fas fa-envelope text-blue-600"></i>
+                {{ request.session.user_email }}
+              </p>
+              <div class="flex flex-wrap gap-2 justify-center">
+                <span class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <i class="fas fa-user mr-1 text-xs"></i>
+                  Active User
+                </span>
+                <span class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <i class="fas fa-check-circle mr-1 text-xs"></i>
+                  Verified
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Stats - Mobile Cards -->
+        <div class="md:hidden space-y-4 mb-6">
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-4 group hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-calendar-alt text-white text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-800">156</h3>
+                <p class="text-gray-600 text-sm">Days Active</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-4 group hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-tasks text-white text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-800">42</h3>
+                <p class="text-gray-600 text-sm">Tasks Completed</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-4 group hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-trophy text-white text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-800">8</h3>
+                <p class="text-gray-600 text-sm">Achievements</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Stats - Desktop Grid -->
+        <div class="hidden md:grid md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 text-center group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <i class="fas fa-calendar-alt text-white text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">156</h3>
+            <p class="text-gray-600 text-sm">Days Active</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 text-center group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <i class="fas fa-tasks text-white text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">42</h3>
+            <p class="text-gray-600 text-sm">Tasks Completed</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 text-center group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+              <i class="fas fa-trophy text-white text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">8</h3>
+            <p class="text-gray-600 text-sm">Achievements</p>
+          </div>
+        </div>
+
+        <!-- Profile Details - Mobile Cards -->
+        <div class="md:hidden space-y-4 mb-6">
+          <div class="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-user-circle text-blue-600"></i>
+              Profile Information
+            </h3>
+            
+            <div class="space-y-4">
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-blue-300 transition-colors duration-200">
+                  <i class="fas fa-user text-gray-400 mr-3 text-sm"></i>
+                  <span class="text-gray-800 font-medium text-sm">{{ request.session.user_email|cut:'@'|slice:':-9'|default:'User' }}</span>
+                </div>
+              </div>
+              
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-blue-300 transition-colors duration-200">
+                  <i class="fas fa-shield-alt text-gray-400 mr-3 text-sm"></i>
+                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                    <i class="fas fa-user-tag mr-1 text-xs"></i>
+                    Administrator
+                  </span>
+                </div>
+              </div>
+              
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-blue-300 transition-colors duration-200">
+                  <i class="fas fa-envelope text-gray-400 mr-3 text-sm"></i>
+                  <span class="text-gray-800 font-medium text-sm">{{ request.session.user_email }}</span>
+                </div>
+              </div>
+              
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-green-300 transition-colors duration-200">
+                  <i class="fas fa-check-circle text-green-500 mr-3 text-sm"></i>
+                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
+                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                    Active & Verified
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Details - Desktop Grid -->
+        <div class="hidden md:block bg-gray-50/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 mb-8 border border-gray-200/50">
+          <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-user-circle text-blue-600"></i>
+            Profile Information
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-4">
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-blue-300 transition-colors duration-200">
+                  <i class="fas fa-user text-gray-400 mr-3"></i>
+                  <span class="text-gray-800 font-medium">{{ request.session.user_email|cut:'@'|slice:':-9'|default:'User' }}</span>
+                </div>
+              </div>
+              
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-blue-300 transition-colors duration-200">
+                  <i class="fas fa-shield-alt text-gray-400 mr-3"></i>
+                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                    <i class="fas fa-user-tag mr-1"></i>
+                    Administrator
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-4">
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-blue-300 transition-colors duration-200">
+                  <i class="fas fa-envelope text-gray-400 mr-3"></i>
+                  <span class="text-gray-800 font-medium">{{ request.session.user_email }}</span>
+                </div>
+              </div>
+              
+              <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Account Status</label>
+                <div class="flex items-center p-3 bg-white rounded-lg border border-gray-200 group-hover:border-green-300 transition-colors duration-200">
+                  <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
+                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                    Active & Verified
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions - Mobile Cards -->
+        <div class="md:hidden mb-6">
+          <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-bolt text-yellow-500"></i>
+            Quick Actions
+          </h3>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <button class="flex flex-col items-center p-3 bg-white rounded-xl hover:shadow-lg transition-all duration-300 group border border-gray-200">
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-blue-200 transition-colors duration-300">
+                <i class="fas fa-edit text-blue-600 text-sm"></i>
+              </div>
+              <span class="text-xs font-medium text-gray-700 text-center">Edit Profile</span>
+            </button>
+            
+            <button class="flex flex-col items-center p-3 bg-white rounded-xl hover:shadow-lg transition-all duration-300 group border border-gray-200">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-green-200 transition-colors duration-300">
+                <i class="fas fa-key text-green-600 text-sm"></i>
+              </div>
+              <span class="text-xs font-medium text-gray-700 text-center">Security</span>
+            </button>
+            
+            <button class="flex flex-col items-center p-3 bg-white rounded-xl hover:shadow-lg transition-all duration-300 group border border-gray-200">
+              <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-purple-200 transition-colors duration-300">
+                <i class="fas fa-bell text-purple-600 text-sm"></i>
+              </div>
+              <span class="text-xs font-medium text-gray-700 text-center">Notifications</span>
+            </button>
+            
+            <button class="flex flex-col items-center p-3 bg-white rounded-xl hover:shadow-lg transition-all duration-300 group border border-gray-200">
+              <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-orange-200 transition-colors duration-300">
+                <i class="fas fa-cog text-orange-600 text-sm"></i>
+              </div>
+              <span class="text-xs font-medium text-gray-700 text-center">Settings</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Actions - Desktop Grid -->
+        <div class="hidden md:block bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 sm:p-8 mb-8">
+          <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-bolt text-yellow-500"></i>
+            Quick Actions
+          </h3>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <button class="flex flex-col items-center p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+              <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-blue-200 transition-colors duration-300">
+                <i class="fas fa-edit text-blue-600"></i>
+              </div>
+              <span class="text-sm font-medium text-gray-700">Edit Profile</span>
+            </button>
+            
+            <button class="flex flex-col items-center p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+              <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-green-200 transition-colors duration-300">
+                <i class="fas fa-key text-green-600"></i>
+              </div>
+              <span class="text-sm font-medium text-gray-700">Security</span>
+            </button>
+            
+            <button class="flex flex-col items-center p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+              <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-purple-200 transition-colors duration-300">
+                <i class="fas fa-bell text-purple-600"></i>
+              </div>
+              <span class="text-sm font-medium text-gray-700">Notifications</span>
+            </button>
+            
+            <button class="flex flex-col items-center p-4 bg-white rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
+              <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-orange-200 transition-colors duration-300">
+                <i class="fas fa-cog text-orange-600"></i>
+              </div>
+              <span class="text-sm font-medium text-gray-700">Settings</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <a href="{% url 'Users:user_logout' %}" 
+             class="inline-flex items-center justify-center px-4 py-3 sm:px-6 sm:py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 group text-sm sm:text-base order-2 sm:order-1">
+            <i class="fas fa-sign-out-alt mr-2 group-hover:scale-110 transition-transform duration-300 text-sm"></i>
+            Logout
+          </a>
+          
+          <a href="#" 
+             class="inline-flex items-center justify-center px-4 py-3 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 group text-sm sm:text-base order-1 sm:order-2">
+            <i class="fas fa-edit mr-2 group-hover:scale-110 transition-transform duration-300 text-sm"></i>
+            Edit Profile
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Info Cards - Mobile -->
+    <div class="md:hidden space-y-4 mt-6">
+      <!-- Recent Activity Mobile Card -->
+      <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 p-4">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-clock text-blue-600"></i>
+          Recent Activity
+        </h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-sign-in-alt text-blue-600 text-xs"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-800">Logged in</p>
+              <p class="text-xs text-gray-500">2 hours ago</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+            <div class="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-check text-green-600 text-xs"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-800">Profile updated</p>
+              <p class="text-xs text-gray-500">1 day ago</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+            <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-star text-purple-600 text-xs"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-800">Achievement unlocked</p>
+              <p class="text-xs text-gray-500">3 days ago</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Info Mobile Card -->
+      <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 p-4">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-shield-alt text-green-600"></i>
+          Security Status
+        </h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Two-Factor Auth</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <i class="fas fa-check mr-1 text-xs"></i>
+              Enabled
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Email Verified</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <i class="fas fa-check mr-1 text-xs"></i>
+              Verified
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Last Password</span>
+            <span class="text-xs text-gray-500">30 days ago</span>
+          </div>
+          
+          <div class="mt-4">
+            <button class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+              <i class="fas fa-key text-xs"></i>
+              Change Password
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Info Cards - Desktop -->
+    <div class="hidden md:grid md:grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+      <!-- Recent Activity -->
+      <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-clock text-blue-600"></i>
+          Recent Activity
+        </h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+            <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
+              <i class="fas fa-sign-in-alt text-blue-600 text-xs"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">Logged in</p>
+              <p class="text-xs text-gray-500">2 hours ago</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+            <div class="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+              <i class="fas fa-check text-green-600 text-xs"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">Profile updated</p>
+              <p class="text-xs text-gray-500">1 day ago</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+            <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+              <i class="fas fa-star text-purple-600 text-xs"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">Achievement unlocked</p>
+              <p class="text-xs text-gray-500">3 days ago</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Info -->
+      <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-shield-alt text-green-600"></i>
+          Security Status
+        </h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Two-Factor Authentication</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <i class="fas fa-check mr-1"></i>
+              Enabled
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Email Verification</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <i class="fas fa-check mr-1"></i>
+              Verified
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Last Password Change</span>
+            <span class="text-xs text-gray-500">30 days ago</span>
+          </div>
+          
+          <div class="mt-4">
+            <button class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+              <i class="fas fa-key"></i>
+              Change Password
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+/* Smooth animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fadeInScale {
+  animation: fadeInScale 0.5s ease-out;
+}
+
+/* Mobile card animations */
+@media (max-width: 767px) {
+  .bg-white\\/90 {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+  }
+  
+  .bg-white\\/90:nth-child(1) { animation-delay: 0.1s; }
+  .bg-white\\/90:nth-child(2) { animation-delay: 0.2s; }
+  .bg-white\\/90:nth-child(3) { animation-delay: 0.3s; }
+  .bg-white\\/90:nth-child(4) { animation-delay: 0.4s; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Glass effect enhancement */
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Focus states */
+button:focus, a:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Enhanced hover effects */
+.hover\:shadow-xl:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.hover\:-translate-y-1:hover {
+  transform: translateY(-4px);
+}
+
+/* Touch improvements for mobile */
+@media (max-width: 767px) {
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .hover\:-translate-y-1:hover {
+    transform: none;
+  }
+  
+  .hover\:shadow-xl:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .md\:ml-80 {
+    margin-left: 0;
+  }
+  
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .bg-gradient-to-br {
+    background: white !important;
+  }
+  
+  .shadow-2xl, .shadow-lg {
+    box-shadow: none !important;
+  }
+  
+  .backdrop-blur-lg {
+    backdrop-filter: none !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeInUp, .animate-fadeInScale, .animate-pulse, .animate-ping {
+    animation: none !important;
+  }
+  
+  .transition-all, .transition-colors, .transition-transform {
+    transition: none !important;
+  }
+  
+  .hover\:-translate-y-1:hover {
+    transform: none !important;
+  }
+}
+</style>
+
+<script>
+// Enhanced mobile interactions
+document.addEventListener('DOMContentLoaded', function() {
+  // Add touch feedback for mobile buttons
+  const buttons = document.querySelectorAll('button, a');
+  
+  buttons.forEach(button => {
+    button.addEventListener('touchstart', function() {
+      this.classList.add('scale-95');
+    });
+    
+    button.addEventListener('touchend', function() {
+      this.classList.remove('scale-95');
+    });
+  });
+  
+  // Handle orientation changes
+  window.addEventListener('orientationchange', function() {
+    setTimeout(() => {
+      // Refresh any layout-dependent elements
+      window.dispatchEvent(new Event('resize'));
+    }, 300);
+  });
+  
+  // Add loading states for buttons
+  const actionButtons = document.querySelectorAll('a[href*="logout"], a[href="#"]');
+  actionButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      if (this.href.includes('logout')) {
+        if (!confirm('Are you sure you want to logout?')) {
+          e.preventDefault();
+          return;
+        }
+      }
+      
+      // Add loading state
+      const originalText = this.innerHTML;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
+      this.classList.add('opacity-50', 'cursor-not-allowed');
+      
+      setTimeout(() => {
+        this.innerHTML = originalText;
+        this.classList.remove('opacity-50', 'cursor-not-allowed');
+      }, 2000);
+    });
+  });
+});
+
+// Utility function to handle profile image upload
+function handleProfileImageUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const profileImage = document.querySelector('.rounded-full img');
+      if (profileImage) {
+        profileImage.src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Initialize profile image upload if needed
+document.addEventListener('DOMContentLoaded', function() {
+  const profileImageContainer = document.querySelector('.group.relative');
+  if (profileImageContainer) {
+    profileImageContainer.addEventListener('click', function() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
+      fileInput.addEventListener('change', handleProfileImageUpload);
+      document.body.appendChild(fileInput);
+      fileInput.click();
+      document.body.removeChild(fileInput);
+    });
+  }
+});
+</script>
+{% endblock %}

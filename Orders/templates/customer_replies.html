@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-8xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow md:ml-[260px] mt-[10px]">
+  <h2 class="text-2xl font-bold mb-4 text-gray-800">Customer TC Responses</h2>
+
+  <!-- Desktop Table View (hidden on mobile) -->
+  <div class="hidden md:block overflow-x-auto">
+    <table class="w-full border border-gray-200 text-sm md:text-base">
+      <thead>
+        <tr class="bg-gray-100 text-left">
+          <th class="border p-3">Challan ID</th>
+          <th class="border p-3">Customer</th>
+          <th class="border p-3">Response</th>
+          <th class="border p-3">Attachments</th>
+          <th class="border p-3">Received At</th>
+          <th class="border p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reply in replies %}
+        <tr class="hover:bg-gray-50 transition">
+          <td class="border p-3 font-medium text-gray-700">{{ reply.challan.id }}</td>
+          <td class="border p-3 text-gray-600">{{ reply.customer }}</td>
+          <td class="border p-3 whitespace-pre-wrap text-gray-700">{{ reply.message }}</td>
+          <td class="border p-3">
+            {% if reply.attachments %}
+              <ul class="list-disc pl-4 space-y-1">
+                {% for file in reply.attachments %}
+                  <li>
+                    <a href="{{ MEDIA_URL }}{{ file }}" 
+                       class="text-blue-600 hover:underline" 
+                       target="_blank">
+                      {{ file|cut:"TC_attachments/" }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="text-gray-400 italic">No attachments</span>
+            {% endif %}
+          </td>
+          <td class="border p-3 text-gray-600">{{ reply.received_at }}</td>
+          <td class="border p-3">
+            <div class="flex flex-col gap-2">
+              <a class="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-center" 
+                 href="create_final_bill?id={{ reply.id }}">
+                Final Bill
+              </a>
+              <a class="inline-block px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-center" 
+                 href="{% url "Orders:create_final_bill" %}">
+                Cancel
+              </a>
+            </div>
+          </td>
+        </tr> 
+
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center p-6 text-gray-500">No responses yet</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card View (hidden on desktop) -->
+  <div class="md:hidden space-y-4">
+    {% for reply in replies %}
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+      <!-- Header with Challan ID and Customer -->
+      <div class="flex justify-between items-start mb-3 pb-3 border-b border-gray-100">
+        <div>
+          <h3 class="font-semibold text-gray-800">Challan #{{ reply.challan.id }}</h3>
+          <p class="text-sm text-gray-600">{{ reply.customer }}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-gray-500">Received</p>
+          <p class="text-sm font-medium text-gray-700">{{ reply.received_at }}</p>
+        </div>
+      </div>
+
+      <!-- Response Message -->
+      <div class="mb-3">
+        <p class="text-sm text-gray-500 mb-1">Response</p>
+        <div class="bg-gray-50 p-3 rounded-lg max-h-32 overflow-y-auto">
+          <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ reply.message|truncatewords:30 }}</p>
+        </div>
+      </div>
+
+      <!-- Attachments -->
+      <div class="mb-4">
+        <p class="text-sm text-gray-500 mb-2">Attachments</p>
+        {% if reply.attachments %}
+          <div class="space-y-2">
+            {% for file in reply.attachments %}
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                </svg>
+                <a href="{{ MEDIA_URL }}{{ file }}" 
+                   class="text-blue-600 hover:underline text-sm truncate flex-1" 
+                   target="_blank">
+                  {{ file|cut:"TC_attachments/" }}
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <span class="text-gray-400 italic text-sm">No attachments</span>
+        {% endif %}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2 pt-3 border-t border-gray-100">
+        <a class="flex-1 text-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium" 
+           href="create_final_bill?id={{ reply.id }}">
+          Final Bill
+        </a>
+        <a class="flex-1 text-center px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium" 
+           href="{% url "Orders:create_final_bill" %}">
+          Cancel
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+      <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+      </svg>
+      <p class="text-gray-500">No responses yet</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

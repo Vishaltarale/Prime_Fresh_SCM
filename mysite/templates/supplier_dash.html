@@ -1,0 +1,1584 @@
+{% extends "base.html" %}
+{% block title %}Suppliers | SCM Dashboard{% endblock %}
+
+{% block content %}
+<div class="suppliers-dashboard">
+  <!-- Animated Background Elements -->
+  <div class="bg-animation">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Page Header -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">
+            <i class="fas fa-truck-field" aria-hidden="true"></i>
+            Supplier Dashboard
+          </h1>
+          <p class="page-subtitle">Manage your supplier relationships and track performance metrics</p>
+        </div>
+        <div class="header-actions">
+
+        </div>
+      </div>
+    </header>
+
+    <!-- Statistics Cards -->
+    <section class="stats-grid" aria-label="Supplier statistics">
+      <!-- Total Suppliers -->
+      <div class="stat-card" data-metric="total">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Total Suppliers</h3>
+            <div class="stat-value">{{ total_suppliers }}</div>
+          </div>
+          <div class="stat-icon stat-icon-blue">
+            <i class="fas fa-users" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-trend">
+          <span class="trend-indicator trend-neutral">
+            <i class="fas fa-chart-line" aria-hidden="true"></i>
+            <span>Total</span>
+          </span>
+          <span class="trend-period">registered suppliers</span>
+        </div>
+      </div>
+
+      <!-- Active Suppliers -->
+      <div class="stat-card" data-metric="active">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Admin Approved Suppliers</h3>
+            <div class="stat-value">{{ active_suppliers }}</div>
+          </div>
+          <div class="stat-icon stat-icon-green">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-trend">
+          <span class="trend-indicator trend-up">
+            <i class="fas fa-arrow-up" aria-hidden="true"></i>
+            <span>{{ active_percentage|floatformat:0 }}%</span>
+          </span>
+          <span class="trend-period">currently Approved</span>
+        </div>
+      </div>
+
+      <!-- Inactive Suppliers -->
+      <div class="stat-card" data-metric="inactive">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Pending Suppliers</h3>
+            <div class="stat-value">{{ inactive_suppliers }}</div>
+          </div>
+          <div class="stat-icon stat-icon-red">
+            <i class="fas fa-pause-circle" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-trend">
+          <span class="trend-indicator trend-down">
+            <i class="fas fa-arrow-down" aria-hidden="true"></i>
+            <span>{{ inactive_percentage|floatformat:0 }}%</span>
+          </span>
+          <span class="trend-period">need attention</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search and Filters -->
+    <section class="filters-section" aria-label="Search and filter suppliers">
+      <div class="filters-container">
+        <div class="search-box">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon" aria-hidden="true"></i>
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="Search suppliers by name, company, or email..."
+                   aria-label="Search suppliers"
+                   id="supplierSearch">
+          </div>
+        </div>
+        <div class="filter-controls">
+          <select class="filter-select" aria-label="Filter by status" id="statusFilter">
+            <option value="">All Status</option>
+            <option value="Approve">Approve</option>
+            <option value="Pending">Pending</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" aria-label="Reset filters" id="resetFilters">
+            <i class="fas fa-times" aria-hidden="true"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Suppliers Table -->
+    <section class="table-section" aria-label="Suppliers data table">
+      <div class="table-container">
+        <div class="table-header">
+          <h2 class="table-title">
+            <i class="fas fa-table" aria-hidden="true"></i>
+            Suppliers Directory
+          </h2>
+          <div class="table-info">
+            <span class="results-count">Showing {{ suppliers|length }} suppliers</span>
+          </div>
+        </div>
+
+        <!-- Mobile Cards (Hidden on Desktop) -->
+        <div class="mobile-cards" role="list" aria-label="Suppliers list">
+          {% for supplier in suppliers %}
+          <div class="mobile-card" role="listitem" data-status="{{ supplier.status|lower }}">
+            <div class="mobile-card-header">
+              <div class="supplier-avatar">
+                {{ supplier.supplier_name|first }}
+              </div>
+              <div class="supplier-basic-info">
+                <h3 class="supplier-name">{{ supplier.supplier_name }}</h3>
+                <p class="supplier-company">{{ supplier.company_name }}</p>
+              </div>
+              <div class="supplier-status">
+                {% if supplier.status == "Active" %}
+                  <span class="status-badge status-active" role="status" aria-label="Status: Active">
+                    <i class="fas fa-circle" aria-hidden="true"></i>
+                    Active
+                  </span>
+                {% else %}
+                  <span class="status-badge status-inactive" role="status" aria-label="Status: Inactive">
+                    <i class="fas fa-circle" aria-hidden="true"></i>
+                    Inactive
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="mobile-card-body">
+              <div class="info-row">
+                <div class="info-item">
+                  <i class="fas fa-envelope info-icon" aria-hidden="true"></i>
+                  <span class="info-label">Email:</span>
+                  <span class="info-value">{{ supplier.email }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <i class="fas fa-phone info-icon" aria-hidden="true"></i>
+                  <span class="info-label">Phone:</span>
+                  <span class="info-value">{{ supplier.phone }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <i class="fas fa-shopping-cart info-icon" aria-hidden="true"></i>
+                  <span class="info-label">Recent Orders:</span>
+                  <span class="info-value">{{ supplier.recent_orders|default:"0" }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mobile-card-actions">
+              <a href="#" class="action-btn action-btn-view" aria-label="View supplier details">
+                <i class="fas fa-eye" aria-hidden="true"></i>
+                <span>View</span>
+              </a>
+              <a href="#" class="action-btn action-btn-edit" aria-label="Edit supplier">
+                <i class="fas fa-edit" aria-hidden="true"></i>
+                <span>Edit</span>
+              </a>
+              <button class="action-btn action-btn-delete" 
+                      aria-label="Delete supplier"
+                      onclick="confirmDelete('{{ supplier.supplier_name }}')">
+                <i class="fas fa-trash" aria-hidden="true"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+          {% empty %}
+          <div class="empty-state" role="status">
+            <div class="empty-icon">
+              <i class="fas fa-truck-field" aria-hidden="true"></i>
+            </div>
+            <h3 class="empty-title">No suppliers found</h3>
+            <p class="empty-subtitle">Get started by adding your first supplier</p>
+            <button class="btn btn-primary" id="addFirstSupplier">
+              <i class="fas fa-plus" aria-hidden="true"></i>
+              Add First Supplier
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Desktop Table (Hidden on Mobile) -->
+        <div class="desktop-table">
+          <table class="data-table" role="table" aria-label="Suppliers data table">
+            <thead>
+              <tr>
+                <th scope="col" class="sortable" data-column="name">
+                  <button class="sort-button" aria-label="Sort by name">
+                    <span>Supplier</span>
+                    <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                  </button>
+                </th>
+                <th scope="col" class="sortable" data-column="company">
+                  <button class="sort-button" aria-label="Sort by company">
+                    <span>Company</span>
+                    <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                  </button>
+                </th>
+                <th scope="col">Contact</th>
+                <th scope="col" class="sortable" data-column="status">
+                  <button class="sort-button" aria-label="Sort by status">
+                    <span>Status</span>
+                    <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                  </button>
+                </th>
+                <th scope="col" class="sortable" data-column="orders">
+                  <button class="sort-button" aria-label="Sort by recent orders">
+                    <span>Orders</span>
+                    <i class="fas fa-sort sort-icon" aria-hidden="true"></i>
+                  </button>
+                </th>
+                <th scope="col" class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for supplier in suppliers %}
+              <tr class="table-row" data-status="{{ supplier.status|lower }}">
+                <td class="supplier-cell">
+                  <div class="supplier-info">
+                    <div class="supplier-avatar-sm">
+                      {{ supplier.supplier_name|first }}
+                    </div>
+                    <div class="supplier-details">
+                      <div class="supplier-name-sm">{{ supplier.supplier_name }}</div>
+                      <div class="supplier-id">ID: #SUP{{ forloop.counter|stringformat:"03d" }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="company-cell">
+                  <div class="company-info">
+                    <div class="company-name">{{ supplier.company_name }}</div>
+                    <div class="company-type">Supplier</div>
+                  </div>
+                </td>
+                <td class="contact-cell">
+                  <div class="contact-info">
+                    <div class="contact-item">
+                      <i class="fas fa-envelope contact-icon" aria-hidden="true"></i>
+                      <span>{{ supplier.email }}</span>
+                    </div>
+                    <div class="contact-item">
+                      <i class="fas fa-phone contact-icon" aria-hidden="true"></i>
+                      <span>{{ supplier.phone }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="status-cell">
+                  {% if supplier.status == "Active" %}
+                    <span class="status-badge status-active" role="status">
+                      <span class="status-indicator" aria-hidden="true"></span>
+                      Active
+                    </span>
+                  {% else %}
+                    <span class="status-badge status-inactive" role="status">
+                      <span class="status-indicator" aria-hidden="true"></span>
+                      Inactive
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="orders-cell">
+                  <div class="orders-info">
+                    <div class="orders-count">{{ supplier.recent_orders|default:"0" }}</div>
+                    <div class="orders-label">recent orders</div>
+                  </div>
+                </td>
+                <td class="actions-cell">
+                  <div class="actions-dropdown">
+                    <button class="actions-trigger" aria-label="More actions" aria-expanded="false">
+                      <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                    </button>
+                    <div class="actions-menu" role="menu">
+                      <a href="#" class="action-item" role="menuitem">
+                        <i class="fas fa-eye" aria-hidden="true"></i>
+                        View Details
+                      </a>
+                      <a href="#" class="action-item" role="menuitem">
+                        <i class="fas fa-edit" aria-hidden="true"></i>
+                        Edit Supplier
+                      </a>
+                      <a href="#" class="action-item" role="menuitem">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        View Orders
+                      </a>
+                      <div class="action-divider" role="separator"></div>
+                      <button class="action-item action-danger" 
+                              role="menuitem"
+                              onclick="confirmDelete('{{ supplier.supplier_name }}')">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                        Delete Supplier
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="empty-row">
+                  <div class="empty-state">
+                    <div class="empty-icon">
+                      <i class="fas fa-truck-field" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="empty-title">No suppliers found</h3>
+                    <p class="empty-subtitle">Get started by adding your first supplier</p>
+                    <button class="btn btn-primary" id="addSupplierFromTable">
+                      <i class="fas fa-plus" aria-hidden="true"></i>
+                      Add First Supplier
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pagination (if needed) -->
+    <nav class="pagination-nav" aria-label="Suppliers pagination">
+      <div class="pagination-info">
+        <span>Showing 1-{{ suppliers|length }} of {{ suppliers|length }} suppliers</span>
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" disabled aria-label="Previous page">
+          <i class="fas fa-chevron-left" aria-hidden="true"></i>
+          <span>Previous</span>
+        </button>
+        <button class="pagination-btn pagination-btn-active" aria-label="Page 1" aria-current="page">1</button>
+        <button class="pagination-btn" disabled aria-label="Next page">
+          <span>Next</span>
+          <i class="fas fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- Add Supplier Modal -->
+<div class="modal" id="addSupplierModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add New Supplier</h2>
+      <button class="modal-close" aria-label="Close modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="supplierForm">
+        <div class="form-group">
+          <label for="supplierName">Supplier Name</label>
+          <input type="text" id="supplierName" name="supplierName" required>
+        </div>
+        <div class="form-group">
+          <label for="companyName">Company Name</label>
+          <input type="text" id="companyName" name="companyName" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" required>
+        </div>
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" name="status" required>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancelSupplier">Cancel</button>
+      <button class="btn btn-primary" id="saveSupplier">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Base Styles */
+.suppliers-dashboard {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 25%, #e8eaf6 75%, #f3e8ff 100%);
+  min-height: 100vh;
+  padding: 20px;
+  padding-top: 100px;
+  padding-left: 280px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .suppliers-dashboard {
+    padding-left: 20px;
+    padding-top: 100px;
+  }
+}
+
+/* Animated Background */
+.bg-animation {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-orb-1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  top: -150px;
+  right: -150px;
+}
+
+.bg-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(59, 130, 246, 0.08));
+  bottom: -200px;
+  left: -200px;
+  animation-delay: -4s;
+}
+
+.bg-orb-3 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(239, 68, 68, 0.08));
+  top: 50%;
+  left: 30%;
+  animation-delay: -2s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 32px;
+  animation: slideInDown 0.6s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+@media (min-width: 768px) {
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1f2937, #3b82f6, #7c3aed);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .page-title {
+    font-size: 2rem;
+  }
+}
+
+.page-subtitle {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #374151;
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.75rem;
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.5s ease;
+  animation: slideInUp 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card[data-metric="total"]:hover::before {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.2));
+  opacity: 1;
+}
+
+.stat-card[data-metric="active"]:hover::before {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2));
+  opacity: 1;
+}
+
+.stat-card[data-metric="inactive"]:hover::before {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.2));
+  opacity: 1;
+}
+
+.stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.stat-icon {
+  padding: 12px;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1);
+}
+
+.stat-icon-blue {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.stat-icon-green {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-icon-red {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.trend-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.trend-up {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.trend-down {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.trend-neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.trend-period {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+/* Filters Section */
+.filters-section {
+  margin-bottom: 24px;
+  animation: slideInUp 0.6s ease-out 0.2s both;
+}
+
+.filters-container {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .filters-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.search-box {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.filter-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Table Section */
+.table-section {
+  animation: slideInUp 0.6s ease-out 0.4s both;
+}
+
+.table-container {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.table-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.table-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Mobile Cards */
+.mobile-cards {
+  display: block;
+  padding: 16px;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .mobile-cards {
+    display: none;
+  }
+}
+
+.mobile-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.mobile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.supplier-avatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.supplier-basic-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.supplier-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.supplier-company {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.supplier-status {
+  flex-shrink: 0;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.mobile-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.info-icon {
+  color: #6b7280;
+  width: 16px;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.info-value {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.mobile-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.action-btn-view {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.action-btn-edit {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.action-btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Desktop Table */
+.desktop-table {
+  display: none;
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .desktop-table {
+    display: block;
+  }
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.data-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sort-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: inherit;
+  padding: 0;
+}
+
+.sort-button:hover {
+  color: #3b82f6;
+}
+
+.table-row:hover td {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.supplier-cell {
+  width: 25%;
+}
+
+.supplier-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.supplier-avatar-sm {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.supplier-name-sm {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.supplier-id {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.company-cell {
+  width: 20%;
+}
+
+.company-name {
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.company-type {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.contact-cell {
+  width: 25%;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.contact-icon {
+  color: #6b7280;
+  width: 14px;
+}
+
+.status-cell {
+  width: 10%;
+}
+
+.orders-cell {
+  width: 10%;
+}
+
+.orders-count {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.125rem;
+}
+
+.orders-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.actions-cell {
+  width: 10%;
+}
+
+.actions-dropdown {
+  position: relative;
+}
+
+.actions-trigger {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.actions-trigger:hover {
+  background: rgba(255, 255, 255, 0.3);
+  color: #374151;
+}
+
+.actions-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  min-width: 180px;
+  z-index: 10;
+  display: none;
+}
+
+.actions-dropdown:hover .actions-menu {
+  display: block;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.action-item:hover {
+  background: #f3f4f6;
+}
+
+.action-danger {
+  color: #dc2626;
+}
+
+.action-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.empty-subtitle {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* Pagination */
+.pagination-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 16px 0;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:not(:disabled):hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn-active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+</style>
+
+<script>
+// Supplier Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+  // Modal functionality
+  const addSupplierBtn = document.getElementById('addSupplierBtn');
+  const addFirstSupplier = document.getElementById('addFirstSupplier');
+  const addSupplierFromTable = document.getElementById('addSupplierFromTable');
+  const modal = document.getElementById('addSupplierModal');
+  const modalClose = document.querySelector('.modal-close');
+  const cancelSupplier = document.getElementById('cancelSupplier');
+  
+  // Open modal from various buttons
+  [addSupplierBtn, addFirstSupplier, addSupplierFromTable].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+    }
+  });
+  
+  // Close modal
+  [modalClose, cancelSupplier].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+  });
+  
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+  
+  // Save supplier
+  const saveSupplier = document.getElementById('saveSupplier');
+  if (saveSupplier) {
+    saveSupplier.addEventListener('click', () => {
+      // Here you would typically send data to server
+      alert('Supplier added successfully!');
+      modal.style.display = 'none';
+      // Reset form
+      document.getElementById('supplierForm').reset();
+    });
+  }
+  
+  // Search functionality
+  const searchInput = document.getElementById('supplierSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', filterSuppliers);
+  }
+  
+  // Status filter
+  const statusFilter = document.getElementById('statusFilter');
+  if (statusFilter) {
+    statusFilter.addEventListener('change', filterSuppliers);
+  }
+  
+  // Reset filters
+  const resetFilters = document.getElementById('resetFilters');
+  if (resetFilters) {
+    resetFilters.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (statusFilter) statusFilter.value = '';
+      filterSuppliers();
+    });
+  }
+  
+  // Sort functionality
+  const sortButtons = document.querySelectorAll('.sort-button');
+  sortButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const column = this.closest('th').getAttribute('data-column');
+      sortTable(column);
+    });
+  });
+  
+  function filterSuppliers() {
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusValue = statusFilter ? statusFilter.value : '';
+    
+    // Filter mobile cards
+    const mobileCards = document.querySelectorAll('.mobile-card');
+    mobileCards.forEach(card => {
+      const supplierName = card.querySelector('.supplier-name').textContent.toLowerCase();
+      const companyName = card.querySelector('.supplier-company').textContent.toLowerCase();
+      const email = card.querySelector('.info-value').textContent.toLowerCase();
+      const status = card.getAttribute('data-status');
+      
+      const matchesSearch = supplierName.includes(searchTerm) || 
+                           companyName.includes(searchTerm) || 
+                           email.includes(searchTerm);
+      const matchesStatus = !statusValue || status === statusValue;
+      
+      card.style.display = matchesSearch && matchesStatus ? 'block' : 'none';
+    });
+    
+    // Filter desktop table rows
+    const tableRows = document.querySelectorAll('.table-row');
+    tableRows.forEach(row => {
+      const supplierName = row.querySelector('.supplier-name-sm').textContent.toLowerCase();
+      const companyName = row.querySelector('.company-name').textContent.toLowerCase();
+      const email = row.querySelector('.contact-item:first-child span').textContent.toLowerCase();
+      const status = row.getAttribute('data-status');
+      
+      const matchesSearch = supplierName.includes(searchTerm) || 
+                           companyName.includes(searchTerm) || 
+                           email.includes(searchTerm);
+      const matchesStatus = !statusValue || status === statusValue;
+      
+      row.style.display = matchesSearch && matchesStatus ? 'table-row' : 'none';
+    });
+    
+    // Update results count
+    updateResultsCount();
+  }
+  
+  function sortTable(column) {
+    // This is a simplified sort implementation
+    // In a real application, you would sort the data and re-render the table
+    alert(`Sorting by ${column} - this would be implemented with actual data sorting`);
+  }
+  
+  function updateResultsCount() {
+    const visibleMobileCards = document.querySelectorAll('.mobile-card[style=""]').length + 
+                              document.querySelectorAll('.mobile-card:not([style])').length;
+    
+    const visibleTableRows = document.querySelectorAll('.table-row[style=""]').length + 
+                            document.querySelectorAll('.table-row:not([style])').length;
+    
+    const visibleCount = Math.max(visibleMobileCards, visibleTableRows);
+    
+    const resultsCount = document.querySelector('.results-count');
+    if (resultsCount) {
+      resultsCount.textContent = `Showing ${visibleCount} suppliers`;
+    }
+  }
+  
+  // Initialize results count
+  updateResultsCount();
+});
+
+// Delete confirmation
+function confirmDelete(supplierName) {
+  if (confirm(`Are you sure you want to delete ${supplierName}? This action cannot be undone.`)) {
+    // Here you would typically send a delete request to the server
+    alert(`${supplierName} has been deleted.`);
+    // Then refresh the page or remove the element from the DOM
+  }
+}
+</script>
+{% endblock %}

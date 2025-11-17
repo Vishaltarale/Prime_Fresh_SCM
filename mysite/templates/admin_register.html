@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Registration</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    /* Fade-in animation */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-black-100 to-purple-100 min-h-screen flex items-center justify-center font-sans">
+
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-200 fade-in-up">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-extrabold text-gray-800 animate-pulse">Admin Setup</h2>
+      <p class="text-gray-500 mt-2 text-sm">Secure your SCM platform with admin access</p>
+    </div>
+
+    <form method="POST" action="{% url "mysite:admin_save" %}" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Floating Input -->
+      <div class="relative">
+        <input type="text" name="username" id="username" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-transparent"
+               placeholder="Username" />
+        <label for="username"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600">
+          Username
+        </label>
+      </div>
+
+      <div class="relative">
+        <input type="email" name="email" id="email" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-transparent"
+               placeholder="Email" />
+        <label for="email"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600">
+          Email
+        </label>
+      </div>
+
+      <div class="relative">
+        <input type="password" name="password1" id="password1" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-transparent"
+               placeholder="Password" />
+        <label for="password1"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600">
+          Password
+        </label>
+      </div>
+
+      <div class="relative">
+        <input type="password" name="password2" id="password2" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-transparent"
+               placeholder="Confirm Password" />
+        <label for="password2"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-blue-600">
+          Confirm Password
+        </label>
+      </div>
+
+      <div>
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg">
+          Register Admin
+        </button>
+      </div>
+      <div class="text-center mt-4">
+      <p class="text-sm text-gray-600">
+        Already have an account?
+        <a href="{% url 'mysite:admin_login' %}" class="text-blue-600 hover:underline">Login</a>
+      </p>
+    </div>
+    </form>
+  </div>
+
+</body>
+</html>

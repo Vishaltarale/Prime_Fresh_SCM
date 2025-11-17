@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Purchase Order</title>
+    <style>
+        body {
+            font-family: "DejaVu Sans", Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+            padding: 0;
+        }
+
+        .header, .footer {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .company-info {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .po-meta {
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .total-row td {
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin-top: 60px;
+        }
+
+        .signature-line {
+            width: 200px;
+            border-top: 1px solid #000;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .footer {
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <h2>{{ company_name }}</h2>
+        <div class="company-info">
+            {{ company_address }}<br>
+            Phone: {{ company_phone }}<br>
+            Email: {{ company_email }}
+        </div>
+    </div>
+
+    <!-- PO Meta Info -->
+    <div class="po-meta">
+        <p><strong>PO Number:</strong> {{ po_number }}</p>
+        <p><strong>Date:</strong> {{ current_date }}</p>
+    </div>
+
+    <!-- Recipient -->
+    <div class="section-title">Recipient Details</div>
+    <table>
+        <tr>
+            <th>Type</th>
+            <td>{% if po.supplier %}Supplier{% elif po.farmer %}Farmer{% endif %}</td>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <td>
+                {% if po.supplier %}
+                    {{ po.supplier.supplier_name }}
+                {% elif po.farmer %}
+                    {{ po.farmer.full_name }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>
+                {% if po.supplier %}
+                    {{ po.supplier.email }}
+                {% elif po.farmer %}
+                    {{ po.farmer.email }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Warehouse</th>
+            <td>{{ po.warehouse.warehouse_name }}</td>
+        </tr>
+    </table>
+
+    <!-- Items -->
+    <div class="section-title">Order Items</div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Quantity</th>
+                <th>UOM</th>
+                <th>Price (₹)</th>
+                <th>Subtotal (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% with 0 as total %}
+            {% for item in po.items %}
+            {% with item.quantity|floatformat:2 as qty %}
+            {% with item.price|floatformat:2 as price %}
+            {% with item.quantity|floatformat:2|floatformat:2|floatformat:2|stringformat:"s" as q %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.uom }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>₹{{ item.price|floatformat:2|floatformat:2|add:item.quantity|floatformat:2 }}</td>
+            </tr>
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
+            {% endwith %}
+            <tr class="total-row">
+                <td colspan="6" style="text-align:right;">Total:</td>
+                <td>₹{{ po.total_amount|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Signature -->
+    <div class="signature-section">
+        <div class="signature-line">Authorized Signature</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        This is a system-generated document. For any queries, contact {{ company_email }}.
+    </div>
+
+</body>
+</html>

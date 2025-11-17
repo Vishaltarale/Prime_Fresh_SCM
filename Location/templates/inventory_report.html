@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="p-8 md:ml-[260px] mt-[80px] bg-gray-100 min-h-screen">
+  <div class="bg-white shadow-lg rounded-lg p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800">Inventory Report</h2>
+      <div class="space-x-2">
+        <a href="{% url 'Location:inventory_report' 'expiry' %}" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm">Export PDF</a>
+        <a href="" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm">Export Excel</a>
+      </div>
+    </div>
+
+    {% include 'Location/templates/custom_tag.html' with headers=headers rows=rows %}
+  </div>
+</div>
+{% endblock %}

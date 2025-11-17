@@ -1,0 +1,11 @@
+Hello {{ recipient_name }},
+
+Please find attached your Purchase Order from {{ company_name }}.
+
+PO ID: {{ po.id }}
+Status: {{ po.status }}
+
+Thank you for your business.
+
+-- 
+{{ company_name }}

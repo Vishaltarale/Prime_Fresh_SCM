@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-black-100 to-purple-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-200 fade-in-up">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-extrabold text-gray-800 animate-pulse">Admin Login</h2>
+      <p class="text-gray-500 mt-1 text-sm">Access your SCM dashboard</p>
+    </div>
+
+    <form method="POST" action="{% url "mysite:admin_login_dash" %}">
+      {% csrf_token %}
+
+      <div class="relative mb-6">
+        <input type="text" name="username" id="username" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Username" />
+        <label for="username"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Username
+        </label>
+      </div>
+
+      <div class="relative mb-6">
+        <input type="password" name="password" id="password" required
+               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
+               placeholder="Password" />
+        <label for="password"
+               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
+          Password
+        </label>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+        Login
+      </button>
+      <div class="text-center mt-4">
+      <p class="text-sm text-gray-600">
+        I don't have account? Create account
+        <a href="" class="text-blue-600 hover:underline">Login</a>
+      </p>
+</div>
+    </form>
+  </div>
+
+</body>
+</html>

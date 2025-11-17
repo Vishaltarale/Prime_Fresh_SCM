@@ -1,0 +1,79 @@
+REQUEST FOR QUOTATION (RFQ)
+=============================
+
+Company: {{ company_name }}
+RFQ ID: {{ rfq.id }}
+Date: {{ rfq.created_at|date:"d M Y" }}
+Prepared By: {{ rfq.created_by }}
+Status: {{ rfq.status }}
+
+SOURCE INFORMATION:
+{% if rfq.supplier %}
+- Supplier: {{ rfq.supplier.supplier_name }}
+{% if rfq.supplier.contact_person %}- Contact Person: {{ rfq.supplier.contact_person }}{% endif %}
+{% if rfq.supplier.email %}- Email: {{ rfq.supplier.email }}{% endif %}
+{% if rfq.supplier.phone %}- Phone: {{ rfq.supplier.phone }}{% endif %}
+{% endif %}
+
+{% if rfq.farmer %}
+- Farmer: {{ rfq.farmer.full_name }}
+{% if rfq.farmer.contact_number %}- Contact: {{ rfq.farmer.contact_number }}{% endif %}
+{% if rfq.farmer.location %}- Location: {{ rfq.farmer.location }}{% endif %}
+{% endif %}
+
+DELIVERY INFORMATION:
+{% if rfq.warehouse %}
+- Warehouse: {{ rfq.warehouse.warehouse_name }}
+{% if rfq.warehouse.location %}- Location: {{ rfq.warehouse.location }}{% endif %}
+{% endif %}
+{% if rfq.tracking_number %}- Tracking: {{ rfq.tracking_number }}{% endif %}
+{% if rfq.received_at %}- Received: {{ rfq.received_at|date:"d M Y" }}{% endif %}
+
+PRODUCT ITEMS:
+{% for item in rfq.items %}
+Item {{ forloop.counter }}:
+- Product: {{ item.product_name }}
+- SKU: {{ item.sku|default:"N/A" }}
+- Category: {{ item.category.name|default:"N/A" }}
+- Subcategory: {{ item.subcategory.name|default:"N/A" }}
+- Quantity: {{ item.quantity }} {{ item.uom }}
+- Unit Price: ₹{{ item.price|floatformat:2 }}
+- GST: {{ item.gst_amount|floatformat:2 }}%
+- GST Amount: ₹{{ item.gst_value|floatformat:2 }}
+- Subtotal: ₹{{ item.subtotal|floatformat:2 }}
+- Line Total: ₹{{ item.line_total|floatformat:2 }}
+{% if item.description %}- Description: {{ item.description }}{% endif %}
+{% if item.warehouse %}- Item Warehouse: {{ item.warehouse.warehouse_name }}{% endif %}
+----------------------------------------
+{% endfor %}
+
+FINANCIAL SUMMARY:
+- Total Items: {{ rfq.items|length }}
+- Subtotal: ₹{{ rfq.subtotal|default:0|floatformat:2 }}
+- Total GST: ₹{{ rfq.gst_amount|default:0|floatformat:2 }}
+- GRAND TOTAL: ₹{{ rfq.total_amount|default:0|floatformat:2 }}
+
+ADDITIONAL INFORMATION:
+{% if rfq.description %}- Description: {{ rfq.description }}{% endif %}
+{% if rfq.notes %}- Notes: {{ rfq.notes }}{% endif %}
+
+QUOTATION REQUIREMENTS:
+1. Quotation must be valid for at least 30 days
+2. Prices should include all taxes and delivery charges
+3. Delivery timeframe must be clearly specified
+4. Quality standards must meet specifications
+5. Payment terms should be clearly stated
+6. Include GST registration details
+7. Mention any deviations from specifications
+
+Please review the attached PDF document for complete details and specifications.
+
+We look forward to your competitive quotation.
+
+Best regards,
+{{ company_name }} Procurement Team
+
+---
+This is an automated email. Please do not reply directly.
+For inquiries, contact us through official channels.
+Generated on: {% now "d M Y H:i" %}

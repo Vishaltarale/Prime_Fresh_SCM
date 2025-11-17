@@ -1,0 +1,65 @@
+<aside class="w-64 bg-white shadow-md flex-shrink-0">
+  <div class="p-6 text-xl font-bold text-blue-700 border-b border-gray-200">
+    SCM Admin
+  </div>
+  <nav class="mt-4">
+    <ul class="space-y-1 text-gray-700 text-sm">
+
+      <li>
+        <a href="{% url "mysite:admin_index" %}" class="block px-6 py-2 hover:bg-blue-50 font-medium">Dashboard</a>
+      </li>
+
+      <!-- Registrations -->
+      <li>
+        <input type="checkbox" id="reg-menu" class="peer hidden">
+        <label for="reg-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
+          Registrations <span class="text-xs">&#9662;</span>
+        </label>
+        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
+          <li><a href="{% url "mysite:employee" %}" class="block px-6 py-1 hover:bg-blue-100">Employee</a></li>
+          <li><a href="{% url "mysite:farmer" %}" class="block px-6 py-1 hover:bg-blue-100">Farmer</a></li>
+          <li><a href="{% url "mysite:supplier" %}" class="block px-6 py-1 hover:bg-blue-100">Supplier</a></li>
+          <li><a href="{% url "mysite:customer" %}" class="block px-6 py-1 hover:bg-blue-100">Customer</a></li>
+        </ul>
+      </li>
+
+      <!-- Products -->
+      <li>
+        <input type="checkbox" id="product-menu" class="peer hidden">
+        <label for="product-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
+          Products <span class="text-xs">&#9662;</span>
+        </label>
+        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
+          <li><a href="{% url "product_Items:products" %}" class="block px-6 py-1 hover:bg-blue-100">Product</a></li>
+          <li><a href="{% url "product_Items:subcategory" %}" class="block px-6 py-1 hover:bg-blue-100">Subcategory</a></li>
+          <li><a href="{% url "product_Items:category" %}" class="block px-6 py-1 hover:bg-blue-100">Category</a></li>
+        </ul>
+      </li>
+
+      <!-- UOM -->
+      <li>
+        <input type="checkbox" id="uom-menu" class="peer hidden">
+        <label for="uom-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
+          UOM <span class="text-xs">&#9662;</span>
+        </label>
+        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
+          <li><a href="{% url "UOM:unit_of_measurement" %}" class="block px-6 py-1 hover:bg-blue-100">Unit of Measurement</a></li>
+          <li><a href="{% url "UOM:conversion_matrix" %}" class="block px-6 py-1 hover:bg-blue-100">Conversion Matrix</a></li>
+        </ul>
+      </li>
+
+      <!-- Location -->
+      <li>
+        <input type="checkbox" id="loc-menu" class="peer hidden">
+        <label for="loc-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
+          Location <span class="text-xs">&#9662;</span>
+        </label>
+        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
+          <li><a href="{% url "Location:office" %}" class="block px-6 py-1 hover:bg-blue-100">Officer</a></li>
+          <li><a href="{% url "Location:warehouse" %}" class="block px-6 py-1 hover:bg-blue-100">Warehouse</a></li>
+        </ul>
+      </li>
+
+    </ul>
+  </nav>
+</aside>

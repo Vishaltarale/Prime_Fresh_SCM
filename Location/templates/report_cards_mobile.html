@@ -1,0 +1,114 @@
+<!-- reports/report_cards_mobile.html -->
+<!-- Inventory Report Mobile Card -->
+<div class="mobile-report-card mobile-card-blue">
+  <div class="mobile-card-header">
+    <div class="mobile-card-icon">📦</div>
+    <span class="mobile-card-badge">Real-time</span>
+  </div>
+  <h3 class="mobile-card-title">Inventory Report</h3>
+  <p class="mobile-card-description">Current stock levels, low stock alerts, and valuation analysis</p>
+  <div class="mobile-card-footer">
+    <a href="{% url 'Location:inventory_report' 'inventory' %}" class="mobile-card-link">
+      View Report
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+    <span class="mobile-card-timestamp">Updated today</span>
+  </div>
+</div>
+
+<!-- Order Report Mobile Card -->
+<div class="mobile-report-card mobile-card-green">
+  <div class="mobile-card-header">
+    <div class="mobile-card-icon">🛒</div>
+    <span class="mobile-card-badge">Live</span>
+  </div>
+  <h3 class="mobile-card-title">Orders Report</h3>
+  <p class="mobile-card-description">Track all customer orders, pending, completed, or cancelled</p>
+  <div class="mobile-card-footer">
+    <a href="{% url 'Location:inventory_report' 'order' %}" class="mobile-card-link">
+      View Report
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+    <span class="mobile-card-timestamp">Updated today</span>
+  </div>
+</div>
+
+<!-- Supplier Report Mobile Card -->
+<div class="mobile-report-card mobile-card-yellow">
+  <div class="mobile-card-header">
+    <div class="mobile-card-icon">🏢</div>
+    <span class="mobile-card-badge">Updated</span>
+  </div>
+  <h3 class="mobile-card-title">Supplier Report</h3>
+  <p class="mobile-card-description">List of suppliers, transactions, and outstanding dues analysis</p>
+  <div class="mobile-card-footer">
+    <a href="{% url 'Location:inventory_report' 'supplier' %}" class="mobile-card-link">
+      View Report
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+    <span class="mobile-card-timestamp">Updated today</span>
+  </div>
+</div>
+
+<!-- Warehouse Stock Mobile Card -->
+<div class="mobile-report-card mobile-card-purple">
+  <div class="mobile-card-header">
+    <div class="mobile-card-icon">🏭</div>
+    <span class="mobile-card-badge">Multi-location</span>
+  </div>
+  <h3 class="mobile-card-title">Warehouse Stock</h3>
+  <p class="mobile-card-description">Check stock distribution across all warehouse locations</p>
+  <div class="mobile-card-footer">
+    <a href="{% url 'Location:inventory_report' 'warehouse' %}" class="mobile-card-link">
+      View Report
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+    <span class="mobile-card-timestamp">Updated today</span>
+  </div>
+</div>
+
+<!-- Sales & Purchase Mobile Card -->
+<div class="mobile-report-card mobile-card-red">
+  <div class="mobile-card-header">
+    <div class="mobile-card-icon">💰</div>
+    <span class="mobile-card-badge">Financial</span>
+  </div>
+  <h3 class="mobile-card-title">Sales & Purchase</h3>
+  <p class="mobile-card-description">Monthly revenue, purchase summary, and profit/loss analysis</p>
+  <div class="mobile-card-footer">
+    <a href="{% url 'Location:inventory_report' 'sales' %}" class="mobile-card-link">
+      View Report
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+    <span class="mobile-card-timestamp">Updated today</span>
+  </div>
+</div>
+
+<!-- Expiry & Restock Mobile Card -->
+<div class="mobile-report-card mobile-card-gray">
+  <div class="mobile-card-header">
+    <div class="mobile-card-icon">⚠️</div>
+    <span class="mobile-card-badge">Alerts</span>
+  </div>
+  <h3 class="mobile-card-title">Expiry / Restock Alerts</h3>
+  <p class="mobile-card-description">Products nearing expiry or requiring restock soon</p>
+  <div class="mobile-card-footer">
+    <a href="{% url 'Location:inventory_report' 'expiry' %}" class="mobile-card-link">
+      View Report
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+    <span class="mobile-card-timestamp">Updated today</span>
+  </div>
+</div>

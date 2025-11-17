@@ -1,0 +1,384 @@
+<!-- Mobile Toggle Button - Fixed Position -->
+<button
+  class="md:hidden fixed top-4 left-4 z-[1002] bg-primary text-white p-2.5 rounded-md shadow-lg focus:outline-none hover:bg-primary-hover active:scale-95 transition-all"
+  id="sidebarToggle"
+  aria-label="Toggle sidebar"
+>
+  <i class="fas fa-bars text-base"></i>
+</button>
+
+<!-- Mobile Overlay -->
+<div 
+  id="sidebarOverlay" 
+  class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden md:hidden"
+></div>
+
+<!-- Sidebar -->
+<aside
+  id="sidebar"
+  class="bg-sidebar-bg fixed top-0 left-0 h-full w-[280px] sm:w-[260px] transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-[1001] overflow-y-auto shadow-2xl"
+>
+  <!-- Header -->
+  <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between">
+    <h4 class="text-white font-semibold flex items-center gap-2 text-sm sm:text-base">
+      <i class="fas fa-cube text-base"></i> 
+      <span class="truncate">SCM Dashboard</span>
+    </h4>
+    <!-- Close button for mobile only -->
+    <button id="sidebarClose" class="md:hidden text-white/80 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded">
+      <i class="fas fa-times text-lg"></i>
+    </button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="py-3 pb-6">
+    <ul class="flex flex-col space-y-1 text-sm">
+
+      <!-- Dashboard -->
+      <li>
+        <a href="{% url 'mysite:index' %}" class="nav-link">
+          <i class="fa-solid fa-gauge-high w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+
+      {% if request.session.user_role == "Admin" or request.session.user_role == "Purchase_Manager" or request.session.user_role == "Sales_Manager" or request.session.user_role == "Inventory_Manager" %} 
+      <li>
+        <a href="{% url 'mysite:admin_index' %}" class="nav-link">
+          <i class="fa-solid fa-user w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Users</span>
+        </a>
+      </li>
+      {% endif %}
+
+      {% if request.session.user_role == "Admin" or  request.session.user_role == "Sales_Manager" or request.session.user_role == "Purchase_Manager" or request.session.user_role == "Inventory_Manager" %}
+              <!-- Registrations -->
+              <li>
+                <button
+                  class="flex justify-between items-center px-4 sm:px-6 py-2.5 w-full text-left font-medium text-white/80 hover:bg-sidebar-hover transition-colors"
+                  data-collapse-toggle="reg-menu"
+                >
+                {% if request.session.user_role == "Admin" or request.session.user_role == "Purchase_Manager" or request.session.user_role == "Sales_Manager" or request.session.user_role == "Inventory_Manager" %}
+                  <span class="flex items-center gap-2 flex-1 min-w-0">
+                    <i class="fa-solid fa-id-card flex-shrink-0"></i>
+                    <span class="truncate">Registrations</span>
+                  </span>
+                  <i class="fas fa-chevron-down text-xs transition-transform duration-200 flex-shrink-0 ml-2" data-chevron="reg-menu"></i>
+                </button>
+                <ul id="reg-menu" class="ml-6 hidden flex-col space-y-1 mt-1">
+                  {% if request.session.user_role == "Admin" or request.session.user_role == "Purchase_Manager" or request.session.user_role == "Inventory_Manager" %}
+                      <li><a href="{% url 'mysite:farmer' %}" class="submenu-link">Farmer</a></li>
+                      <li><a href="{% url 'mysite:supplier' %}" class="submenu-link">Supplier</a></li>
+                  {% endif %}
+
+                  {% if request.session.user_role == "Admin" or request.session.user_role == "Sales_Manager" %}
+                      <li><a href="{% url 'mysite:customer' %}" class="submenu-link">Customer</a></li>
+                  {% endif %}
+                  {% endif %}
+                </ul>
+              </li>
+
+              <!-- Products -->
+              <li>
+                <button
+                  class="flex justify-between items-center px-4 sm:px-6 py-2.5 w-full text-left font-medium text-white/80 hover:bg-sidebar-hover transition-colors"
+                  data-collapse-toggle="product-menu"
+                >
+                {% if request.session.user_role == "Admin" or request.session.user_role == "Inventory_Manager" %}
+                      <span class="flex items-center gap-2 flex-1 min-w-0">
+                        <i class="fa-solid fa-box flex-shrink-0"></i>
+                        <span class="truncate">Products</span>
+                      </span>
+                      <i class="fas fa-chevron-down text-xs transition-transform duration-200 flex-shrink-0 ml-2" data-chevron="product-menu"></i>
+                    </button>
+                    <ul id="product-menu" class="ml-6 hidden flex-col space-y-1 mt-1">
+                      <li><a href="{% url 'product_Items:products' %}" class="submenu-link">Product</a></li>
+                      <li><a href="{% url 'product_Items:subcategory' %}" class="submenu-link">Subcategory</a></li>
+                      <li><a href="{% url 'product_Items:category' %}" class="submenu-link">Category</a></li>
+                    </ul>
+                  </li>
+                {% endif %}
+
+                {% if request.session.user_role == "Admin" or request.session.user_role == "Inventory_Manager" %} 
+                  <!-- UOM -->
+                  <li>
+                    <button
+                      class="flex justify-between items-center px-4 sm:px-6 py-2.5 w-full text-left font-medium text-white/80 hover:bg-sidebar-hover transition-colors"
+                      data-collapse-toggle="uom-menu"
+                    >
+                      <span class="flex items-center gap-2 flex-1 min-w-0">
+                        <i class="fa-solid fa-ruler flex-shrink-0"></i>
+                        <span class="truncate">UOM</span>
+                      </span>
+                      <i class="fas fa-chevron-down text-xs transition-transform duration-200 flex-shrink-0 ml-2" data-chevron="uom-menu"></i>
+                    </button>
+                    <ul id="uom-menu" class="ml-6 hidden flex-col space-y-1 mt-1">
+                      <li><a href="{% url 'UOM:unit_of_measurement' %}" class="submenu-link">Unit of Measurement</a></li>
+                      <li><a href="{% url 'UOM:conversion_matrix' %}" class="submenu-link">Conversion Matrix</a></li>
+                    </ul>
+                  </li>
+                {% endif %}
+
+                  <!-- Location -->
+                  <li>
+                    <button
+                      class="flex justify-between items-center px-4 sm:px-6 py-2.5 w-full text-left font-medium text-white/80 hover:bg-sidebar-hover transition-colors"
+                      data-collapse-toggle="loc-menu"
+                    >
+                      <span class="flex items-center gap-2 flex-1 min-w-0">
+                        <i class="fa-solid fa-location-dot flex-shrink-0"></i>
+                        <span class="truncate">Location</span>
+                      </span>
+                      <i class="fas fa-chevron-down text-xs transition-transform duration-200 flex-shrink-0 ml-2" data-chevron="loc-menu"></i>
+                    </button>
+                    <ul id="loc-menu" class="ml-6 hidden flex-col space-y-1 mt-1">
+                      <li><a href="{% url 'Location:office' %}" class="submenu-link">Office</a></li>
+                      <li><a href="{% url 'Location:warehouse' %}" class="submenu-link">Warehouse</a></li>
+                    </ul>
+                  </li>
+              {% endif %}
+
+      <!-- Inventory -->
+      <li>
+        <a href="{% url 'mysite:inventory' %}" class="nav-link">
+          <i class="fa-solid fa-boxes-stacked w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Inventory</span>
+        </a>
+      </li>
+
+      <!-- Purchase -->
+      {% if request.session.user_role == "Admin" or request.session.user_role == "Purchase_Manager" %}
+      <li>
+        <a href="{% url 'Purchase:purchase_dash' %}" class="nav-link">
+          <i class="fa-solid fa-cart-flatbed w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Purchase</span>
+        </a>
+      </li>
+      {% endif %}
+
+      <!-- Sales -->
+      {% if request.session.user_role == "Admin" or request.session.user_role == "Sales_Manager" or request.session.user_role == "Customer" %}
+      <li>
+        <a href="{% url 'Orders:Order_dash' %}" class="nav-link">
+          <i class="fa-solid fa-shopping-cart w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Sales Orders</span>
+        </a>
+      </li>
+      {% endif %}
+
+      <!-- Suppliers -->
+      <li>
+        <a href="{% url 'mysite:supplier_dash' %}" class="nav-link">
+          <i class="fa-solid fa-truck-field w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Suppliers</span>
+        </a>
+      </li>
+
+      <!-- Warehouse -->
+      <li>
+        <a href="{% url 'Location:location_dash' %}" class="nav-link">
+          <i class="fa-solid fa-warehouse w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Warehouse</span>
+        </a>
+      </li>
+
+      <!-- Reports -->
+      {% if request.session.user_role == "Admin" or request.session.user_role == "Accountant" %}
+      <li>
+        <a href="{% url 'Location:reports' %}" class="nav-link">
+          <i class="fa-solid fa-chart-line w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Reports</span>
+        </a>
+      </li>
+      {% endif %}
+
+      <!-- Settings -->
+      <li>
+        <a href="{% url 'Settings:settings' %}" class="nav-link">
+          <i class="fa-solid fa-gear w-5 mr-2.5 text-center flex-shrink-0"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+</aside>
+
+<!-- Tailwind CSS Styling -->
+<style type="text/tailwindcss">
+  @layer components {
+    .nav-link {
+      @apply text-white/80 py-2.5 px-4 sm:px-6 flex items-center no-underline transition-all duration-200 ease-in-out hover:bg-sidebar-hover hover:text-white w-full;
+    }
+    .submenu-link {
+      @apply block px-4 sm:px-6 py-2 text-sm text-gray-300 hover:bg-blue-100 hover:text-gray-900 rounded-md transition-colors;
+    }
+  }
+  
+  /* Custom scrollbar */
+  #sidebar::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  #sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  #sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+  
+  #sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Ensure sidebar is above content */
+  #sidebar {
+    position: fixed;
+  }
+
+  /* Prevent body scroll when sidebar is open on mobile */
+  body.sidebar-open {
+    overflow: hidden;
+  }
+</style>
+
+<!-- Enhanced Sidebar JavaScript -->
+<script>
+(function() {
+  'use strict';
+  
+  // Wait for DOM to be ready
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get elements
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const body = document.body;
+
+    // Check if elements exist
+    if (!sidebar || !sidebarToggle) {
+      console.error('Sidebar elements not found!');
+      return;
+    }
+
+    // Open sidebar function
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebar.classList.add('translate-x-0');
+      if (sidebarOverlay) {
+        sidebarOverlay.classList.remove('hidden');
+      }
+      body.classList.add('sidebar-open');
+      body.style.overflow = 'hidden';
+    }
+
+    // Close sidebar function
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      sidebar.classList.remove('translate-x-0');
+      if (sidebarOverlay) {
+        sidebarOverlay.classList.add('hidden');
+      }
+      body.classList.remove('sidebar-open');
+      body.style.overflow = '';
+    }
+
+    // Toggle button click
+    sidebarToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const isOpen = sidebar.classList.contains('translate-x-0');
+      if (isOpen) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+
+    // Close button click
+    if (sidebarClose) {
+      sidebarClose.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeSidebar();
+      });
+    }
+
+    // Overlay click
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', function(e) {
+        e.preventDefault();
+        closeSidebar();
+      });
+    }
+
+    // Click outside to close (mobile only)
+    document.addEventListener('click', function(e) {
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) return;
+
+      const isOpen = sidebar.classList.contains('translate-x-0');
+      const clickedInside = sidebar.contains(e.target);
+      const clickedToggle = sidebarToggle.contains(e.target);
+
+      if (isOpen && !clickedInside && !clickedToggle) {
+        closeSidebar();
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (window.innerWidth >= 768) {
+        closeSidebar();
+      }
+    });
+
+    // Collapsible menu functionality
+    const collapseButtons = document.querySelectorAll('[data-collapse-toggle]');
+    collapseButtons.forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetId = button.getAttribute('data-collapse-toggle');
+        const targetMenu = document.getElementById(targetId);
+        const chevron = button.querySelector('[data-chevron="' + targetId + '"]');
+        
+        if (targetMenu) {
+          const isHidden = targetMenu.classList.contains('hidden');
+          
+          if (isHidden) {
+            targetMenu.classList.remove('hidden');
+            if (chevron) {
+              chevron.style.transform = 'rotate(180deg)';
+            }
+          } else {
+            targetMenu.classList.add('hidden');
+            if (chevron) {
+              chevron.style.transform = 'rotate(0deg)';
+            }
+          }
+        }
+      });
+    });
+
+    // Auto-close sidebar on link click (mobile only)
+    const allLinks = sidebar.querySelectorAll('a');
+    allLinks.forEach(function(link) {
+      link.addEventListener('click', function() {
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          setTimeout(function() {
+            closeSidebar();
+          }, 150);
+        }
+      });
+    });
+
+  });
+})();
+</script>

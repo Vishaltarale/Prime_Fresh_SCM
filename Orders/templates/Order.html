@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-4 md:p-6 md:ml-[260px] mt-[60px] md:mt-[80px]">
+  <div class="bg-white shadow-md rounded-lg p-4 md:p-6 max-w-6xl mx-auto">
+    <h2 class="text-xl md:text-2xl font-semibold mb-4 md:mb-6 text-gray-800 text-center">Create Sales Order</h2>
+
+    <form method="POST" action="{% url 'Orders:Order_save' %}" id="orderForm">
+      {% csrf_token %}
+
+      <!-- Customer Info Section -->
+      <div class="bg-gray-50 p-4 rounded-lg mb-4 md:mb-6">
+        <h3 class="text-lg font-medium text-gray-800 mb-3">Customer Information</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Customer Name -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1 text-sm md:text-base">Customer Name</label>
+            <select name="customer_name" required
+              class="w-full border border-gray-300 rounded-md px-3 md:px-4 py-2 text-sm md:text-base focus:outline-none focus:ring focus:ring-blue-300">
+              <option value="" disabled selected>Select a customer</option>
+              {% for customer in Customers %}
+                <option value="{{ customer.full_name }}">{{ customer.full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Warehouse Selection -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-1 text-sm md:text-base">Warehouse</label>
+            <select name="warehouse_id" required
+              class="w-full border border-gray-300 rounded-md px-3 md:px-4 py-2 text-sm md:text-base focus:outline-none focus:ring focus:ring-blue-300">
+              <option value="" disabled selected>Select a warehouse</option>
+              {% for warehouse in warehouses %}
+                <option value="{{ warehouse.id }}">{{ warehouse.warehouse_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="mt-4">
+          <label class="block text-gray-700 font-medium mb-1 text-sm md:text-base">Delivery Address</label>
+          <textarea name="delivery_address" rows="2" required
+            class="w-full border border-gray-300 rounded-md px-3 md:px-4 py-2 text-sm md:text-base focus:outline-none focus:ring focus:ring-blue-300"></textarea>
+        </div>
+      </div>
+
+      <!-- Product Items Section -->
+      <div class="mb-6">
+        <div class="flex justify-between items-center mb-3">
+          <label class="block text-gray-700 font-medium text-sm md:text-base">Order Items</label>
+          <button type="button" onclick="addProductRow()"
+                  class="bg-green-600 text-white py-1 md:py-2 px-3 md:px-4 rounded hover:bg-green-700 text-xs md:text-sm flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Product
+          </button>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="border p-2 text-left">Product</th>
+                <th class="border p-2 text-left">SKU</th>
+                <th class="border p-2 text-left">Category</th>
+                <th class="border p-2 text-left">Subcategory</th>
+                <th class="border p-2 text-left">Quantity</th>
+                <th class="border p-2 text-left">UOM</th>
+                <th class="border p-2 text-left">Price</th>
+                <th class="border p-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="desktopItemsContainer">
+              <!-- Initial Row -->
+              <tr class="item-row hover:bg-gray-50">
+                <td class="border p-2">
+                  <select name="product_name[]" class="w-full border border-gray-300 rounded px-2 py-1 product_name text-sm" required>
+                    <option value="" disabled selected>Select Product</option>
+                    {% for p in products %}
+                      <option value="{{ p.product_name }}"
+                              data-sku="{{ p.sku }}"
+                              data-category="{{ p.category }}"
+                              data-subcategory="{{ p.subcategory }}"
+                              data-uom="{{ p.uom }}"
+                              data-price="{{ p.price }}"
+                              data-warehouse="{{ p.warehouse }}">
+                        {{ p.product_name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td class="border p-2">
+                  <input type="text" name="sku[]" placeholder="SKU" required class="w-full border border-gray-300 rounded px-2 py-1 sku_input text-sm">
+                </td>
+                <td class="border p-2">
+                  <select name="category[]" required class="w-full border border-gray-300 rounded px-2 py-1 category_select text-sm">
+                    <option value="">Select Category</option>
+                    {% for cat in categories %}
+                      <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td class="border p-2">
+                  <select name="subcategory[]" required class="w-full border border-gray-300 rounded px-2 py-1 subcategory_select text-sm">
+                    <option value="">Select Subcategory</option>
+                    {% for sub in subcategories %}
+                      <option value="{{ sub.id }}">{{ sub.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td class="border p-2">
+                  <input type="number" name="quantity[]" placeholder="Qty" min="1" required class="w-full border border-gray-300 rounded px-2 py-1 quantity_input text-sm">
+                </td>
+                <td class="border p-2">
+                  <select name="uom[]" required class="w-full border border-gray-300 rounded px-2 py-1 uom_select text-sm">
+                    <option value="" disabled selected>UOM</option>
+                    {% for item in uoms %}
+                      <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td class="border p-2">
+                  <input type="number" name="price[]" placeholder="Price" step="0.01" min="0" required class="w-full border border-gray-300 rounded px-2 py-1 price_input text-sm">
+                </td>
+                <td class="border p-2">
+                  <button type="button" onclick="removeRow(this)" class="text-red-500 hover:text-red-700 text-sm flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div id="mobileItemsContainer" class="md:hidden space-y-4">
+          <!-- Initial Card -->
+          <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm item-card">
+            <div class="flex justify-between items-start mb-3">
+              <h4 class="font-medium text-gray-800">Product Item</h4>
+              <button type="button" onclick="removeCard(this)" class="text-red-500 hover:text-red-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Product Name</label>
+                <select name="product_name[]" class="w-full border border-gray-300 rounded-md px-3 py-2 product_name text-sm" required>
+                  <option value="" disabled selected>Select Product</option>
+                  {% for p in products %}
+                    <option value="{{ p.product_name }}"
+                            data-sku="{{ p.sku }}"
+                            data-category="{{ p.category }}"
+                            data-subcategory="{{ p.subcategory }}"
+                            data-uom="{{ p.uom }}"
+                            data-price="{{ p.price }}"
+                            data-warehouse="{{ p.warehouse }}">
+                      {{ p.product_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">SKU</label>
+                  <input type="text" name="sku[]" placeholder="SKU" required class="w-full border border-gray-300 rounded-md px-3 py-2 sku_input text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Quantity</label>
+                  <input type="number" name="quantity[]" placeholder="Qty" min="1" required class="w-full border border-gray-300 rounded-md px-3 py-2 quantity_input text-sm">
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Category</label>
+                  <select name="category[]" required class="w-full border border-gray-300 rounded-md px-3 py-2 category_select text-sm">
+                    <option value="">Select Category</option>
+                    {% for cat in categories %}
+                      <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Subcategory</label>
+                  <select name="subcategory[]" required class="w-full border border-gray-300 rounded-md px-3 py-2 subcategory_select text-sm">
+                    <option value="">Select Subcategory</option>
+                    {% for sub in subcategories %}
+                      <option value="{{ sub.id }}">{{ sub.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">UOM</label>
+                  <select name="uom[]" required class="w-full border border-gray-300 rounded-md px-3 py-2 uom_select text-sm">
+                    <option value="" disabled selected>UOM</option>
+                    {% for item in uoms %}
+                      <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">Price</label>
+                  <input type="number" name="price[]" placeholder="Price" step="0.01" min="0" required class="w-full border border-gray-300 rounded-md px-3 py-2 price_input text-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Amount & Submit -->
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-gray-700 font-medium text-sm md:text-base">Total Amount:</span>
+          <span id="totalAmount" class="text-xl md:text-2xl font-semibold text-blue-700">₹0.00</span>
+        </div>
+        
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-200 font-medium text-sm md:text-base flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Place Order
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Remove Row (Desktop)
+function removeRow(button) {
+  button.closest('.item-row').remove();
+  calculateTotal();
+}
+
+// Remove Card (Mobile)
+function removeCard(button) {
+  button.closest('.item-card').remove();
+  calculateTotal();
+}
+
+// Add Product Row (Both desktop and mobile)
+function addProductRow() {
+  // Desktop table row
+  const desktopContainer = document.getElementById('desktopItemsContainer');
+  const desktopRow = document.createElement('tr');
+  desktopRow.classList.add('item-row', 'hover:bg-gray-50');
+  desktopRow.innerHTML = `
+    <td class="border p-2">
+      <select name="product_name[]" class="w-full border border-gray-300 rounded px-2 py-1 product_name text-sm" required>
+        <option value="" disabled selected>Select Product</option>
+        {% for p in products %}
+          <option value="{{ p.product_name }}"
+                  data-sku="{{ p.sku }}"
+                  data-category="{{ p.category }}"
+                  data-subcategory="{{ p.subcategory }}"
+                  data-uom="{{ p.uom }}"
+                  data-price="{{ p.price }}"
+                  data-warehouse="{{ p.warehouse }}">
+            {{ p.product_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="border p-2">
+      <input type="text" name="sku[]" placeholder="SKU" required class="w-full border border-gray-300 rounded px-2 py-1 sku_input text-sm">
+    </td>
+    <td class="border p-2">
+      <select name="category[]" required class="w-full border border-gray-300 rounded px-2 py-1 category_select text-sm">
+        <option value="">Select Category</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}">{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="border p-2">
+      <select name="subcategory[]" required class="w-full border border-gray-300 rounded px-2 py-1 subcategory_select text-sm">
+        <option value="">Select Subcategory</option>
+        {% for sub in subcategories %}
+          <option value="{{ sub.id }}">{{ sub.name }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="border p-2">
+      <input type="number" name="quantity[]" placeholder="Qty" min="1" required class="w-full border border-gray-300 rounded px-2 py-1 quantity_input text-sm">
+    </td>
+    <td class="border p-2">
+      <select name="uom[]" required class="w-full border border-gray-300 rounded px-2 py-1 uom_select text-sm">
+        <option value="" disabled selected>UOM</option>
+        {% for item in uoms %}
+          <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td class="border p-2">
+      <input type="number" name="price[]" placeholder="Price" step="0.01" min="0" required class="w-full border border-gray-300 rounded px-2 py-1 price_input text-sm">
+    </td>
+    <td class="border p-2">
+      <button type="button" onclick="removeRow(this)" class="text-red-500 hover:text-red-700 text-sm flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+        Remove
+      </button>
+    </td>
+  `;
+  desktopContainer.appendChild(desktopRow);
+  attachListeners(desktopRow);
+
+  // Mobile card
+  const mobileContainer = document.getElementById('mobileItemsContainer');
+  const mobileCard = document.createElement('div');
+  mobileCard.classList.add('bg-white', 'border', 'border-gray-200', 'rounded-lg', 'p-4', 'shadow-sm', 'item-card');
+  mobileCard.innerHTML = `
+    <div class="flex justify-between items-start mb-3">
+      <h4 class="font-medium text-gray-800">Product Item</h4>
+      <button type="button" onclick="removeCard(this)" class="text-red-500 hover:text-red-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Product Name</label>
+        <select name="product_name[]" class="w-full border border-gray-300 rounded-md px-3 py-2 product_name text-sm" required>
+          <option value="" disabled selected>Select Product</option>
+          {% for p in products %}
+            <option value="{{ p.product_name }}"
+                    data-sku="{{ p.sku }}"
+                    data-category="{{ p.category }}"
+                    data-subcategory="{{ p.subcategory }}"
+                    data-uom="{{ p.uom }}"
+                    data-price="{{ p.price }}"
+                    data-warehouse="{{ p.warehouse }}">
+              {{ p.product_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">SKU</label>
+          <input type="text" name="sku[]" placeholder="SKU" required class="w-full border border-gray-300 rounded-md px-3 py-2 sku_input text-sm">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Quantity</label>
+          <input type="number" name="quantity[]" placeholder="Qty" min="1" required class="w-full border border-gray-300 rounded-md px-3 py-2 quantity_input text-sm">
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Category</label>
+          <select name="category[]" required class="w-full border border-gray-300 rounded-md px-3 py-2 category_select text-sm">
+            <option value="">Select Category</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Subcategory</label>
+          <select name="subcategory[]" required class="w-full border border-gray-300 rounded-md px-3 py-2 subcategory_select text-sm">
+            <option value="">Select Subcategory</option>
+            {% for sub in subcategories %}
+              <option value="{{ sub.id }}">{{ sub.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">UOM</label>
+          <select name="uom[]" required class="w-full border border-gray-300 rounded-md px-3 py-2 uom_select text-sm">
+            <option value="" disabled selected>UOM</option>
+            {% for item in uoms %}
+              <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Price</label>
+          <input type="number" name="price[]" placeholder="Price" step="0.01" min="0" required class="w-full border border-gray-300 rounded-md px-3 py-2 price_input text-sm">
+        </div>
+      </div>
+    </div>
+  `;
+  mobileContainer.appendChild(mobileCard);
+  attachListeners(mobileCard);
+}
+
+// Calculate Total
+document.getElementById('orderForm').addEventListener('input', calculateTotal);
+function calculateTotal() {
+  const prices = document.querySelectorAll('input[name="price[]"]');
+  const quantities = document.querySelectorAll('input[name="quantity[]"]');
+  let total = 0;
+  prices.forEach((price, i) => {
+    const qty = parseFloat(quantities[i].value) || 0;
+    const cost = parseFloat(price.value) || 0;
+    total += qty * cost;
+  });
+  document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
+}
+
+// Attach Listeners for auto-fill
+function attachListeners(element) {
+  const productSelect = element.querySelector('.product_name');
+  
+  if (productSelect) {
+    productSelect.addEventListener('change', function() {
+      const selected = productSelect.selectedOptions[0];
+      if (selected && selected.dataset) {
+        const row = productSelect.closest('.item-row, .item-card');
+        if (row) {
+          row.querySelector('.sku_input').value = selected.dataset.sku || '';
+          row.querySelector('.price_input').value = selected.dataset.price || '';
+          row.querySelector('.category_select').value = selected.dataset.category || '';
+          row.querySelector('.subcategory_select').value = selected.dataset.subcategory || '';
+          row.querySelector('.uom_select').value = selected.dataset.uom || '';
+        }
+      }
+      calculateTotal();
+    });
+  }
+}
+
+// Initial row listeners
+document.querySelectorAll('.item-row, .item-card').forEach(attachListeners);
+</script>
+{% endblock %}

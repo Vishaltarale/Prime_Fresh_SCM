@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br md:ml-[200px] from-blue-50 via-white to-indigo-50 py-6 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 rounded-full mb-4 shadow-lg">
+        <svg class="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">Employee Registration</h2>
+      <p class="text-gray-600 text-sm sm:text-base">Fill in the details to register a new employee</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-4">
+        <h3 class="text-white text-lg font-semibold">Personal Information</h3>
+      </div>
+
+      <form action="{% url 'mysite:employee_register' %}" method="POST" class="p-4 sm:p-6 lg:p-8">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <!-- Full Name -->
+          <div class="group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Full Name <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+              </div>
+              <input type="text" name="full_name" required
+                     placeholder="Enter full name"
+                     class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Email Address <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <input type="email" name="email" required
+                     placeholder="employee@company.com"
+                     class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number <span class="text-red-500">*</span></label>
+            <input type="text" name="phone" required
+                   placeholder="+1 (555) 000-0000"
+                   class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+          </div>
+
+          <!-- Role -->
+          <div class="group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Role <span class="text-red-500">*</span></label>
+            <select name="role" required
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+              <option value="">Select Role</option>
+              <option value="Admin">Admin</option>
+              <option value="Inventory Officer">Inventory Officer</option>
+              <option value="Warehouse Manager">Warehouse Manager</option>
+            </select>
+          </div>
+
+          <!-- Joining Date -->
+          <div class="group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Joining Date <span class="text-red-500">*</span></label>
+            <input type="date" name="joining_date" required
+                   class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          </div>
+
+          <!-- Address -->
+          <div class="group sm:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+            <textarea name="address" rows="3" placeholder="Enter complete address"
+                      class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+          <button type="submit"
+                  class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition duration-200">
+            Register Employee
+          </button>
+          <button type="reset"
+                  class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition duration-200">
+            Reset Form
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center">
+      <svg class="w-5 h-5 text-blue-600 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <div>
+        <p class="text-sm text-blue-800 font-medium">Important Information</p>
+        <p class="text-sm text-blue-700 mt-1">All fields marked with <span class="text-red-500">*</span> are required. Please ensure all information is accurate before submitting.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+Dear {{ recipient_name }},
+
+Please find attached the Transport Challan / Invoice {{ invoice_number }} for your order.
+
+Challan Date: {{ current_date }}
+Vehicle: {{ challan.vehicle_number }} | Driver: {{ challan.driver_name }}
+
+Thank you,
+{{ company_name }}

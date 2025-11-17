@@ -1,0 +1,242 @@
+<!-- navbar.html -->
+<header class="bg-white shadow-custom p-4 md:pl-[260px] fixed top-0 left-0 right-0 z-40">
+    <div class="flex flex-col sm:flex-row sm:items-center w-full justify-between gap-2">
+        <!-- Page Title Section -->
+        <div class="flex-1 min-w-0">
+            <h2 id="pageTitle" class="text-secondary text-lg font-semibold truncate">
+                Supply Chain Dashboard
+            </h2>
+            <p id="pageSubtitle" class="text-sm text-gray-500 truncate">
+                Welcome back, {{request.session.user_email}}
+            </p>
+        </div>
+
+        <!-- User Profile Section -->
+        <div class="flex items-center justify-end gap-2 sm:gap-3">
+            <!-- Mobile Menu Toggle (Hidden on desktop) -->
+            <button id="mobileMenuToggle" class="md:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                <i class="fas fa-bars text-gray-600"></i>
+            </button>
+
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button id="profileDropdownBtn" class="flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-white focus:outline-none hover:bg-primary-dark transition-colors min-w-0">
+                    <i class="fas fa-user text-sm"></i>
+                    <span class="hidden sm:inline text-sm truncate max-w-[120px]">
+                        {{ request.session.user_email|cut:"@"|slice:":-9" }}
+                    </span>
+                    <i class="fas fa-chevron-down text-xs hidden sm:block"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="profileDropdownMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 hidden border border-gray-100">
+                    <!-- User Info (Mobile only) -->
+                    <div class="px-4 py-2 border-b border-gray-100 sm:hidden">
+                        <p class="text-sm font-medium text-gray-800 truncate">
+                            {{ request.session.user_email|cut:"@"|slice:":-9" }}
+                        </p>
+                        <p class="text-xs text-gray-500 truncate">
+                            {{ request.session.user_email }}
+                        </p>
+                    </div>
+                    
+                    <!-- Dropdown Items -->
+                    <a href="{% url 'Users:user_profile' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-user-circle w-4 mr-3 text-gray-400"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="{% url 'Users:user_logout' %}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-sign-out-alt w-4 mr-3"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Sidebar Overlay (Hidden by default) -->
+<div id="mobileSidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const profileBtn = document.getElementById('profileDropdownBtn');
+    const dropdownMenu = document.getElementById('profileDropdownMenu');
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileSidebarOverlay = document.getElementById('mobileSidebarOverlay');
+    const sidebar = document.getElementById('sidebar'); // Assuming you have a sidebar with this ID
+
+    // Profile dropdown functionality
+    if (profileBtn && dropdownMenu) {
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#profileDropdownBtn') && !e.target.closest('#profileDropdownMenu')) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    // Mobile menu toggle functionality
+    if (mobileMenuToggle && sidebar && mobileSidebarOverlay) {
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('-translate-x-full');
+            mobileSidebarOverlay.classList.toggle('hidden');
+            document.body.classList.toggle('overflow-hidden');
+        });
+
+        // Close sidebar when clicking overlay
+        mobileSidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.add('-translate-x-full');
+            mobileSidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        });
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !mobileSidebarOverlay.classList.contains('hidden')) {
+                sidebar.classList.add('-translate-x-full');
+                mobileSidebarOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+    }
+
+    // Update page title and subtitle dynamically (if needed)
+    function updatePageTitle(title, subtitle = '') {
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+        
+        if (pageTitle && title) {
+            pageTitle.textContent = title;
+        }
+        if (pageSubtitle && subtitle) {
+            pageSubtitle.textContent = subtitle;
+        }
+    }
+
+    // Handle window resize
+    function handleResize() {
+        if (window.innerWidth >= 768) { // md breakpoint
+            // Ensure sidebar is visible on desktop
+            if (sidebar) {
+                sidebar.classList.remove('-translate-x-full');
+            }
+            if (mobileSidebarOverlay) {
+                mobileSidebarOverlay.classList.add('hidden');
+            }
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
+    // Add resize listener
+    window.addEventListener('resize', handleResize);
+
+    // Initialize on load
+    handleResize();
+
+    // Add smooth animations
+    dropdownMenu.style.transition = 'all 0.2s ease-in-out';
+});
+
+// Optional: Add loading state for better UX
+function setNavbarLoading(loading) {
+    const profileBtn = document.getElementById('profileDropdownBtn');
+    if (profileBtn) {
+        if (loading) {
+            profileBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            profileBtn.disabled = true;
+        } else {
+            profileBtn.innerHTML = `
+                <i class="fas fa-user text-sm"></i>
+                <span class="hidden sm:inline text-sm truncate max-w-[120px]">
+                    {{ request.session.user_email|cut:"@"|slice:":-9" }}
+                </span>
+                <i class="fas fa-chevron-down text-xs hidden sm:block"></i>
+            `;
+            profileBtn.disabled = false;
+        }
+    }
+}
+</script>
+
+<style>
+/* Custom styles for better mobile experience */
+@media (max-width: 768px) {
+    .shadow-custom {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    #profileDropdownMenu {
+        width: 200px;
+        right: 1rem;
+    }
+}
+
+/* Smooth transitions */
+#profileDropdownMenu {
+    transform-origin: top right;
+    transition: all 0.2s ease-in-out;
+}
+
+#profileDropdownMenu:not(.hidden) {
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Focus styles for accessibility */
+#profileDropdownBtn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Prevent text selection on interactive elements */
+#profileDropdownBtn, #mobileMenuToggle {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Improved hover states */
+#profileDropdownMenu a:hover {
+    background-color: #f8fafc;
+}
+
+/* Mobile sidebar transition */
+#sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Ensure proper z-index stacking */
+header {
+    z-index: 40;
+}
+
+#mobileSidebarOverlay {
+    z-index: 30;
+}
+
+#sidebar {
+    z-index: 50;
+}
+</style>

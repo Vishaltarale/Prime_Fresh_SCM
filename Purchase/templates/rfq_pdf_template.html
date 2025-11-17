@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Request For Quotation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 10px;
+            line-height: 1.3;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #875a7b;
+        }
+        .header p {
+            margin: 2px 0;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr;
+            gap: 6px;
+            margin: 4px 0;
+            font-size: 10px;
+        }
+        .detail-label {
+            font-weight: bold;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin: 8px 0 4px 0;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            background-color: #f8f9fa;
+            padding: 4px 6px;
+        }
+        .product-card {
+            border: 1px solid #000;
+            border-radius: 4px;
+            margin: 4px 0;
+            padding: 4px 6px;
+            background-color: #fdfdfd;
+            font-size: 10px;
+        }
+        .product-card h4 {
+            margin: 0 0 2px 0;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .product-card p {
+            margin: 0 0 2px 0;
+        }
+        .summary-section {
+            margin-top: 6px;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+            font-size: 10px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .summary-total {
+            font-weight: bold;
+            border-top: 1px solid #000;
+            padding-top: 2px;
+            background-color: #f8f9fa;
+        }
+        .footer {
+            margin-top: 8px;
+            font-size: 9px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h1>{{ company_name|default:"VBT-Tech" }}</h1>
+    <p>REQUEST FOR QUOTATION (RFQ)</p>
+    <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 4px;">
+        <div>
+            <p><strong>RFQ ID:</strong> {{ rfq.id }}</p>
+            <p><strong>Date:</strong> {{ current_date }}</p>
+        </div>
+        <div style="text-align: right;">
+            <p><strong>Prepared By:</strong> {{ rfq.created_by }}</p>
+            <p><strong>Status:</strong> {{ rfq.status }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Source Info -->
+<h2 class="section-title">SOURCE INFORMATION</h2>
+<div class="details-grid">
+    {% if rfq.supplier %}
+        <div class="detail-label">Supplier:</div><div>{{ rfq.supplier.supplier_name }}</div>
+        <div class="detail-label">Email:</div><div>{{ rfq.supplier.email }}</div>
+        <div class="detail-label">Phone:</div><div>{{ rfq.supplier.phone }}</div>
+        <div class="detail-label">Contact:</div><div>{{ rfq.supplier.contact_person }}</div>
+    {% elif rfq.farmer %}
+        <div class="detail-label">Farmer:</div><div>{{ rfq.farmer.full_name }}</div>
+        <div class="detail-label">Email:</div><div>{{ rfq.farmer.email }}</div>
+        <div class="detail-label">Phone:</div><div>{{ rfq.farmer.contact_number }}</div>
+        <div class="detail-label">Location:</div><div>{{ rfq.farmer.location }}</div>
+    {% else %}
+        <div class="detail-label">Recipient:</div><div>Not specified</div>
+    {% endif %}
+</div>
+
+<!-- Delivery Info -->
+<h2 class="section-title">DELIVERY INFORMATION</h2>
+<div class="details-grid">
+    {% if rfq.warehouse %}
+        <div class="detail-label">Warehouse:</div><div>{{ rfq.warehouse.warehouse_name }}</div>
+        <div class="detail-label">Location:</div><div>{{ rfq.warehouse.location }}</div>
+    {% else %}
+        <div class="detail-label">Delivery Location:</div><div>To be specified</div>
+    {% endif %}
+</div>
+
+<!-- Product Items -->
+<h2 class="section-title">PRODUCT ITEMS</h2>
+{% if rfq.processed_items %}
+    {% for item in rfq.processed_items %}
+    <div class="product-card">
+        <h4>{{ item.product_name }} (SKU: {{ item.sku|default:"-" }})</h4>
+        <p><strong>Category:</strong> {{ item.category.name|default:"-" }} | <strong>Subcategory:</strong> {{ item.subcategory.name|default:"-" }}</p>
+        <p><strong>Qty:</strong> {{ item.quantity }} {{ item.uom }} | <strong>Unit Price:</strong> ₹{{ item.price|floatformat:2 }}</p>
+        <p><strong>GST %:</strong> {{ item.gst_amount|floatformat:2 }} | <strong>GST Value:</strong> ₹{{ item.gst_value|floatformat:2 }}</p>
+        <p><strong>Subtotal:</strong> ₹{{ item.subtotal|floatformat:2 }} | <strong>Total:</strong> ₹{{ item.line_total|floatformat:2 }}</p>
+        {% if item.description %}
+        <p><strong>Description:</strong> {{ item.description }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+<p style="text-align: center; color: #666; font-style: italic;">No products listed</p>
+{% endif %}
+
+<!-- Financial Summary -->
+<h2 class="section-title">FINANCIAL SUMMARY</h2>
+<div class="summary-section">
+    <div class="summary-row">
+        <span>Total Items:</span><span>{{ rfq.processed_items|length }}</span>
+    </div>
+    <div class="summary-row">
+        <span>Total Quantity:</span>
+        <span>
+            {% with total_qty=0 %}
+            {% for item in rfq.processed_items %}
+                {% with total_qty=total_qty|add:item.quantity %}{% endwith %}
+            {% endfor %}
+            {{ total_qty }} Units
+            {% endwith %}
+        </span>
+    </div>
+    <div class="summary-row">
+        <span>Subtotal:</span><span>₹{{ rfq.subtotal|default:0|floatformat:2 }}</span>
+    </div>
+    <div class="summary-row">
+        <span>Total GST:</span><span>₹{{ rfq.gst_amount|default:0|floatformat:2 }}</span>
+    </div>
+    <div class="summary-row summary-total">
+        <span>GRAND TOTAL:</span><span>₹{{ rfq.total_amount|default:0|floatformat:2 }}</span>
+    </div>
+</div>
+
+<!-- Additional Notes -->
+{% if rfq.notes or rfq.description %}
+<h2 class="section-title">ADDITIONAL INFORMATION</h2>
+<div style="background-color: #f8f9fa; padding: 6px; border-left: 3px solid #875a7b; font-size: 10px;">
+    {% if rfq.description %}<p><strong>RFQ Description:</strong> {{ rfq.description }}</p>{% endif %}
+    {% if rfq.notes %}<p><strong>Notes:</strong> {{ rfq.notes }}</p>{% endif %}
+</div>
+{% endif %}
+
+<!-- Terms & Conditions -->
+<h2 class="section-title">TERMS & CONDITIONS</h2>
+<ol style="margin: 0; padding-left: 15px; font-size: 10px;">
+    <li>Quotation must be valid for at least 30 days from submission date</li>
+    <li>Prices include all taxes and delivery charges</li>
+    <li>Delivery timeframe must be clearly specified</li>
+    <li>Quality standards must meet specified requirements</li>
+    <li>Payment terms should be clearly stated</li>
+    <li>Any deviations from specifications must be explicitly mentioned</li>
+    <li>Warranty and after-sales support details should be included</li>
+</ol>
+
+<!-- Footer -->
+<div class="footer">
+    <p><strong>{{ company_name|default:"VBT-Tech" }} - Procurement Dept</strong></p>
+    <p>Contact: {{ company_email|default:"vishaltarale055@gmail.com" }}</p>
+    <p>Generated on: {{ current_date }}</p>
+    <p style="font-size: 8px;">Confidential - Authorized Use Only</p>
+</div>
+
+</body>
+</html>

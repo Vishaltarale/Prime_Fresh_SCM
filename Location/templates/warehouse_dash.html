@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}  {# for intcomma & floatformat #}
+
+{% block content %}
+<div class="p-4 md:p-8 md:ml-[270px] pt-[10px] bg-gray-100 min-h-screen">
+  
+  <!-- Page Header -->
+  <div class="bg-white shadow-md rounded-lg p-4 md:p-6 mb-6 md:mb-10">
+    <h2 class="text-xl md:text-3xl font-semibold text-gray-800 mb-2">📦 Warehouse Inventory Overview</h2>
+    <p class="text-gray-500 text-sm md:text-base">Track stock levels, product availability, and warehouse performance</p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-10">
+    <div class="bg-white shadow rounded-lg p-4 md:p-6">
+      <p class="text-xs md:text-sm text-gray-500">Total Warehouses</p>
+      <p class="text-xl md:text-2xl font-bold text-indigo-700">{{ warehouse_data|length }}</p>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4 md:p-6">
+      <p class="text-xs md:text-sm text-gray-500">Total Products</p>
+      <p class="text-xl md:text-2xl font-bold text-indigo-700">{{ total_products }}</p>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4 md:p-6">
+      <p class="text-xs md:text-sm text-gray-500">Low Stock Products</p>
+      <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ low_stock_count }}</p>
+    </div>
+    <div class="bg-white shadow rounded-lg p-4 md:p-6">
+      <p class="text-xs md:text-sm text-gray-500">Out of Stock</p>
+      <p class="text-xl md:text-2xl font-bold text-red-600">{{ out_of_stock_count }}</p>
+    </div>
+  </div>
+
+  <!-- Plotly Stock Status Chart -->
+  <div class="bg-white shadow-md rounded-lg p-4 md:p-6 mb-6 md:mb-10">
+    <h3 class="text-lg md:text-xl font-semibold text-indigo-700 mb-4">📊 Stock Status Overview</h3>
+    <div class="overflow-x-auto">
+      {{ plot_div|safe }}
+    </div>
+  </div>
+
+  <!-- Warehouse-wise Product Tables -->
+  {% for entry in warehouse_data %}
+  {% with warehouse=entry.warehouse items=entry.items %}
+  <div class="bg-white shadow-md rounded-lg p-4 md:p-6 mb-6 md:mb-10">
+    <div class="flex justify-between items-start md:items-center mb-4">
+      <div>
+        <h3 class="text-lg md:text-xl font-bold text-indigo-700">🏭 {{ warehouse.warehouse_name }}</h3>
+        <p class="text-xs md:text-sm text-gray-500">📍 Location: {{ warehouse.address }}</p>
+      </div>
+      <span class="bg-indigo-100 text-indigo-700 px-2 md:px-3 py-1 rounded-full text-xs font-medium">
+        {{ items|length }} Items
+      </span>
+    </div>
+
+    {% if items %}
+      <!-- Desktop Table View (Hidden on Mobile) -->
+      <div class="hidden md:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-indigo-100 text-gray-700">
+            <tr>
+              <th class="px-4 py-2 text-left">Product</th>
+              <th class="px-4 py-2 text-left">SKU</th>
+              <th class="px-4 py-2 text-left">Category</th>
+              <th class="px-4 py-2 text-left">Subcategory</th>
+              <th class="px-4 py-2 text-left">UOM</th>
+              <th class="px-4 py-2 text-left">Available Qty</th>
+              <th class="px-4 py-2 text-left">Price / Unit</th>
+              <th class="px-4 py-2 text-left">Created At</th>
+              <th class="px-4 py-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100">
+            {% for item in items %}
+            <tr class="hover:bg-gray-50 transition-colors duration-200">
+              <td class="px-4 py-2 font-medium text-gray-800">{{ item.product_name }}</td>
+              <td class="px-4 py-2 text-gray-600">{{ item.sku }}</td>
+              <td class="px-4 py-2 text-gray-600">{{ item.category.name }}</td>
+              <td class="px-4 py-2 text-gray-600">{{ item.subcategory.name }}</td>
+              <td class="px-4 py-2 text-gray-600">{{ item.uom }}</td>
+              <td class="px-4 py-2 font-semibold text-gray-800">{{ item.quantity|intcomma }}</td>
+              <td class="px-4 py-2 text-gray-600">${{ item.price|floatformat:2 }}</td>
+              <td class="px-4 py-2 text-gray-600 text-xs">{{ warehouse.created_at|date:"Y-m-d H:i" }}</td>
+              <td class="px-4 py-2">
+                {% if item.quantity <= 0 %}
+                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">Out of Stock</span>
+                {% elif item.quantity < 50 %}
+                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">Low Stock</span>
+                {% else %}
+                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Available</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View (Hidden on Desktop) -->
+      <div class="md:hidden space-y-4">
+        {% for item in items %}
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+          <!-- Card Header -->
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <h4 class="font-semibold text-gray-800 text-sm">{{ item.product_name }}</h4>
+              <p class="text-xs text-gray-500 mt-1">SKU: {{ item.sku }}</p>
+            </div>
+            <div class="text-right">
+              {% if item.quantity <= 0 %}
+              <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">Out of Stock</span>
+              {% elif item.quantity < 50 %}
+              <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">Low Stock</span>
+              {% else %}
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Available</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="space-y-3">
+            <!-- Category & Subcategory -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <p class="text-xs text-gray-500 mb-1">Category</p>
+                <span class="text-xs font-medium text-gray-800">{{ item.category.name }}</span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">Subcategory</p>
+                <span class="text-xs font-medium text-gray-800">{{ item.subcategory.name }}</span>
+              </div>
+            </div>
+
+            <!-- Quantity & Price -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <p class="text-xs text-gray-500 mb-1">Available Qty</p>
+                <span class="text-sm font-bold text-gray-800">{{ item.quantity|intcomma }} {{ item.uom }}</span>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">Price / Unit</p>
+                <span class="text-sm font-bold text-gray-800">${{ item.price|floatformat:2 }}</span>
+              </div>
+            </div>
+
+            <!-- Stock Level Indicator -->
+            <div class="pt-2 border-t border-gray-100">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs text-gray-500">Stock Level</span>
+                <span class="text-xs text-gray-600">{{ item.quantity|intcomma }} {{ item.uom }}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="h-2 rounded-full 
+                  {% if item.quantity <= 0 %} bg-red-500 w-0
+                  {% elif item.quantity < 50 %} bg-yellow-500 w-1/3
+                  {% elif item.quantity < 100 %} bg-blue-500 w-2/3
+                  {% else %} bg-green-500 w-full {% endif %}">
+                </div>
+              </div>
+            </div>
+
+            <!-- Created Date -->
+            <div class="flex items-center justify-between text-xs text-gray-500 pt-2">
+              <span>Added</span>
+              <span>{{ warehouse.created_at|date:"M d, Y" }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-8">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-box-open text-gray-400 text-xl"></i>
+        </div>
+        <p class="text-gray-500 text-sm">No items found in this warehouse.</p>
+      </div>
+    {% endif %}
+  </div>
+  {% endwith %}
+  {% empty %}
+  <div class="bg-white shadow-md rounded-lg p-6 md:p-8 text-center">
+    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-warehouse text-gray-400 text-2xl"></i>
+    </div>
+    <h3 class="text-lg font-semibold text-gray-700 mb-2">No Warehouses Found</h3>
+    <p class="text-gray-500 text-sm">No warehouse data available to display.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<style>
+  /* Custom styles for better mobile experience */
+  @media (max-width: 768px) {
+    .md\:ml-\[270px\] {
+      margin-left: 0;
+    }
+  }
+
+  /* Smooth transitions for interactive elements */
+  .transition-colors {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Custom scrollbar for tables */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* Mobile card hover effects */
+  @media (min-width: 768px) {
+    .bg-white.border.rounded-lg.shadow-sm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Animation for card loading */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .md\:hidden .bg-white.border.rounded-lg {
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  /* Print styles */
+  @media print {
+    .md\:hidden {
+      display: none !important;
+    }
+    
+    .hidden.md\:block {
+      display: table !important;
+    }
+    
+    .bg-gray-100 {
+      background: white !important;
+    }
+    
+    .shadow-md, .shadow {
+      box-shadow: none !important;
+    }
+    
+    .rounded-lg {
+      border-radius: 0 !important;
+    }
+  }
+</style>
+
+<script>
+  // Add interactive features
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add click animation for mobile cards
+    const mobileCards = document.querySelectorAll('.md\\:hidden .bg-white.border.rounded-lg');
+    mobileCards.forEach(card => {
+      card.addEventListener('click', function() {
+        this.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          this.style.transform = 'scale(1)';
+        }, 150);
+      });
+    });
+
+    // Add loading state for charts (if needed)
+    const plotlyContainers = document.querySelectorAll('.plotly-graph-div');
+    plotlyContainers.forEach(container => {
+      container.style.minHeight = '400px';
+      container.style.display = 'flex';
+      container.style.alignItems = 'center';
+      container.style.justifyContent = 'center';
+    });
+
+    // Add smooth scrolling for better UX
+    const smoothScroll = (target) => {
+      const element = document.querySelector(target);
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
+
+    // Make warehouse headers clickable to scroll to their sections
+    const warehouseHeaders = document.querySelectorAll('h3.text-indigo-700');
+    warehouseHeaders.forEach(header => {
+      header.style.cursor = 'pointer';
+      header.addEventListener('click', function() {
+        const warehouseSection = this.closest('.bg-white.shadow-md.rounded-lg');
+        warehouseSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
+    });
+  });
+
+  // Add keyboard navigation support
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      // Close any open modals or focused elements
+      const focusedElement = document.activeElement;
+      if (focusedElement && focusedElement.blur) {
+        focusedElement.blur();
+      }
+    }
+  });
+
+  // Enhance table row interactions
+  const tableRows = document.querySelectorAll('tbody tr');
+  tableRows.forEach(row => {
+    row.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = '#f8fafc';
+    });
+    
+    row.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = '';
+    });
+  });
+</script>
+{% endblock %}

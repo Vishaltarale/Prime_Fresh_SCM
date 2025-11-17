@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request for Quotation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #875a7b;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            background-color: #875a7b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 12px;
+        }
+        .rfq-details {
+            background-color: white;
+            padding: 20px;
+            border-left: 4px solid #875a7b;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background-color: white;
+        }
+        .product-table th, .product-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .product-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .summary-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .button {
+            background-color: #875a7b;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="margin: 0; font-size: 28px;">{{ company_name }}</h1>
+        <h2 style="margin: 10px 0 0 0; font-size: 20px;">Request for Quotation</h2>
+        <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">RFQ ID: {{ rfq.id }}</p>
+    </div>
+    
+    <div class="content">
+        <p>Dear {{ recipient_name }},</p>
+        
+        <p>We hope this email finds you well. We are pleased to send you a Request for Quotation (RFQ) for the following items:</p>
+        
+        <div class="rfq-details">
+            <h3 style="color: #875a7b; margin-top: 0;">RFQ Overview</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <strong>RFQ Date:</strong> {{ rfq.created_at|date:"d M Y" }}<br>
+                    <strong>Prepared By:</strong> {{ rfq.created_by }}<br>
+                    <strong>Status:</strong> {{ rfq.status }}
+                </div>
+                <div>
+                    {% if rfq.supplier %}
+                    <strong>Supplier:</strong> {{ rfq.supplier.supplier_name }}<br>
+                    {% endif %}
+                    {% if rfq.farmer %}
+                    <strong>Farmer:</strong> {{ rfq.farmer.full_name }}<br>
+                    {% endif %}
+                    {% if rfq.warehouse %}
+                    <strong>Delivery To:</strong> {{ rfq.warehouse.warehouse_name }}<br>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h4 style="color: #875a7b; margin-bottom: 10px;">Product Details</h4>
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Qty</th>
+                        <th>UOM</th>
+                        <th>Unit Price</th>
+                        <th>GST %</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in rfq.items %}
+                    <tr>
+                        <td>{{ item.product_name }}</td>
+                        <td>{{ item.sku|default:"-" }}</td>
+                        <td>{{ item.category.name|default:"-" }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.uom }}</td>
+                        <td>₹{{ item.price|floatformat:2 }}</td>
+                        <td>{{ item.gst_amount|floatformat:2 }}%</td>
+                        <td>₹{{ item.line_total|floatformat:2 }}</td>
+                    </tr>
+                    {% if item.description %}
+                    <tr>
+                        <td colspan="8" style="background-color: #f8f9fa;">
+                            <strong>Description:</strong> {{ item.description }}
+                            {% if item.warehouse %}
+                            <br><strong>Warehouse:</strong> {{ item.warehouse.warehouse_name }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="summary-box">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span><strong>Subtotal:</strong></span>
+                    <span><strong>₹{{ rfq.subtotal|default:0|floatformat:2 }}</strong></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span><strong>Total GST:</strong></span>
+                    <span><strong>₹{{ rfq.gst_amount|default:0|floatformat:2 }}</strong></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 18px; border-top: 2px solid #875a7b; padding-top: 8px;">
+                    <span><strong>GRAND TOTAL:</strong></span>
+                    <span><strong>₹{{ rfq.total_amount|default:0|floatformat:2 }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight">
+            <p><strong>📋 Important Requirements:</strong></p>
+            <ul>
+                <li>Review the detailed specifications in the attached PDF document</li>
+                <li>Provide your best competitive quotation with complete breakdown</li>
+                <li>Include delivery timeframes and payment terms</li>
+                <li>Mention any minimum order quantities if applicable</li>
+                <li>Confirm product availability and quality specifications</li>
+                <li>Include GST registration details and tax breakdown</li>
+            </ul>
+        </div>
+
+        <p><strong>📅 Validity:</strong> Please ensure your quotation is valid for at least <strong>30 days</strong> from the date of submission.</p>
+
+        <p><strong>📎 Attachments:</strong> This email includes a detailed PDF document with complete RFQ specifications, terms, and conditions.</p>
+
+        <p>We look forward to receiving your quotation and potentially establishing a mutually beneficial business relationship.</p>
+
+        <p>If you have any questions or need clarification on any aspect of this RFQ, please don't hesitate to contact us.</p>
+
+        <p>Best regards,<br>
+        <strong style="color: #875a7b;">{{ company_name }} Procurement Team</strong></p>
+        
+        <div style="text-align: center; margin-top: 25px;">
+            <p style="font-size: 12px; color: #666;">
+                This RFQ contains {{ rfq.items|length }} item(s) with total value of ₹{{ rfq.total_amount|default:0|floatformat:2 }}
+            </p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p style="margin: 0;">This is an automated email. Please do not reply directly to this email.</p>
+        <p style="margin: 5px 0 0 0;">For any inquiries, please contact us through our official channels.</p>
+        <p style="margin: 5px 0 0 0; font-size: 11px; opacity: 0.8;">Document Generated on {% now "d M Y H:i" %}</p>
+    </div>
+</body>
+</html>
+

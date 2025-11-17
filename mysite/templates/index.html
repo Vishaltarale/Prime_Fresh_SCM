@@ -1,0 +1,1613 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container ">
+  <!-- Animated Background Elements -->
+  <div class="bg-animation">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Page Header -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">Overall SCM Overview</h1>
+          <p class="page-subtitle">Monitor your inventory, orders, and business metrics in real-time</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" aria-label="Export data">
+            <i class="fas fa-download" aria-hidden="true"></i>
+            <span>Export</span>
+          </button>
+          <button class="btn btn-primary" aria-label="Create new order">
+            <i class="fas fa-plus" aria-hidden="true"></i>
+            <span>New Order</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Statistics Cards -->
+    <section class="stats-grid" aria-label="Key metrics">
+      <!-- Total Inventory -->
+      <div class="stat-card" data-metric="inventory">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Total Inventory Items</h3>
+            <div class="stat-value">{{ data|length }}</div>
+          </div>
+          <div class="stat-icon stat-icon-blue">
+            <i class="fas fa-boxes" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-trend">
+          <span class="trend-indicator trend-up">
+            <i class="fas fa-arrow-up" aria-hidden="true"></i>
+            <span>12%</span>
+          </span>
+          <span class="trend-period">from last month</span>
+        </div>
+      </div>
+
+      <!-- Pending Orders -->
+      <div class="stat-card" data-metric="orders">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Pending Orders</h3>
+            <div class="stat-value">{{ pending_orders_count }}</div>
+          </div>
+          <div class="stat-icon stat-icon-orange">
+            <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-trend">
+          <span class="trend-indicator trend-down">
+            <i class="fas fa-arrow-down" aria-hidden="true"></i>
+            <span>5%</span>
+          </span>
+          <span class="trend-period">from last month</span>
+        </div>
+      </div>
+
+      <!-- Active Suppliers -->
+      <div class="stat-card" data-metric="suppliers">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Active Suppliers</h3>
+            <div class="stat-value">{{ suppliers|length }}</div>
+          </div>
+          <div class="stat-icon stat-icon-green">
+            <i class="fas fa-truck" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-trend">
+          <span class="trend-indicator trend-up">
+            <i class="fas fa-arrow-up" aria-hidden="true"></i>
+            <span>+3</span>
+          </span>
+          <span class="trend-period">new this month</span>
+        </div>
+      </div>
+
+      <!-- Warehouse Capacity -->
+      <div class="stat-card" data-metric="warehouse">
+        <div class="stat-content">
+          <div class="stat-text">
+            <h3 class="stat-label">Warehouse Capacity</h3>
+            <div class="stat-value">78%</div>
+          </div>
+          <div class="stat-icon stat-icon-purple">
+            <i class="fas fa-warehouse" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="capacity-bar">
+          <div class="capacity-labels">
+            <span>Used</span>
+            <span>78%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 78%" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100" aria-label="Warehouse capacity used: 78%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="main-grid">
+      <!-- Recent Orders -->
+      <section class="content-card orders-card" aria-label="Recent orders">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2 class="card-title">Recent Orders</h2>
+            <p class="card-subtitle">Track your latest customer orders</p>
+          </div>
+          <a href="#" class="btn btn-link" aria-label="View all orders">
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            <span>View All</span>
+          </a>
+        </div>
+        
+        <!-- Desktop Table View -->
+        <div class="table-container desktop-view">
+          <table class="data-table" role="table" aria-label="Recent orders data">
+            <thead>
+              <tr>
+                <th scope="col">Customer</th>
+                <th scope="col" class="hidden-mobile">Date</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if request.session.user_role == "Customer" or request.session.user_role == "Sales_Manager" %}
+              {% for order in Orders %}
+              <tr class="table-row">
+                <td class="customer-cell">
+                  <div class="customer-info">
+                    <div class="customer-avatar" aria-hidden="true">
+                      {{ order.customer_name|first }}
+                    </div>
+                    <div class="customer-details">
+                      <div class="customer-name">{{ order.customer_name }}</div>
+                      <div class="customer-date mobile-only">{{ order.order_date|date:"M d" }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="hidden-mobile">{{ order.order_date|date:"Y-m-d" }}</td>
+                <td>
+                  <span class="status-badge status-{{ order.status|lower }}" 
+                        role="status" 
+                        aria-label="Order status: {{ order.status }}">
+                    <span class="status-indicator" aria-hidden="true"></span>
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="text-right amount-cell">₹{{ order.total_amount }}</td>
+              </tr>
+              {% endfor %}
+              {% elif request.session.user_role == "Admin"  %}
+
+              {% for order in Admin_orders %}
+              <tr class="table-row">
+                <td class="customer-cell">
+                  <div class="customer-info">
+                    <div class="customer-avatar" aria-hidden="true">
+                      {{ order.customer_name|first }}
+                    </div>
+                    <div class="customer-details">
+                      <div class="customer-name">{{ order.customer_name }}</div>
+                      <div class="customer-date mobile-only">{{ order.order_date|date:"M d" }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="hidden-mobile">{{ order.order_date|date:"Y-m-d" }}</td>
+                <td>
+                  <span class="status-badge status-{{ order.status|lower }}" 
+                        role="status" 
+                        aria-label="Order status: {{ order.status }}">
+                    <span class="status-indicator" aria-hidden="true"></span>
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="text-right amount-cell">₹{{ order.total_amount }}</td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr>
+                <td colspan="4">
+                  <div class="orders-summary">
+                    <div class="summary-metric">
+                      <span class="summary-label">Total Orders</span>
+                      <span class="summary-value">{{ Orders|length }}</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Mobile Card View -->
+        <div class="mobile-view">
+          <div class="orders-cards">
+            {% if request.session.user_role == "Customer" or request.session.user_role == "Sales_Manager" %}
+            {% for order in Orders %}
+            <div class="order-card">
+              <div class="order-card-header">
+                <div class="customer-info">
+                  <div class="customer-avatar" aria-hidden="true">
+                    {{ order.customer_name|first }}
+                  </div>
+                  <div class="customer-details">
+                    <div class="customer-name">{{ order.customer_name }}</div>
+                    <div class="order-date">{{ order.order_date|date:"M d, Y" }}</div>
+                  </div>
+                </div>
+                <div class="order-amount">₹{{ order.total_amount }}</div>
+              </div>
+              <div class="order-card-body">
+                <div class="order-status">
+                  <span class="status-badge status-{{ order.status|lower }}" 
+                        role="status" 
+                        aria-label="Order status: {{ order.status }}">
+                    <span class="status-indicator" aria-hidden="true"></span>
+                    {{ order.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% elif request.session.user_role == "Admin"  %}
+            {% for order in Admin_orders %}
+            <div class="order-card">
+              <div class="order-card-header">
+                <div class="customer-info">
+                  <div class="customer-avatar" aria-hidden="true">
+                    {{ order.customer_name|first }}
+                  </div>
+                  <div class="customer-details">
+                    <div class="customer-name">{{ order.customer_name }}</div>
+                    <div class="order-date">{{ order.order_date|date:"M d, Y" }}</div>
+                  </div>
+                </div>
+                <div class="order-amount">₹{{ order.total_amount }}</div>
+              </div>
+              <div class="order-card-body">
+                <div class="order-status">
+                  <span class="status-badge status-{{ order.status|lower }}" 
+                        role="status" 
+                        aria-label="Order status: {{ order.status }}">
+                    <span class="status-indicator" aria-hidden="true"></span>
+                    {{ order.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="orders-summary">
+              <div class="summary-metric">
+                <span class="summary-label">Total Orders</span>
+                <span class="summary-value">{{ Orders|length }}</span>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Events -->
+      <section class="content-card events-card" aria-label="Recent inventory events">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2 class="card-title">Recent Events</h2>
+            {% if request.session.user_role == "Admin" or request.session.user_role == "Inventory" %}
+              <p class="card-subtitle">Latest inventory activities</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="events-list">
+          {% if request.session.user_role == "Admin" or request.session.user_role == "Inventory" %}
+            {% for event in events %}
+              <div class="event-item" role="listitem">
+                <div class="event-icon event-{{ event.type }}" aria-hidden="true">
+                  <i class="{{ event.icon }}"></i>
+                </div>
+                <div class="event-content">
+                  <h4 class="event-title">{{ event.title }}</h4>
+                  <p class="event-message">{{ event.message }}</p>
+                  <time class="event-time">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    {{ event.time }}
+                  </time>
+                </div>
+              </div>
+            {% empty %}
+              <div class="empty-state" role="status">
+                <div class="empty-icon" aria-hidden="true">
+                  <i class="fas fa-bell-slash"></i>
+                </div>
+                <p class="empty-title">No recent events</p>
+                <p class="empty-subtitle">Events will appear here when inventory changes occur</p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state" role="status">
+              <div class="empty-icon" aria-hidden="true">
+                <i class="fas fa-bell-slash"></i>
+              </div>
+              <p class="empty-title">No recent events</p>
+              <p class="empty-subtitle">Events will appear here when inventory changes occur</p>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <!-- Order Status Chart -->
+    <section class="content-card chart-card" aria-label="Order status trends">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title">Order Status Trend</h2>
+          <p class="card-subtitle">Analyze your order patterns over time</p>
+        </div>
+        <div class="chart-controls" role="tablist" aria-label="Time period selection">
+          <button class="chart-control" role="tab" aria-selected="false">7D</button>
+          <button class="chart-control active" role="tab" aria-selected="true">30D</button>
+          <button class="chart-control" role="tab" aria-selected="false">90D</button>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        {% if chart_image %}
+          <img src="data:image/png;base64,{{ chart_image }}" 
+               alt="Order status chart showing trends over time" 
+               class="chart-image" />
+        {% else %}
+          <div class="chart-loading" role="status" aria-label="Chart loading">
+            <i class="fas fa-chart-line" aria-hidden="true"></i>
+            <p>Chart loading...</p>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="content-card actions-card" aria-label="Quick actions">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title">Quick Actions</h2>
+          <p class="card-subtitle">Commonly used operations</p>
+        </div>
+      </div>
+
+      <div class="actions-grid">
+        {% if request.session.user_role == "Admin" or request.session.user_role == "Inventory_Manager" %}
+          <a href="{% url 'mysite:inventory' %}" class="action-item" aria-label="Add new inventory item">
+            <div class="action-icon action-icon-blue">
+              <i class="fas fa-plus" aria-hidden="true"></i>
+            </div>
+            <span class="action-label">Add Item</span>
+          </a>
+        {% endif %}
+
+        <button class="action-item" aria-label="Synchronize data">
+          <div class="action-icon action-icon-green">
+            <i class="fas fa-sync-alt" aria-hidden="true"></i>
+          </div>
+          <span class="action-label">Sync Data</span>
+        </button>
+
+        {% if request.session.user_role == "Admin" or request.session.user_role == "Accountant" %}
+          <a href="{% url "Location:reports" %}" class="action-item" aria-label="Export reports">
+            <div class="action-icon action-icon-purple">
+              <i class="fas fa-file-export" aria-hidden="true"></i>
+            </div>
+            <span class="action-label">Export</span>
+          </a>
+        {% endif %}
+
+        {% if request.session.user_role == "Admin" or request.session.user_role == "Inventory_Manager" %}
+          <a href="{% url 'mysite:inventory' %}#inv" class="action-item" aria-label="View inventory alerts">
+            <div class="action-icon action-icon-orange">
+              <i class="fas fa-bell" aria-hidden="true"></i>
+            </div>
+            <span class="action-label">Alerts</span>
+          </a>
+        {% endif %}
+
+        {% if request.session.user_role == "Admin" or request.session.user_role == "Accountant" %}
+          <a href="{% url "Location:reports" %}" class="action-item" aria-label="View detailed reports">
+            <div class="action-icon action-icon-red">
+              <i class="fas fa-chart-bar" aria-hidden="true"></i>
+            </div>
+            <span class="action-label">Reports</span>
+          </a>
+        {% endif %}
+
+        <a href="{% url "Settings:settings" %}" class="action-item" aria-label="Open settings">
+          <div class="action-icon action-icon-gray">
+            <i class="fas fa-cog" aria-hidden="true"></i>
+          </div>
+          <span class="action-label">Settings</span>
+        </a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+/* Reset and Base Styles */
+.dashboard-container {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #e8eaf6 100%);
+  min-height: 100vh;
+  padding-top: 80px;
+  padding-left: 260px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding-left: 0;
+  }
+}
+
+/* Animated Background */
+.bg-animation {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-orb {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 6s ease-in-out infinite;
+}
+
+.bg-orb-1 {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
+  top: -160px;
+  right: -160px;
+}
+
+.bg-orb-2 {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15));
+  bottom: -160px;
+  left: -160px;
+  animation-delay: -3s;
+}
+
+/* Main Content */
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 16px;
+  }
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 32px;
+  animation: slideInDown 0.6s ease-out;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1f2937, #3b82f6, #7c3aed);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 640px) {
+  .page-title {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-title {
+    font-size: 3.5rem;
+  }
+}
+
+.page-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .page-subtitle {
+    font-size: 1rem;
+  }
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.btn-link {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #3b82f6;
+}
+
+.btn-link:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.5s ease;
+  animation: slideInUp 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.stat-card[data-metric="inventory"]:hover::before {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.2));
+  opacity: 1;
+}
+
+.stat-card[data-metric="orders"]:hover::before {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.2));
+  opacity: 1;
+}
+
+.stat-card[data-metric="suppliers"]:hover::before {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2));
+  opacity: 1;
+}
+
+.stat-card[data-metric="warehouse"]:hover::before {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(147, 51, 234, 0.2));
+  opacity: 1;
+}
+
+.stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+@media (min-width: 640px) {
+  .stat-value {
+    font-size: 2.5rem;
+  }
+}
+
+.stat-icon {
+  padding: 12px;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .stat-icon {
+    font-size: 1.5rem;
+  }
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1);
+  animation: float 2s ease-in-out infinite;
+}
+
+.stat-icon-blue {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.stat-icon-orange {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.stat-icon-green {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-icon-purple {
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.trend-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.trend-up {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.trend-down {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.trend-period {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .trend-period {
+    font-size: 0.875rem;
+  }
+}
+
+/* Capacity Bar */
+.capacity-bar {
+  position: relative;
+  z-index: 1;
+}
+
+.capacity-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #9333ea);
+  border-radius: 6px;
+  transition: width 1s ease-out;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Main Grid */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 1280px) {
+  .main-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Content Cards */
+.content-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  animation: slideInUp 0.6s ease-out;
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .card-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Table Styles */
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.data-table thead {
+  background: linear-gradient(90deg, #f9fafb, #f3f4f6);
+}
+
+.data-table th {
+  text-align: left;
+  padding: 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table-row {
+  transition: background-color 0.2s ease;
+}
+
+.table-row:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customer-avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.customer-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.customer-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.table-row:hover .status-badge {
+  transform: scale(1.05);
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.status-processing {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.status-cancelled {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.amount-cell {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hidden-mobile {
+    display: table-cell;
+  }
+  
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* Orders Summary */
+.orders-summary {
+  text-align: right;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.summary-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Events List */
+.events-list {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.events-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.events-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.events-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.event-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.event-item:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(4px);
+}
+
+.event-icon {
+  padding: 12px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.event-item:hover .event-icon {
+  transform: scale(1.1);
+}
+
+.event-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.event-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.event-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.event-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.event-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-title {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+.event-item:hover .event-title {
+  color: #3b82f6;
+}
+
+.event-message {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 1.5rem;
+  color: #9ca3af;
+  animation: pulse 3s infinite;
+}
+
+.empty-title {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.empty-subtitle {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Chart Section */
+.chart-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.chart-control {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chart-control:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.chart-control.active {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #3b82f6;
+}
+
+.chart-container {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.3));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.chart-image {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 256px;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  border-radius: 8px;
+  animation: pulse 2s infinite;
+}
+
+.chart-loading i {
+  font-size: 3rem;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.chart-loading p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Quick Actions */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .actions-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.action-item:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.action-item:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.action-icon {
+  padding: 12px;
+  border-radius: 50%;
+  color: white;
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.action-item:hover .action-icon {
+  animation: bounce 0.6s ease;
+}
+
+.action-icon-blue {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.action-icon-green {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.action-icon-purple {
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+
+.action-icon-orange {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.action-icon-red {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.action-icon-gray {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.action-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+}
+
+/* Mobile Order Cards */
+.desktop-view {
+  display: block;
+}
+
+.mobile-view {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-view {
+    display: none;
+  }
+  
+  .mobile-view {
+    display: block;
+  }
+}
+
+.orders-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.order-amount {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.125rem;
+}
+
+.order-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0,-1px,0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Animation Delays */
+.stats-grid .stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-grid .stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stats-grid .stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stats-grid .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+.orders-card { animation-delay: 0.5s; }
+.events-card { animation-delay: 0.6s; }
+.chart-card { animation-delay: 0.7s; }
+.actions-card { animation-delay: 0.8s; }
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .dashboard-content {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .header-content {
+    gap: 20px;
+  }
+  
+  .stats-grid {
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-value {
+    font-size: 1.875rem;
+  }
+  
+  .main-grid {
+    gap: 16px;
+  }
+  
+  .content-card {
+    padding: 20px;
+  }
+  
+  .card-header {
+    gap: 12px;
+  }
+  
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .action-item {
+    padding: 16px 12px;
+  }
+  
+  /* Enhanced glass effect for mobile */
+  .glass {
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .bg-orb {
+    animation: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #000;
+  }
+  
+  .stat-card {
+    border: 2px solid #000;
+  }
+  
+  .content-card {
+    border: 2px solid #000;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .bg-animation,
+  .header-actions,
+  .actions-card {
+    display: none;
+  }
+  
+  .dashboard-container {
+    background: white;
+    padding: 0;
+  }
+  
+  .glass,
+  .content-card,
+  .stat-card {
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Focus Visible Support */
+.btn:focus-visible,
+.action-item:focus-visible,
+.chart-control:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
