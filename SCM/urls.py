@@ -21,12 +21,4 @@ from django_mongoengine import mongo_admin
 urlpatterns = [
     path('mongo-admin/', mongo_admin.site.urls),
     path('api/', include('api.urls')),
-    path('',include('mysite.urls')),
-    path('Orders/',include('Orders.urls')),
-    path('Customer/',include('Customer.urls')),
-    path('product_Items/',include('product_Items.urls')),
-    path('UOM',include('UOM.urls')),
-    path("Location",include('Location.urls')),
-    path('Users',include('Users.urls')),
-    path('Settings/',include('settings.urls')),
 ]
