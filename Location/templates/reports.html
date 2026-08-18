@@ -4,7 +4,16 @@
 
 <div class="p-6 md:ml-[250px] mt-[20px] bg-gray-100 min-h-screen">
   <div class="bg-white shadow-md rounded-lg p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Reports Dashboard</h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Reports Dashboard</h1>
+      <!-- Transitional link to the new React Reports module, migrated in parallel for side-by-side testing.
+           Safe to remove once the React page is the primary Reports experience. -->
+      <a href="{{ react_web_url }}/reports" target="_blank" rel="noopener"
+         class="text-xs font-bold tracking-wide uppercase px-3 py-1.5 rounded-full text-violet-700 border border-violet-400 hover:bg-violet-50"
+         title="Try the new React version of this page">
+        Try New UI
+      </a>
+    </div>
 
     <!-- Reports Overview Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

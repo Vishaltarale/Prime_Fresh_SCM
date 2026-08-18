@@ -1,135 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SCM Dashboard{% endblock %}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Prime Fresh SCM{% endblock %}</title>
 
-    <!-- Tailwind & Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: { DEFAULT: '#6f42c1', hover: '#5a359a' },
-                        sidebar: { bg: '#2c3e50', hover: '#34495e' },
-                        secondary: '#495057',
-                        'bg-light': '#f8f9fa',
-                    },
-                    borderRadius: { custom: '10px' },
-                    boxShadow: {
-                        custom: '0 2px 10px rgba(0,0,0,0.1)',
-                        notification: '0 4px 12px rgba(0,0,0,0.15)',
-                    },
-                    width: { sidebar: '260px' },
-                    transitionProperty: { custom: 'all' },
-                }
-            }
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
         }
-    </script>
+      }
+    }
+  </script>
 
-    {% block extra_head %}{% endblock %}
+  <style>
+    :root {
+      --brand: #7c3aed;
+      --brand2: #4f46e5;
+      --brand3: #06b6d4;
+      --sidebar-w: 268px;
+    }
+
+    * { scrollbar-width: thin; scrollbar-color: #7c3aed #1e1b4b; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f5f3ff; }
+    ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 99px; }
+
+    body { background: #f0f4ff; font-family: 'Inter', sans-serif; }
+
+    /* ── Sidebar ── */
+    #pf-sidebar {
+      width: var(--sidebar-w);
+      background: linear-gradient(180deg, #0f0c29 0%, #1a1045 40%, #0d0d2b 100%);
+      transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+    }
+    @media (max-width: 1023px) {
+      #pf-sidebar { transform: translateX(-100%); }
+      #pf-sidebar.open { transform: translateX(0); }
+    }
+    #pf-main { margin-left: var(--sidebar-w); }
+    @media (max-width: 1023px) { #pf-main { margin-left: 0; } }
+
+    /* ── Nav links ── */
+    .pf-nav-link {
+      position: relative;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; border-radius: 12px;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.875rem; font-weight: 500;
+      transition: all 0.22s ease;
+      text-decoration: none;
+    }
+    .pf-nav-link::before {
+      content: '';
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 0;
+      background: linear-gradient(180deg, #a78bfa, #818cf8);
+      border-radius: 0 3px 3px 0;
+      transition: height 0.25s ease;
+    }
+    .pf-nav-link:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .pf-nav-link:hover::before { height: 60%; }
+    .pf-nav-link.active {
+      background: linear-gradient(135deg, rgba(124,58,237,0.35), rgba(79,70,229,0.2));
+      color: #c4b5fd;
+      border: 1px solid rgba(139,92,246,0.25);
+    }
+    .pf-nav-link.active::before { height: 65%; }
+    .pf-nav-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 13px;
+      background: rgba(255,255,255,0.05);
+      transition: background 0.2s ease;
+    }
+    .pf-nav-link:hover .pf-nav-icon,
+    .pf-nav-link.active .pf-nav-icon { background: rgba(124,58,237,0.3); }
+
+    /* ── Glass navbar ── */
+    #pf-topbar {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(124,58,237,0.1);
+    }
+
+    /* ── Page entrance ── */
+    @keyframes pageIn {
+      from { opacity:0; transform: translateY(16px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .pf-page { animation: pageIn 0.42s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* ── Card stagger ── */
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(20px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .pf-stagger > * { animation: cardIn 0.48s cubic-bezier(0.16,1,0.3,1) both; }
+    .pf-stagger > *:nth-child(1) { animation-delay: 0.04s; }
+    .pf-stagger > *:nth-child(2) { animation-delay: 0.09s; }
+    .pf-stagger > *:nth-child(3) { animation-delay: 0.14s; }
+    .pf-stagger > *:nth-child(4) { animation-delay: 0.19s; }
+    .pf-stagger > *:nth-child(5) { animation-delay: 0.24s; }
+    .pf-stagger > *:nth-child(6) { animation-delay: 0.29s; }
+
+    /* ── Stat card hover ── */
+    .pf-stat { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: default; }
+    .pf-stat:hover { transform: translateY(-5px); box-shadow: 0 20px 48px rgba(124,58,237,0.15); }
+
+    /* ── Pulse dot ── */
+    @keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.6} }
+    .pulse { animation: pulseDot 2s ease-in-out infinite; }
+
+    /* ── Toast ── */
+    @keyframes toastIn { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+    .pf-toast { animation: toastIn 0.32s cubic-bezier(0.16,1,0.3,1); border-radius: 12px; padding: 12px 18px; font-size:14px; font-weight:500; color:#fff; box-shadow:0 8px 32px rgba(0,0,0,.2); display:flex; align-items:center; gap:10px; max-width:340px; pointer-events:all; }
+    .pf-toast-success  { background: linear-gradient(135deg,#22c55e,#16a34a); }
+    .pf-toast-error,
+    .pf-toast-danger   { background: linear-gradient(135deg,#ef4444,#dc2626); }
+    .pf-toast-critical {
+      background: linear-gradient(135deg,#b91c1c,#7f1d1d);
+      box-shadow: 0 8px 32px rgba(185,28,28,.4), 0 0 0 1px rgba(255,255,255,.15) inset;
+      animation: toastIn 0.32s cubic-bezier(0.16,1,0.3,1), pfToastCriticalPulse 1.6s ease-in-out infinite 0.32s;
+    }
+    @keyframes pfToastCriticalPulse {
+      0%,100% { box-shadow: 0 8px 32px rgba(185,28,28,.4), 0 0 0 1px rgba(255,255,255,.15) inset; }
+      50%     { box-shadow: 0 8px 32px rgba(185,28,28,.7), 0 0 0 1px rgba(255,255,255,.25) inset; }
+    }
+    .pf-toast-warning  { background: linear-gradient(135deg,#f59e0b,#d97706); }
+    .pf-toast-info     { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+
+    /* ── Gradient text ── */
+    .grad-text {
+      background: linear-gradient(135deg,#7c3aed,#4f46e5,#06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ── Shimmer loading ── */
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    .shimmer {
+      background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 37%,#f0f0f0 63%);
+      background-size: 400px 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.18) !important;
+      border-color: #7c3aed !important;
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
 </head>
 
-<body class="bg-gray-100">
-    {% if messages %}
-    <div class="fixed top-5 right-5 z-50 space-y-4">
-        {% for message in messages %}
-        <div class="flash-message px-4 py-3 rounded-md shadow-notification transition-opacity duration-500 ease-out
-            {% if message.tags == 'success' %}bg-green-500 text-white
-            {% elif message.tags == 'error' %}bg-red-500 text-white
-            {% elif message.tags == 'warning' %}bg-yellow-400 text-black
-            {% else %}bg-blue-500 text-white{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
+<body>
+  <!-- Mobile overlay -->
+  <div id="pf-overlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden backdrop-blur-sm" onclick="closeSidebar()"></div>
+
+  <!-- Flash messages -->
+  {% if messages %}
+  <div class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" id="pf-alerts">
+    {% for message in messages %}
+    {% if 'critical' in message.tags %}
+    <div class="pf-toast pf-toast-critical" data-life="6500"><span>⛔</span><span>{{ message }}</span></div>
+    {% elif message.tags == 'error' %}
+    <div class="pf-toast pf-toast-danger" data-life="4500"><span>✕</span><span>{{ message }}</span></div>
+    {% elif message.tags == 'warning' %}
+    <div class="pf-toast pf-toast-warning" data-life="4000"><span>⚠</span><span>{{ message }}</span></div>
+    {% elif message.tags == 'success' %}
+    <div class="pf-toast pf-toast-success" data-life="3500"><span>✓</span><span>{{ message }}</span></div>
+    {% else %}
+    <div class="pf-toast pf-toast-info" data-life="3500"><span>ℹ</span><span>{{ message }}</span></div>
     {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
 
-    <button class="md:hidden fixed top-4 left-4 z-[1001] bg-primary text-white p-2 rounded-md" id="sidebarToggle" aria-label="Toggle sidebar">
-        <i class="fas fa-bars"></i>
-    </button>
-
+  <div class="flex min-h-screen">
     {% include "sidebar.html" %}
 
-    <div class="ml-sidebar transition-all duration-300 ease-in-out">
-        {% if request.resolver_match.view_name == 'mysite:index' or request.resolver_match.view_name == 'Customer:Customer_register' %}
-            {% include "mysite/templates/navbar.html" %}
-        {% elif request.resolver_match.view_name == 'Orders:Order_dash' or request.resolver_match.view_name == 'Orders:Create_order' %}
-            {% include "Orders/templates/navbar.html" %}
-        {% endif %}
+    <div id="pf-main" class="flex-1 flex flex-col min-w-0 overflow-hidden transition-all duration-300">
+      {% include "navbar.html" %}
 
-        <main class="p-4 md:p-6">
-            {% block content %}{% endblock %}
-        </main>
+      <main class="flex-1 overflow-y-auto pf-page">
+        <div class="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
     </div>
+  </div>
 
-    <script>
-        document.getElementById('sidebarToggle').addEventListener('click', function () {
-            document.getElementById('sidebar').classList.toggle('translate-x-0');
-        });
+  <!-- Toast container -->
+  <div id="pf-toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
-        document.addEventListener('click', function (e) {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
+  <script>
+    // Sidebar
+    function openSidebar() {
+      document.getElementById('pf-sidebar').classList.add('open');
+      document.getElementById('pf-overlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      document.getElementById('pf-sidebar').classList.remove('open');
+      document.getElementById('pf-overlay').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
 
-            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                sidebar.classList.remove('translate-x-0');
-            }
-        });
+    // Active link highlight
+    document.addEventListener('DOMContentLoaded', () => {
+      const path = window.location.pathname;
+      document.querySelectorAll('.pf-nav-link[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href !== '/' && path.startsWith(href)) {
+          link.classList.add('active');
+        }
+        if (href === '/' && path === '/') link.classList.add('active');
+      });
 
-        // Navbar page title handler
-        document.addEventListener('DOMContentLoaded', () => {
-            const navbar = {
-                updatePageTitle: function (title, subtitle = '') {
-                    const titleElement = document.getElementById('pageTitle');
-                    const subtitleElement = document.getElementById('pageSubtitle');
-                    if (titleElement) titleElement.textContent = title;
-                    if (subtitleElement) subtitleElement.textContent = subtitle;
-                }
-            };
+      // Auto-dismiss each flash message on its own timer
+      document.querySelectorAll('#pf-alerts .pf-toast').forEach(el => {
+        const life = parseInt(el.dataset.life, 10) || 3500;
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(40px)';
+          el.style.transition = 'all 0.4s ease';
+          setTimeout(() => el.remove(), 400);
+        }, life);
+      });
+    });
 
-            document.addEventListener('sidebarSectionChange', (e) => {
-                const section = e.detail.section;
-                const titles = {
-                    dashboard: 'Supply Chain Dashboard',
-                    inventory: 'Inventory Management',
-                    orders: 'Order Management',
-                    suppliers: 'Supplier Management',
-                    warehouse: 'Warehouse Management',
-                    reports: 'Reports & Analytics',
-                    settings: 'System Settings'
-                };
-                const subtitles = {
-                    dashboard: 'Welcome back, Manager',
-                    inventory: 'Manage your inventory items',
-                    orders: 'Track and manage orders',
-                    suppliers: 'Manage supplier relationships',
-                    warehouse: 'Warehouse operations',
-                    reports: 'View reports and analytics',
-                    settings: 'Configure system settings'
-                };
-                navbar.updatePageTitle(titles[section] || 'SCM Dashboard', subtitles[section] || '');
-            });
-        });
+    // Toast utility — type: 'success' | 'danger' | 'critical' | 'warning' | 'info'
+    function showToast(msg, type='success', duration) {
+      const icons = {success:'✓', error:'✕', danger:'✕', critical:'⛔', warning:'⚠', info:'ℹ'};
+      const el = document.createElement('div');
+      el.className = `pf-toast pf-toast-${type}`;
+      el.innerHTML = `<span style="font-size:16px;font-weight:700">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+      const c = document.getElementById('pf-toast-container');
+      c.appendChild(el);
+      const life = duration || (type === 'critical' ? 6500 : type === 'warning' || type === 'danger' ? 4000 : 3500);
+      setTimeout(() => {
+        el.style.opacity='0'; el.style.transform='translateX(40px)';
+        el.style.transition='all 0.3s ease';
+        setTimeout(() => el.remove(), 300);
+      }, life);
+    }
+  </script>
 
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(function () {
-                const alerts = document.querySelectorAll('.flash-message');
-                alerts.forEach(alert => {
-                    alert.style.opacity = '0';
-                    alert.style.transition = 'opacity 0.6s ease-out';
-                    setTimeout(() => {
-                        alert.remove();
-                    }, 600);
-                });
-            }, 3000); 
-        });
-    </script>
-
-    {% block extra_scripts %}{% endblock %}
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

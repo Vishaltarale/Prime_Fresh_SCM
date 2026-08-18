@@ -30,7 +30,7 @@ class FruitInventory(Document):
     quality_grade = StringField(choices=["A", "B", "C"])
 
     meta = {
-        'collection': 'products'  
+        'collection': 'fruit_inventory'
     }
 
 class Employee(Document):
@@ -63,6 +63,7 @@ class Farmer(Document):
 
     meta = {
         'collection': 'farmers',
+        'strict': False,
     }
 
     def __str__(self):
@@ -82,7 +83,8 @@ class Supplier(Document):
 
     meta = {
         'collection': 'suppliers',
-        'ordering': ['-registration_date']
+        'ordering': ['-registration_date'],
+        'strict': False
     }
 
     def __str__(self):
@@ -100,7 +102,8 @@ class Customer(Document):
 
     meta = {
         'collection': 'customers',
-        'ordering': ['-registration_date']
+        'ordering': ['-registration_date'],
+        'strict': False
     }
 
     def __str__(self):

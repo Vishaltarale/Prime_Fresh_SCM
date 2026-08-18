@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path,include
 from .import views
+from . import grn_views
 
 
 app_name = "mysite"
@@ -11,10 +12,11 @@ urlpatterns = [
     path("user_index",views.index,name="index"),
         #ADMIN_RGISTRATION
     path("",views.admin_register,name="admin_register"),
-    path("admin_save",views.admin_save,name="admin_save"),
+    path("admin_save",views.admin_save,name="admin_save"), 
 
     #supplier dash
     path("supplier_dash",views.supplier_dash,name="supplier_dash"),
+
     #ADMIN_LOGIN
     path("admin_login",views.admin_login,name="admin_login"),
     path("admin_login_dash",views.admin_login_dash,name="admin_login_dash"),
@@ -52,5 +54,10 @@ urlpatterns = [
     #UserRegiteration
     path('user_reg',views.user_reg,name="user_reg"),
 
-
+    # GRN — Goods Receipt Note
+    path('grn/', grn_views.grn_list,   name='grn_list'),
+    path('grn/create/', grn_views.grn_create, name='grn_create'),
+    path('grn/<str:grn_id>/', grn_views.grn_detail, name='grn_detail'),
+    path('grn/<str:grn_id>/confirm/', grn_views.grn_confirm, name='grn_confirm'),
+    path('grn/<str:grn_id>/reject/',  grn_views.grn_reject,  name='grn_reject'),
 ]

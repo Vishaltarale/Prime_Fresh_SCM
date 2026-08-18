@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
-from Location.models import OfficeLocation,Warehouse
+from django.contrib import messages
+from Location.models import Warehouse
 from product_Items.models import Product
 #WAREHOUSE DASH
 from collections import Counter
@@ -60,32 +61,6 @@ def location_dash(request):
         'plot_div': plot_div
     })
 
-# Create your views here.
-def office(request):
-    return render(request,"office.html")
-
-def office_register(request):
-    if request.method == "POST":
-            office_name = request.POST.get("office_name")
-            address = request.POST.get("address")
-            city = request.POST.get("city")
-            state = request.POST.get("state")
-            pincode = request.POST.get("pincode")
-
-            # Save to MongoDB using MongoEngine
-            office = OfficeLocation(
-                office_name=office_name,
-                address=address,
-                city=city,
-                state=state,
-                pincode=pincode
-            )
-            office.save()
-
-            # messages.success(request, "Office location registered successfully.")
-            return redirect("Location:office")
-    return render(request, "office.html")
-
 #WAREHOUSE
 def warehouse(request):
      return render(request,"warehouse.html")
@@ -100,7 +75,7 @@ def warehouse_register(request):
 
             # Optional: Prevent duplicate warehouse names
             if Warehouse.objects(warehouse_name__iexact=warehouse_name).first():
-                # messages.warning(request, "Warehouse with this name already exists.")
+                messages.warning(request, "Warehouse with this name already exists.")
                 return redirect("Location:warehouse")
 
             warehouse = Warehouse(
@@ -111,7 +86,7 @@ def warehouse_register(request):
                 pincode=pincode
             )
             warehouse.save()
-            # messages.success(request, "Warehouse registered successfully.")
+            messages.success(request, f"Warehouse '{warehouse_name}' registered successfully.")
             return redirect("Location:warehouse")
     return redirect("Location:warehouse")
 

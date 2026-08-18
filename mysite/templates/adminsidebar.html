@@ -1,65 +1,222 @@
-<aside class="w-64 bg-white shadow-md flex-shrink-0">
-  <div class="p-6 text-xl font-bold text-blue-700 border-b border-gray-200">
-    SCM Admin
+<aside id="sidebar"
+  class="sidebar-gradient fixed inset-y-0 left-0 z-30 w-64 flex flex-col
+         -translate-x-full lg:translate-x-0 lg:static lg:inset-auto
+         overflow-hidden border-r border-white/[0.04]">
+
+  <!-- ── Glow orb decoration ── -->
+  <div class="absolute top-0 left-0 w-48 h-48 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle at 30% 30%, rgba(99,102,241,0.18), transparent 70%);"></div>
+  <div class="absolute bottom-1/3 right-0 w-32 h-32 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%);"></div>
+
+  <!-- ── Logo ── -->
+  <div class="relative flex items-center gap-3 px-5 py-5 border-b border-white/[0.06] flex-shrink-0">
+    <!-- Gradient icon -->
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0"
+         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 3C10 7 4 8 4 13a8 8 0 0016 0c0-5-6-6-8-10z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 13v5"/>
+      </svg>
+    </div>
+    <div class="overflow-hidden">
+      <p class="text-white font-bold text-sm leading-tight tracking-wide font-display">Prime Fresh</p>
+      <p class="text-indigo-400 text-[10px] font-semibold tracking-widest uppercase">SCM Admin</p>
+    </div>
+    <!-- Mobile close -->
+    <button onclick="closeSidebar()"
+      class="ml-auto p-1 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 lg:hidden transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
   </div>
-  <nav class="mt-4">
-    <ul class="space-y-1 text-gray-700 text-sm">
 
-      <li>
-        <a href="{% url "mysite:admin_index" %}" class="block px-6 py-2 hover:bg-blue-50 font-medium">Dashboard</a>
-      </li>
+  <!-- ── Navigation ── -->
+  <nav class="relative flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
-      <!-- Registrations -->
-      <li>
-        <input type="checkbox" id="reg-menu" class="peer hidden">
-        <label for="reg-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
-          Registrations <span class="text-xs">&#9662;</span>
-        </label>
-        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
-          <li><a href="{% url "mysite:employee" %}" class="block px-6 py-1 hover:bg-blue-100">Employee</a></li>
-          <li><a href="{% url "mysite:farmer" %}" class="block px-6 py-1 hover:bg-blue-100">Farmer</a></li>
-          <li><a href="{% url "mysite:supplier" %}" class="block px-6 py-1 hover:bg-blue-100">Supplier</a></li>
-          <li><a href="{% url "mysite:customer" %}" class="block px-6 py-1 hover:bg-blue-100">Customer</a></li>
-        </ul>
-      </li>
+    <!-- Dashboard -->
+    <div class="flex items-center">
+      <a href="{% url 'mysite:admin_index' %}"
+         class="sidebar-nav-link flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+                hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+        <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-indigo-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+        </span>
+        Dashboard
+      </a>
+      <a href="{{ react_web_url }}/" target="_blank" rel="noopener"
+         class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0"
+         title="Try the new React version of this page">
+        New UI
+      </a>
+    </div>
 
-      <!-- Products -->
-      <li>
-        <input type="checkbox" id="product-menu" class="peer hidden">
-        <label for="product-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
-          Products <span class="text-xs">&#9662;</span>
-        </label>
-        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
-          <li><a href="{% url "product_Items:products" %}" class="block px-6 py-1 hover:bg-blue-100">Product</a></li>
-          <li><a href="{% url "product_Items:subcategory" %}" class="block px-6 py-1 hover:bg-blue-100">Subcategory</a></li>
-          <li><a href="{% url "product_Items:category" %}" class="block px-6 py-1 hover:bg-blue-100">Category</a></li>
-        </ul>
-      </li>
+    <!-- Section label -->
+    <p class="px-3 pt-5 pb-1.5 text-[10px] font-bold tracking-[0.12em] text-slate-600 uppercase">Management</p>
 
-      <!-- UOM -->
-      <li>
-        <input type="checkbox" id="uom-menu" class="peer hidden">
-        <label for="uom-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
-          UOM <span class="text-xs">&#9662;</span>
-        </label>
-        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
-          <li><a href="{% url "UOM:unit_of_measurement" %}" class="block px-6 py-1 hover:bg-blue-100">Unit of Measurement</a></li>
-          <li><a href="{% url "UOM:conversion_matrix" %}" class="block px-6 py-1 hover:bg-blue-100">Conversion Matrix</a></li>
-        </ul>
-      </li>
+    <!-- Registrations -->
+    <div>
+      <button onclick="toggleMenu('reg-menu')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+               hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+        <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-violet-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </span>
+        <span class="flex-1 text-left">Registrations</span>
+        <svg id="reg-menu-chevron" class="chevron-icon w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <!-- "New UI" badges link to the new React entity pages, migrated in parallel for side-by-side testing.
+           Safe to drop the flex wrapper (back to a plain <a>) once React is primary for that entity. -->
+      <div id="reg-menu" class="submenu-items pl-11 mt-1 space-y-0.5">
+        <div class="flex items-center"><a href="{% url 'mysite:employee' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Employee</a><a href="{{ react_web_url }}/entities/employee" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+        <div class="flex items-center"><a href="{% url 'mysite:farmer' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Farmer</a><a href="{{ react_web_url }}/entities/farmer" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+        <div class="flex items-center"><a href="{% url 'mysite:supplier' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Supplier</a><a href="{{ react_web_url }}/entities/supplier" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+        <div class="flex items-center"><a href="{% url 'mysite:customer' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Customer</a><a href="{{ react_web_url }}/entities/customer" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+      </div>
+    </div>
 
-      <!-- Location -->
-      <li>
-        <input type="checkbox" id="loc-menu" class="peer hidden">
-        <label for="loc-menu" class="flex justify-between px-6 py-2 hover:bg-blue-50 cursor-pointer font-medium">
-          Location <span class="text-xs">&#9662;</span>
-        </label>
-        <ul class="ml-4 hidden peer-checked:block text-sm text-gray-600">
-          <li><a href="{% url "Location:office" %}" class="block px-6 py-1 hover:bg-blue-100">Officer</a></li>
-          <li><a href="{% url "Location:warehouse" %}" class="block px-6 py-1 hover:bg-blue-100">Warehouse</a></li>
-        </ul>
-      </li>
+    <!-- Products -->
+    <div>
+      <button onclick="toggleMenu('product-menu')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+               hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+        <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-cyan-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+        </span>
+        <span class="flex-1 text-left">Products</span>
+        <svg id="product-menu-chevron" class="chevron-icon w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="product-menu" class="submenu-items pl-11 mt-1 space-y-0.5">
+        <div class="flex items-center"><a href="{% url 'product_Items:products' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Product</a><a href="{{ react_web_url }}/catalog/products" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+        <div class="flex items-center"><a href="{% url 'product_Items:subcategory' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Subcategory</a><a href="{{ react_web_url }}/catalog/subcategories" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+        <div class="flex items-center"><a href="{% url 'product_Items:category' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Category</a><a href="{{ react_web_url }}/catalog/categories" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+      </div>
+    </div>
 
-    </ul>
+    <!-- UOM -->
+    <div>
+      <button onclick="toggleMenu('uom-menu')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+               hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+        <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-amber-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+          </svg>
+        </span>
+        <span class="flex-1 text-left">UOM</span>
+        <svg id="uom-menu-chevron" class="chevron-icon w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="uom-menu" class="submenu-items pl-11 mt-1 space-y-0.5">
+        <div class="flex items-center"><a href="{% url 'UOM:unit_of_measurement' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Unit of Measurement</a><a href="{{ react_web_url }}/catalog/uom" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+        <div class="flex items-center"><a href="{% url 'UOM:conversion_matrix' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Conversion Matrix</a><a href="{{ react_web_url }}/catalog/uom" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+      </div>
+    </div>
+
+    <!-- Location -->
+    <div>
+      <button onclick="toggleMenu('loc-menu')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+               hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+        <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-rose-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </span>
+        <span class="flex-1 text-left">Location</span>
+        <svg id="loc-menu-chevron" class="chevron-icon w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div id="loc-menu" class="submenu-items pl-11 mt-1 space-y-0.5">
+        <div class="flex items-center"><a href="{% url 'Location:warehouse' %}" class="sidebar-nav-link flex-1 flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-indigo-300 text-sm transition-all"><span class="w-1.5 h-1.5 rounded-full bg-slate-600 flex-shrink-0"></span>Warehouse</a><a href="{{ react_web_url }}/entities/warehouse" target="_blank" rel="noopener" class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0" title="Try the new React version of this page">New UI</a></div>
+      </div>
+    </div>
+
+    <!-- Section label -->
+    <p class="px-3 pt-5 pb-1.5 text-[10px] font-bold tracking-[0.12em] text-slate-600 uppercase">Operations</p>
+
+    <!-- Orders -->
+    <div class="flex items-center">
+      <a href="{% url 'Orders:admin_customer_orders' %}"
+         class="sidebar-nav-link flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+                hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+        <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-orange-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+          </svg>
+        </span>
+        Orders
+      </a>
+      <a href="{{ react_web_url }}/orders/all" target="_blank" rel="noopener"
+         class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-indigo-300 border border-indigo-400/40 hover:bg-indigo-400/10 flex-shrink-0"
+         title="Try the new React version of this page">
+        New UI
+      </a>
+    </div>
+
+    <!-- Settings -->
+    <a href="{% url 'settings:settings' %}"
+       class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400
+              hover:bg-white/[0.06] hover:text-indigo-200 text-sm font-medium transition-all group">
+      <span class="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-slate-500/20 flex items-center justify-center transition-colors flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </span>
+      Settings
+    </a>
+
   </nav>
+
+  <!-- ── Bottom: User ── -->
+  <div class="border-t border-white/[0.06] p-3 flex-shrink-0 bg-white/[0.02]">
+    <a href="{% url 'mysite:admin_profile' %}"
+       class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.06] transition-colors group cursor-pointer">
+      <div class="relative flex-shrink-0">
+        <img src="https://i.pravatar.cc/40?img=12" alt="Avatar"
+             class="w-8 h-8 rounded-full object-cover"
+             style="border:2px solid rgba(99,102,241,0.5)">
+        <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-indigo-400 border-2 border-[#08091a] pulse-dot"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">{{ request.session.email|default:"Admin" }}</p>
+        <p class="text-indigo-400 text-[10px] truncate font-medium">Administrator</p>
+      </div>
+      <svg class="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </a>
+    <a href="{% url 'mysite:admin_logout' %}"
+       class="mt-1 flex items-center gap-3 px-2 py-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors text-sm font-medium">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      Sign Out
+    </a>
+  </div>
+
 </aside>

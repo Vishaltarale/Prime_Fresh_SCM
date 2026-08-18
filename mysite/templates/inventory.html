@@ -1,119 +1,219 @@
 {% extends "base.html" %}
+{% block title %}Inventory | Prime Fresh SCM{% endblock %}
+{% block navbar_title %}Inventory{% endblock %}
+
+{% block extra_head %}
+<style>
+  #inv-search:focus { box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
+  .inv-row:hover { background: rgba(124,58,237,0.03); }
+  .status-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:99px; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="flex min-h-screen bg-gray-50">
-    <div class="flex-1 md:ml-64 transition-all duration-300">
-        <div class="p-6">
-            <!-- Header -->
-            <header class="bg-white border-b border-gray-200 py-4 px-6 rounded-lg mb-6">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800">Inventory Dashboard</h1>
-                </div>
-            </header>
 
-            <!-- Inventory Table -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">Current Stock</h2>
-                    <input type="text" placeholder="Search Products..." class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring focus:ring-primary" />
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead>
-                            <tr class="text-left text-gray-600 border-b">
-                                <th class="py-2 px-4">Product</th>
-                                <th class="py-2 px-4">Warehouse</th>
-                                <th class="py-2 px-4">SKU</th>
-                                <th class="py-2 px-4">Category</th>
-                                <th class="py-2 px-4">Subcategory</th>
-                                <th class="py-2 px-4">UOM</th>
-                                <th class="py-2 px-4">Quantity</th>
-                                <th class="py-2 px-4">Price Per Unit</th>
-                                <th class="py-2 px-4">Created At</th>
-                                <th class="py-2 px-4">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-700">
-                        {% for product in products %}
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="py-2 px-4">{{ product.name }}</td>
-                                <td class="py-2 px-4">{{ product.warehouse.warehouse_name }}</td>
-                                <td class="py-2 px-4">{{ product.sku }}</td>
-                                <td class="py-2 px-4">{{ product.category.name }}</td>
-                                <td class="py-2 px-4">{{ product.subcategory.name }}</td>
-                                <td class="py-2 px-4">{{ product.uom.name }}</td>
-                                <td class="py-2 px-4">{{ product.quantity_available }}</td>
-                                <td class="py-2 px-4">₹{{ product.price_per_unit }}</td>
-                                <td class="py-2 px-4">{{ product.created_at|date:"Y-m-d H:i" }}</td>
-                                <td class="py-2 px-4">
-                                    {% if product.quantity_available <= 0 %}
-                                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Out of Stock</span>
-                                    {% elif product.quantity_available < 50 %}
-                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Low Stock</span>
-                                    {% else %}
-                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Available</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Dynamic Category-wise Totals -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                {% for category, total in category_totals.items %}
-                <div class="bg-white shadow rounded-lg p-4">
-                    <h3 class="text-sm font-semibold text-gray-600">Total {{ category }} Available</h3>
-                    <p class="text-2xl font-bold text-indigo-600">{{ total }} kg</p>
-                </div>
-                {% empty %}
-                <div class="text-gray-500 text-sm">No inventory data available.</div>
-                {% endfor %}
-            </div>
-
-            <!-- Events and Chart -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-                <div class="space-y-4 bg-white shadow rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Recent Inventory Events</h3>
-                    {% for event in events %}
-                    <div class="flex items-start">
-                        <div class="{{ event.type|yesno:'bg-red-100,bg-yellow-100,bg-blue-100,bg-green-100' }} p-2 rounded-full mr-3">
-                            <i class="{{ event.icon }} text-{{ event.type }}-500"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium">{{ event.title }}</p>
-                            <p class="text-sm text-gray-500">{{ event.message }}</p>
-                            <p class="text-xs text-gray-400 mt-1">{{ event.time }}</p>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="text-sm text-gray-500">No recent activity.</p>
-                    {% endfor %}
-                </div>
-
-                {% if chart %}
-                <div class="bg-white shadow-lg rounded-2xl p-6 flex items-center justify-center">
-                    <div class="text-center">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Inventory Distribution Chart</h3>
-                        <img src="data:image/png;base64,{{ chart }}" alt="Inventory Pie Chart" class="w-64 h-64 object-contain mx-auto">
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
+<!-- ── Page Header ── -->
+<div class="relative overflow-hidden rounded-2xl p-6 mb-8 shadow-xl"
+     style="background:linear-gradient(135deg,#0f0c29 0%,#1a1045 50%,#0d1b3e 100%)">
+  <div class="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle at 70% 20%,rgba(6,182,212,0.2),transparent 60%);transform:translate(20%,-30%)"></div>
+  <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 65%);transform:translate(-25%,35%)"></div>
+  <div class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border mb-3"
+           style="background:rgba(6,182,212,0.15);border-color:rgba(103,232,249,0.3);color:#67e8f9">
+        <span class="w-1.5 h-1.5 rounded-full pulse" style="background:#67e8f9"></span>
+        Real-time Stock
+      </div>
+      <h1 class="text-white text-2xl font-bold font-display mb-1">Inventory Management</h1>
+      <p class="text-slate-400 text-sm">Track, monitor and manage your product stock levels</p>
     </div>
+    <div class="flex gap-3 flex-shrink-0">
+      <a href="{% url 'product_Items:products' %}"
+         class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all shadow-lg"
+         style="background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 4px 18px rgba(124,58,237,0.4)">
+        <i class="fas fa-plus"></i> Add Product
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Category Totals ── -->
+{% if category_totals %}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-{{ category_totals|length|default:4 }} gap-4 mb-8 pf-stagger">
+  {% for cat, total in category_totals.items %}
+  <div class="pf-stat bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:border-violet-200 transition-colors">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+           style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.1))">
+        <i class="fas fa-leaf text-violet-600 text-xs"></i>
+      </div>
+      <p class="text-xs font-semibold text-slate-500 truncate">{{ cat }}</p>
+    </div>
+    <p class="text-2xl font-bold font-display grad-text">{{ total }}</p>
+    <p class="text-[10px] text-slate-400 mt-0.5 font-medium">kg available</p>
+    <div class="mt-3 h-1 rounded-full overflow-hidden bg-slate-100">
+      <div class="h-full rounded-full" style="width:70%;background:linear-gradient(90deg,#7c3aed,#06b6d4)"></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── Stock Table ── -->
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-slate-100">
+    <h3 class="font-bold text-slate-800 flex items-center gap-2">
+      <span class="w-6 h-6 rounded-lg flex items-center justify-center"
+            style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
+        <i class="fas fa-table text-white text-xs"></i>
+      </span>
+      Current Stock
+    </h3>
+    <div class="flex items-center gap-2 rounded-xl px-3 py-2 w-full sm:w-64 border border-violet-100 bg-violet-50/50
+                focus-within:bg-white focus-within:border-violet-400 transition-all">
+      <i class="fas fa-search text-violet-400 text-xs flex-shrink-0"></i>
+      <input id="inv-search" type="text" placeholder="Search products..."
+             class="bg-transparent text-sm text-slate-700 placeholder-violet-300/70 w-full focus:outline-none"
+             oninput="filterTable(this.value)"/>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm" id="inv-table">
+      <thead>
+        <tr class="border-b border-slate-100 bg-slate-50/60">
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Product</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Warehouse</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">SKU</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Category</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">UOM</th>
+          <th class="text-right py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Qty</th>
+          <th class="text-right py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Price/Unit</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50" id="inv-tbody">
+        {% for product in products %}
+        <tr class="inv-row transition-colors">
+          <td class="py-3 px-5">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                   style="background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.08))">
+                <i class="fas fa-seedling text-violet-500 text-xs"></i>
+              </div>
+              <span class="font-medium text-slate-700">{{ product.name }}</span>
+            </div>
+          </td>
+          <td class="py-3 px-5 text-slate-500">{{ product.warehouse.warehouse_name }}</td>
+          <td class="py-3 px-5">
+            <code class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">{{ product.sku }}</code>
+          </td>
+          <td class="py-3 px-5 text-slate-500">{{ product.category.name }}</td>
+          <td class="py-3 px-5 text-slate-500">{{ product.uom.name }}</td>
+          <td class="py-3 px-5 text-right font-semibold text-slate-700">{{ product.quantity_available }}</td>
+          <td class="py-3 px-5 text-right font-semibold text-slate-700">₹{{ product.price_per_unit }}</td>
+          <td class="py-3 px-5">
+            {% if product.quantity_available <= 0 %}
+              <span class="status-badge bg-red-100 text-red-700">Out of Stock</span>
+            {% elif product.quantity_available < 50 %}
+              <span class="status-badge bg-amber-100 text-amber-700">Low Stock</span>
+            {% else %}
+              <span class="status-badge bg-emerald-100 text-emerald-700">Available</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="py-12 text-center">
+            <i class="fas fa-box-open text-slate-300 text-3xl mb-3 block"></i>
+            <p class="text-slate-400 text-sm">No products in inventory yet.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Events + Chart Row ── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <!-- Events -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100">
+      <h3 class="font-bold text-slate-800 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-lg flex items-center justify-center"
+              style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+          <i class="fas fa-bolt text-white text-xs"></i>
+        </span>
+        Recent Events
+      </h3>
+    </div>
+    <div class="p-5 space-y-3">
+      {% for event in events %}
+      <div class="flex items-start gap-3 p-3 rounded-xl border transition-all hover:shadow-sm
+        {% if event.type == 'warning' %}bg-amber-50 border-amber-100
+        {% elif event.type == 'danger' %}bg-red-50 border-red-100
+        {% else %}bg-blue-50 border-blue-100{% endif %}">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+          {% if event.type == 'warning' %}bg-amber-100
+          {% elif event.type == 'danger' %}bg-red-100
+          {% else %}bg-blue-100{% endif %}">
+          <i class="{{ event.icon }} text-xs
+            {% if event.type == 'warning' %}text-amber-600
+            {% elif event.type == 'danger' %}text-red-600
+            {% else %}text-blue-600{% endif %}"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-slate-800">{{ event.title }}</p>
+          <p class="text-xs text-slate-500 mt-0.5">{{ event.message }}</p>
+          <p class="text-[10px] text-slate-400 mt-1">{{ event.time }}</p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center py-8 text-slate-400">
+        <i class="fas fa-check-circle text-3xl text-emerald-300 mb-2 block"></i>
+        <p class="text-sm">All systems normal</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Pie Chart -->
+  {% if chart %}
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+    <div class="px-6 py-4 border-b border-slate-100">
+      <h3 class="font-bold text-slate-800 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-lg flex items-center justify-center"
+              style="background:linear-gradient(135deg,#06b6d4,#4f46e5)">
+          <i class="fas fa-chart-pie text-white text-xs"></i>
+        </span>
+        Stock Distribution
+      </h3>
+    </div>
+    <div class="flex-1 flex items-center justify-center p-6">
+      <img src="data:image/png;base64,{{ chart }}" alt="Inventory Distribution" class="max-w-xs w-full h-auto rounded-xl"/>
+    </div>
+  </div>
+  {% else %}
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center p-12">
+    <div class="text-center text-slate-400">
+      <i class="fas fa-chart-pie text-4xl text-slate-200 mb-3 block"></i>
+      <p class="text-sm">No chart data available</p>
+    </div>
+  </div>
+  {% endif %}
+
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    if (typeof sidebar !== 'undefined') {
-        sidebar.setActiveSection('inventory');
-    }
-    if (typeof navbar !== 'undefined') {
-        navbar.updatePageTitle('Inventory Management', 'Track your inventory category-wise');
-    }
-});
+  function filterTable(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('#inv-tbody tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
 </script>
 {% endblock %}

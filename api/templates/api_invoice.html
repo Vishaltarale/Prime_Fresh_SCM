@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice {{ order.id }}</title>
+  <style>
+    body { font-family: Helvetica, Arial, sans-serif; color: #1f2937; margin: 32px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 24px; }
+    h1 { text-align: center; font-size: 28px; margin-bottom: 16px; }
+    .company h2 { margin: 0; font-size: 18px; }
+    .company p { margin: 2px 0; font-size: 11px; color: #6b7280; }
+    .meta { text-align: right; font-size: 11px; color: #6b7280; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 12px; }
+    th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+    th { background: #f3f4f6; }
+    .total { text-align: right; font-size: 16px; font-weight: bold; margin-top: 12px; }
+    .footer { display: flex; justify-content: space-between; margin-top: 32px; font-size: 11px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <h1>INVOICE</h1>
+  <div class="header">
+    <div class="company">
+      <h2>SCM Company Pvt. Ltd.</h2>
+      <p>GSTIN: 29ABCDE1234F2Z5</p>
+      <p>123 Supply Street, Industrial Area, Pune, India</p>
+      <p>Phone: +91 9876543210 | Email: support@scmcompany.com</p>
+    </div>
+    <div class="meta">
+      <p>Date: {{ order.order_date }}</p>
+      <p>Invoice #: {{ order.id }}</p>
+      <p>Status: {{ order.status }} / {{ order.payment_status }}</p>
+    </div>
+  </div>
+
+  <div>
+    <strong>Bill To:</strong> {{ order.customer_name }}<br/>
+    <span>{{ order.delivery_address }}</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Product</th><th>Quantity</th><th>UOM</th><th>Price</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      {% for item in order.items %}
+      <tr>
+        <td>{{ item.product_name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.uom }}</td>
+        <td>Rs. {{ item.price|floatformat:2 }}</td>
+        <td>Rs. {{ item.line_total|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="total">Total Amount Payable: Rs. {{ order.total_amount|floatformat:2 }}</div>
+
+  <div class="footer">
+    <div>
+      <p><strong>Terms:</strong> Payment due within 15 days.</p>
+      <p>Thank you for doing business with us!</p>
+    </div>
+    <div>Authorized Signature</div>
+  </div>
+</body>
+</html>

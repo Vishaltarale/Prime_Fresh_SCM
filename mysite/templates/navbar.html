@@ -1,45 +1,153 @@
-<!-- navbar.html -->
-<header class="bg-white shadow-custom p-4 pl-[260px] fixed top-0 left-0 right-0 z-40 flex justify-between items-center">
-        <div class="flex flex-col md:flex-row md:items-center w-full justify-between">
-            <div class="md:w-1/2 mb-2 md:mb-0">
-            <h2 id="pageTitle" class="text-secondary  md:ml-5 text-lg font-semibold">Supply Chain Dashboard</h2>
-            <p id="pageSubtitle" class="text-sm md:ml-5 text-gray-500">Welcome back, {{request.session.user_email}}</p>
-            </div>
-            <div class="md:w-1/2 text-right flex items-center justify-end gap-2">
-            <button id="profileDropdownBtn" class="flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-white focus:outline-none">
-                <i class="fas fa-user"> {{ request.session.user_email|cut:"@"|slice:":-9" }}</i>
-                <span class="hidden md:inline"></span>
-            </button>
+<header id="pf-topbar" class="sticky top-0 z-10 h-16 flex items-center px-4 sm:px-6 gap-4 flex-shrink-0 shadow-sm">
 
-            <!-- Dropdown Menu -->
-            <div id="profileDropdownMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
-                <a href="{% url 'Users:user_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                <i class="fas fa-user-circle w-5 mr-2"></i> Profile
-                </a>
-                <a href="{% url 'Users:user_logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                <i class="fas fa-sign-out-alt w-5 mr-2"></i> Logout
-                </a>
-                </div>
-            </div>
+  <!-- Hamburger (mobile) -->
+  <button onclick="openSidebar()"
+    class="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+    <i class="fas fa-bars text-sm"></i>
+  </button>
+
+  <!-- Page title area -->
+  <div class="hidden sm:flex items-center gap-2 text-sm">
+    <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
+         style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(79,70,229,0.06))">
+      <i class="fas fa-seedling text-violet-500 text-xs"></i>
+      <span class="text-violet-600 font-semibold text-xs">Prime Fresh</span>
+    </div>
+    <i class="fas fa-chevron-right text-slate-300 text-xs"></i>
+    <span class="text-slate-700 font-semibold text-sm">{% block navbar_title %}Dashboard{% endblock %}</span>
+  </div>
+
+  <div class="flex-1"></div>
+
+  <!-- Search -->
+  <div class="hidden md:flex items-center gap-2 rounded-xl px-3 py-2 w-56 lg:w-72 transition-all
+              bg-violet-50/60 border border-violet-100
+              focus-within:bg-white focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.12)]">
+    <i class="fas fa-search text-violet-400 text-xs flex-shrink-0"></i>
+    <input type="text" placeholder="Quick search..."
+           class="bg-transparent text-sm text-slate-700 placeholder-violet-300/70 w-full focus:outline-none"/>
+  </div>
+
+  <!-- Notifications -->
+  <div class="relative">
+    <button id="pf-notif-btn" onclick="toggleNotif()"
+      class="relative p-2 rounded-xl text-slate-500 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+      <i class="fas fa-bell text-sm"></i>
+      <span class="absolute top-1 right-1 w-2 h-2 rounded-full border-2 border-white pulse"
+            style="background:#7c3aed"></span>
+    </button>
+    <div id="pf-notif-drop"
+         class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-violet-100 z-50 overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3.5 border-b border-slate-100">
+        <h3 class="font-bold text-slate-800 text-sm">Notifications</h3>
+        <span class="text-xs px-2.5 py-1 rounded-full font-semibold text-white"
+              style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">3 new</span>
+      </div>
+      <div class="divide-y divide-slate-50 max-h-60 overflow-y-auto">
+        <div class="flex items-start gap-3 px-4 py-3 hover:bg-violet-50/50 transition-colors cursor-pointer">
+          <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fas fa-box text-violet-600 text-xs"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-slate-800">New order received</p>
+            <p class="text-xs text-slate-500 mt-0.5">Order #1049 placed successfully</p>
+            <p class="text-[10px] text-slate-400 mt-1">5 min ago</p>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0 mt-2"></span>
         </div>
+        <div class="flex items-start gap-3 px-4 py-3 hover:bg-violet-50/50 transition-colors cursor-pointer">
+          <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fas fa-triangle-exclamation text-amber-600 text-xs"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-slate-800">Low stock alert</p>
+            <p class="text-xs text-slate-500 mt-0.5">3 products below threshold</p>
+            <p class="text-[10px] text-slate-400 mt-1">1 hour ago</p>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 mt-2"></span>
+        </div>
+        <div class="flex items-start gap-3 px-4 py-3 hover:bg-violet-50/50 transition-colors cursor-pointer">
+          <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fas fa-check text-emerald-600 text-xs"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-slate-800">Delivery completed</p>
+            <p class="text-xs text-slate-500 mt-0.5">Order #1042 delivered</p>
+            <p class="text-[10px] text-slate-400 mt-1">2 hours ago</p>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 mt-2"></span>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- User dropdown -->
+  <div class="relative">
+    <button id="pf-user-btn" onclick="toggleUser()"
+      class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-violet-50 transition-colors group">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+           style="background:linear-gradient(135deg,#7c3aed,#06b6d4);">
+        {{ request.session.user_email|first|upper|default:"U" }}
+      </div>
+      <div class="hidden sm:block text-left">
+        <p class="text-xs font-bold text-slate-700 leading-tight truncate max-w-[120px]">
+          {{ request.session.user_email|default:"User" }}
+        </p>
+        <p class="text-[10px] text-violet-500 font-semibold">SCM User</p>
+      </div>
+      <i id="pf-user-chev" class="fas fa-chevron-down text-slate-400 group-hover:text-violet-500 transition-all text-xs"></i>
+    </button>
+
+    <div id="pf-user-drop"
+         class="hidden absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-violet-100 z-50 overflow-hidden py-1">
+      <div class="px-4 py-3 border-b border-slate-100"
+           style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(6,182,212,0.04))">
+        <p class="text-sm font-bold text-slate-800 truncate">{{ request.session.user_email|default:"User" }}</p>
+        <p class="text-xs font-semibold" style="color:#7c3aed">SCM User</p>
+      </div>
+      <div class="py-1">
+        <a href="{% url 'Users:user_profile' %}"
+           class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-violet-50 hover:text-violet-700 transition-colors">
+          <i class="fas fa-user w-4 text-center text-violet-400"></i> My Profile
+        </a>
+        <a href="{% url 'settings:settings' %}"
+           class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-violet-50 hover:text-violet-700 transition-colors">
+          <i class="fas fa-gear w-4 text-center text-violet-400"></i> Settings
+        </a>
+      </div>
+      <div class="border-t border-slate-100 py-1">
+        <a href="{% url 'Users:user_logout' %}"
+           class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-semibold">
+          <i class="fas fa-right-from-bracket w-4 text-center"></i> Sign Out
+        </a>
+      </div>
+    </div>
+  </div>
+
 </header>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const profileBtn = document.getElementById('profileDropdownBtn');
-    const dropdownMenu = document.getElementById('profileDropdownMenu');
-
-    profileBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('#profileDropdownBtn')) {
-        dropdownMenu.classList.add('hidden');
-      }
-    });
+  function toggleNotif() {
+    document.getElementById('pf-user-drop')?.classList.add('hidden');
+    document.getElementById('pf-notif-drop').classList.toggle('hidden');
+  }
+  function toggleUser() {
+    document.getElementById('pf-notif-drop')?.classList.add('hidden');
+    const d = document.getElementById('pf-user-drop');
+    const c = document.getElementById('pf-user-chev');
+    d.classList.toggle('hidden');
+    c?.classList.toggle('rotate-180');
+  }
+  document.addEventListener('click', function(e) {
+    const nb = document.getElementById('pf-notif-btn');
+    const nd = document.getElementById('pf-notif-drop');
+    const ub = document.getElementById('pf-user-btn');
+    const ud = document.getElementById('pf-user-drop');
+    const c  = document.getElementById('pf-user-chev');
+    if (nd && nb && !nd.contains(e.target) && !nb.contains(e.target)) nd.classList.add('hidden');
+    if (ud && ub && !ud.contains(e.target) && !ub.contains(e.target)) {
+      ud.classList.add('hidden');
+      c?.classList.remove('rotate-180');
+    }
   });
 </script>

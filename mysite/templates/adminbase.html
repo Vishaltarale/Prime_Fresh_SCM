@@ -2,23 +2,303 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SCM Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin{% endblock %} | Prime Fresh SCM</title>
+
+  <!-- Google Fonts: Inter + Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --brand:       #6366f1;   /* indigo-500  */
+      --brand-dark:  #4f46e5;   /* indigo-600  */
+      --brand-light: #e0e7ff;   /* indigo-100  */
+      --accent:      #8b5cf6;   /* violet-500  */
+      --sidebar-bg:  #08091a;
+      --sidebar-bg2: #0e1030;
+      --brand-glow:  rgba(99,102,241,0.18);
+    }
+
+    /* ── Scrollbar ── */
+    * { scrollbar-width: thin; scrollbar-color: #6366f1 #1e2035; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f2ff; }
+    ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 99px; }
+    #sidebar { scrollbar-color: #4338ca #0e1030; }
+    #sidebar::-webkit-scrollbar-track { background: #0e1030; }
+    #sidebar::-webkit-scrollbar-thumb { background: #4338ca; }
+
+    /* ── Sidebar accordion ── */
+    .submenu-items {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease;
+      opacity: 0;
+    }
+    .submenu-items.open { max-height: 600px; opacity: 1; }
+
+    .chevron-icon { transition: transform 0.3s ease; }
+    .chevron-icon.rotated { transform: rotate(180deg); }
+
+    /* ── Sidebar active left bar ── */
+    .sidebar-nav-link {
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .sidebar-nav-link::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 0;
+      background: linear-gradient(180deg, #818cf8, #a78bfa);
+      border-radius: 0 3px 3px 0;
+      transition: height 0.25s ease;
+    }
+    .sidebar-nav-link:hover::before,
+    .sidebar-nav-link.active::before { height: 65%; }
+
+    /* ── Page entrance animation ── */
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page-enter { animation: pageIn 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* ── Card stagger ── */
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(22px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)   scale(1);    }
+    }
+    .card-stagger > * { animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+    .card-stagger > *:nth-child(1) { animation-delay: 0.04s; }
+    .card-stagger > *:nth-child(2) { animation-delay: 0.09s; }
+    .card-stagger > *:nth-child(3) { animation-delay: 0.14s; }
+    .card-stagger > *:nth-child(4) { animation-delay: 0.19s; }
+    .card-stagger > *:nth-child(5) { animation-delay: 0.24s; }
+    .card-stagger > *:nth-child(6) { animation-delay: 0.29s; }
+    .card-stagger > *:nth-child(7) { animation-delay: 0.34s; }
+    .card-stagger > *:nth-child(8) { animation-delay: 0.39s; }
+
+    /* ── Stat card hover lift ── */
+    .stat-card { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+    .stat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(99,102,241,0.14);
+    }
+
+    /* ── Mobile sidebar transition ── */
+    #sidebar { transition: transform 0.32s cubic-bezier(0.4,0,0.2,1); }
+
+    /* ── Toast notifications ── */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(48px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .toast {
+      animation: toastIn 0.35s cubic-bezier(0.16,1,0.3,1);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+      display: flex; align-items: center; gap: 10px;
+      pointer-events: all;
+      max-width: 340px;
+    }
+    .toast-success  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .toast-error,
+    .toast-danger   { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .toast-critical {
+      background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+      box-shadow: 0 8px 32px rgba(185,28,28,0.4), 0 0 0 1px rgba(255,255,255,0.15) inset;
+      animation: toastIn 0.35s cubic-bezier(0.16,1,0.3,1), toastCriticalPulse 1.6s ease-in-out infinite 0.35s;
+    }
+    @keyframes toastCriticalPulse {
+      0%,100% { box-shadow: 0 8px 32px rgba(185,28,28,0.4), 0 0 0 1px rgba(255,255,255,0.15) inset; }
+      50%     { box-shadow: 0 8px 32px rgba(185,28,28,0.7), 0 0 0 1px rgba(255,255,255,0.25) inset; }
+    }
+    .toast-info     { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .toast-warning  { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    /* ── Input focus ring – indigo ── */
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
+      border-color: #6366f1 !important;
+    }
+
+    /* ── Table row hover ── */
+    .data-table tbody tr { transition: background-color 0.15s ease; }
+
+    /* ── Pulse dot ── */
+    @keyframes pulseDot {
+      0%,100% { transform: scale(1);   opacity: 1;   }
+      50%      { transform: scale(1.5); opacity: 0.6; }
+    }
+    .pulse-dot { animation: pulseDot 2.2s ease-in-out infinite; }
+
+    /* ── Glassmorphism navbar ── */
+    .glass-nav {
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* ── Gradient text utility ── */
+    .gradient-text {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Sidebar gradient overlay ── */
+    .sidebar-gradient {
+      background: linear-gradient(180deg, #08091a 0%, #0e1030 60%, #0a0d28 100%);
+    }
+
+    /* ── Brand button ── */
+    .btn-brand {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      transition: all 0.22s ease;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    }
+    .btn-brand:hover {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      box-shadow: 0 8px 28px rgba(99,102,241,0.45);
+      transform: translateY(-2px);
+    }
+    .btn-brand:active { transform: translateY(0); }
+  </style>
 </head>
-<body class="flex bg-gray-100 min-h-screen font-sans">
 
-  {% include 'adminsidebar.html' %}
+<body class="bg-[#f5f6ff] font-sans antialiased text-slate-800">
 
-  <div class="flex-1">
-    {% include 'adminnavbar.html' %}
+  <!-- Mobile overlay -->
+  <div id="sidebarOverlay"
+       class="fixed inset-0 bg-black/65 z-20 hidden lg:hidden backdrop-blur-sm"
+       onclick="closeSidebar()"></div>
+
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    {% include 'adminsidebar.html' %}
 
     <!-- Main content -->
-    <main class="p-6">
-      {% block content %}
-      <!-- Page content will go here -->
-      {% endblock %}
-    </main>
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+      {% include 'adminnavbar.html' %}
+
+      <main class="flex-1 overflow-y-auto bg-[#f5f6ff] page-enter">
+        <div class="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+
+    </div>
   </div>
 
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <script>
+    /* ── Sidebar open/close ── */
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebarOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      if (window.innerWidth < 1024) {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+
+    /* ── Accordion ── */
+    function toggleMenu(menuId) {
+      const submenu = document.getElementById(menuId);
+      const chevron = document.getElementById(menuId + '-chevron');
+      const isOpen  = submenu.classList.contains('open');
+
+      document.querySelectorAll('.submenu-items.open').forEach(el => {
+        if (el.id !== menuId) {
+          el.classList.remove('open');
+          const ch = document.getElementById(el.id + '-chevron');
+          if (ch) ch.classList.remove('rotated');
+        }
+      });
+
+      submenu.classList.toggle('open', !isOpen);
+      if (chevron) chevron.classList.toggle('rotated', !isOpen);
+    }
+
+    /* ── Active link ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      const path = window.location.pathname;
+      document.querySelectorAll('.sidebar-nav-link[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href !== '/' && path.startsWith(href)) {
+          link.classList.add('active');
+          link.style.background = 'rgba(99,102,241,0.14)';
+          link.style.color = '#a5b4fc';
+          const parent = link.closest('.submenu-items');
+          if (parent) {
+            parent.classList.add('open');
+            const ch = document.getElementById(parent.id + '-chevron');
+            if (ch) ch.classList.add('rotated');
+          }
+        }
+      });
+    });
+
+    /* ── Toast ── */
+    function showToast(message, type = 'success', duration = 3500) {
+      const icons = { success: '✓', error: '✕', danger: '✕', critical: '⛔', info: 'ℹ', warning: '⚠' };
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.innerHTML = `<span style="font-size:17px;font-weight:700">${icons[type]||'ℹ'}</span><span>${message}</span>`;
+      document.getElementById('toast-container').appendChild(el);
+      const life = type === 'critical' ? Math.max(duration, 5500) : duration;
+      setTimeout(() => {
+        el.style.opacity = '0'; el.style.transform = 'translateX(40px)';
+        el.style.transition = 'all 0.3s ease';
+        setTimeout(() => el.remove(), 300);
+      }, life);
+    }
+
+    /* ── Flash django messages as toasts on load ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      {% for message in messages %}
+        showToast("{{ message|escapejs }}", "{% if 'critical' in message.tags %}critical{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% elif message.tags == 'success' %}success{% else %}info{% endif %}");
+      {% endfor %}
+    });
+  </script>
 </body>
 </html>

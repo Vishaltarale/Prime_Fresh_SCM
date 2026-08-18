@@ -1,54 +1,123 @@
-<!-- Mobile Toggle Button -->
-<button class="md:hidden fixed top-4 left-4 z-[1001] bg-primary text-white p-2 rounded-md" id="sidebarToggle" aria-label="Toggle sidebar">
-  <i class="fas fa-bars"></i>
-</button>
+<aside id="pf-sidebar" class="fixed inset-y-0 left-0 z-30 flex flex-col overflow-hidden border-r border-white/[0.04]">
 
-<!-- Sidebar -->
-<aside id="sidebar" class="bg-sidebar-bg min-h-screen fixed top-0 left-0 w-[260px] transition-sidebar duration-300 ease-in-out z-[1000] overflow-y-auto md:translate-x-0 -translate-x-full">
-  <div class="p-6 border-b border-white/10">
-    <h4 class="text-white font-semibold flex items-center gap-2">
-      <i class="fas fa-cube"></i> SCM Dashboard
-    </h4>
+  <!-- Glow orbs -->
+  <div class="absolute top-0 left-0 w-56 h-56 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle at 30% 20%, rgba(124,58,237,0.22), transparent 70%);"></div>
+  <div class="absolute bottom-1/3 right-0 w-36 h-36 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle, rgba(6,182,212,0.12), transparent 70%);"></div>
+
+  <!-- Logo -->
+  <div class="relative flex items-center gap-3 px-5 py-5 border-b border-white/[0.07] flex-shrink-0">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg"
+         style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
+      <i class="fas fa-seedling text-white text-sm"></i>
+    </div>
+    <div>
+      <p class="text-white font-bold text-sm tracking-wide font-display leading-tight">Prime Fresh</p>
+      <p class="text-violet-400 text-[10px] font-semibold tracking-widest uppercase">Supply Chain</p>
+    </div>
+    <button onclick="closeSidebar()"
+      class="ml-auto p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/10 lg:hidden transition-colors">
+      <i class="fas fa-times text-sm"></i>
+    </button>
   </div>
-  <nav class="py-4">
-    <ul class="flex flex-col space-y-2">
-      <li><a href="{% url 'mysite:index' %}" class="nav-link"><i class="fas fa-boxes w-5 mr-2.5 text-center"></i> Dashboard</a></li>
-      <li><a href="{% url 'mysite:inventory' %}" class="nav-link"><i class="fas fa-warehouse w-5 mr-2.5 text-center"></i> Inventory</a></li>
-      <li><a href="{% url 'Orders:Order_dash' %}" class="nav-link"><i class="fas fa-shopping-cart w-5 mr-2.5 text-center"></i> Orders</a></li>
-      <li><a href="{% url "mysite:supplier_dash" %}" class="nav-link"><i class="fas fa-truck w-5 mr-2.5 text-center"></i> Suppliers</a></li>
-      <li><a href="{% url 'Location:location_dash' %}" class="nav-link"><i class="fas fa-warehouse w-5 mr-2.5 text-center"></i> Warehouse</a></li>
-      <li><a href="{% url 'Location:reports' %}" class="nav-link"><i class="fas fa-chart-bar w-5 mr-2.5 text-center"></i> Reports</a></li>
-      <li><a href="{% url 'Settings:settings' %}" class="nav-link"><i class="fas fa-cog w-5 mr-2.5 text-center"></i> Settings</a></li>
-    </ul>
+
+  <!-- Navigation -->
+  <nav class="relative flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+
+    <p class="px-3 pb-2 text-[10px] font-bold tracking-[0.12em] text-slate-600 uppercase">Main</p>
+
+    <div class="flex items-center">
+      <a href="{% url 'mysite:index' %}" class="pf-nav-link flex-1">
+        <span class="pf-nav-icon"><i class="fas fa-chart-pie"></i></span>
+        Dashboard
+      </a>
+      <a href="{{ react_web_url }}/" target="_blank" rel="noopener"
+         class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-violet-300 border border-violet-400/40 hover:bg-violet-400/10 flex-shrink-0"
+         title="Try the new React version of this page">
+        New UI
+      </a>
+    </div>
+
+    <a href="{% url 'mysite:inventory' %}" class="pf-nav-link">
+      <span class="pf-nav-icon"><i class="fas fa-boxes-stacked"></i></span>
+      Inventory
+    </a>
+
+    <!-- "New UI" badge links to the new React GRN module, migrated in parallel for side-by-side testing.
+         Safe to remove this whole wrapper (reverting to the plain pf-nav-link above) once React is primary. -->
+    <div class="flex items-center">
+      <a href="{% url 'mysite:grn_list' %}" class="pf-nav-link flex-1">
+        <span class="pf-nav-icon"><i class="fas fa-file-circle-check"></i></span>
+        GRN
+      </a>
+      <a href="{{ react_web_url }}/grn" target="_blank" rel="noopener"
+         class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-violet-300 border border-violet-400/40 hover:bg-violet-400/10 flex-shrink-0"
+         title="Try the new React version of this page">
+        New UI
+      </a>
+    </div>
+
+    <div class="flex items-center">
+      <a href="{% url 'Orders:Order_dash' %}" class="pf-nav-link flex-1">
+        <span class="pf-nav-icon"><i class="fas fa-cart-shopping"></i></span>
+        Orders
+      </a>
+      <a href="{{ react_web_url }}/orders" target="_blank" rel="noopener"
+         class="mr-2 text-[9px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded-full text-violet-300 border border-violet-400/40 hover:bg-violet-400/10 flex-shrink-0"
+         title="Try the new React version of this page">
+        New UI
+      </a>
+    </div>
+
+    <p class="px-3 pt-4 pb-2 text-[10px] font-bold tracking-[0.12em] text-slate-600 uppercase">Operations</p>
+
+    <a href="{% url 'mysite:supplier_dash' %}" class="pf-nav-link">
+      <span class="pf-nav-icon"><i class="fas fa-truck"></i></span>
+      Suppliers
+    </a>
+
+    <a href="{% url 'Location:location_dash' %}" class="pf-nav-link">
+      <span class="pf-nav-icon"><i class="fas fa-warehouse"></i></span>
+      Warehouse
+    </a>
+
+    <a href="{% url 'Location:reports' %}" class="pf-nav-link">
+      <span class="pf-nav-icon"><i class="fas fa-chart-bar"></i></span>
+      Reports
+    </a>
+
+    <p class="px-3 pt-4 pb-2 text-[10px] font-bold tracking-[0.12em] text-slate-600 uppercase">System</p>
+
+    <a href="{% url 'settings:settings' %}" class="pf-nav-link">
+      <span class="pf-nav-icon"><i class="fas fa-gear"></i></span>
+      Settings
+    </a>
+
   </nav>
+
+  <!-- Bottom user strip -->
+  <div class="border-t border-white/[0.06] p-3 flex-shrink-0">
+    <a href="{% url 'Users:user_profile' %}"
+       class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.06] transition-colors group cursor-pointer">
+      <div class="relative flex-shrink-0">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+             style="background:linear-gradient(135deg,#7c3aed,#06b6d4);">
+          {{ request.session.user_email|first|upper|default:"U" }}
+        </div>
+        <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0f0c29] pulse"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">{{ request.session.user_email|default:"User" }}</p>
+        <p class="text-violet-400 text-[10px] font-medium">SCM User</p>
+      </div>
+      <i class="fas fa-chevron-right text-slate-600 group-hover:text-violet-400 transition-colors text-xs"></i>
+    </a>
+    <a href="{% url 'Users:user_logout' %}"
+       class="mt-1 flex items-center gap-3 px-2 py-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors text-sm font-medium">
+      <i class="fas fa-right-from-bracket w-4 text-center"></i>
+      Sign Out
+    </a>
+  </div>
+
 </aside>
-
-<!-- Tailwind CSS Styling -->
-<style type="text/tailwindcss">
-  @layer components {
-    .nav-link {
-      @apply text-white/80 py-3 px-6 flex items-center no-underline transition-all duration-300 ease-in-out bg-transparent w-full;
-    }
-    .nav-link:hover {
-      @apply bg-sidebar-hover text-white;
-    }
-    .nav-link.active {
-      @apply bg-primary text-white;
-    }
-    .nav-link:focus {
-      @apply outline outline-2 outline-primary outline-offset-2;
-    }
-  }
-</style>
-
-<!-- Sidebar Toggle Script -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-
-    sidebarToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('-translate-x-full');
-    });
-  });
-</script>

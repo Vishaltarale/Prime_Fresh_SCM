@@ -218,9 +218,11 @@ def Order_update(request):
                     product.quantity_available -= item["quantity"]
                     product.save()
 
+            messages.success(request, "Order updated successfully.")
             return redirect("Orders:admin_customer_orders")
 
         except ValidationError as ve:
+            messages.error(request, str(ve))
             order = Order.objects(id=request.GET.get("id")).first()
             customers = Customer.objects()
             products = Product.objects()
@@ -242,7 +244,12 @@ def Order_update(request):
         
 def orderdelete(request):
     id = request.GET['id']
-    Order.objects(id=id).first().delete()
+    order = Order.objects(id=id).first()
+    if order:
+        order.delete()
+        messages.error(request, "Order deleted permanently.", extra_tags="critical")
+    else:
+        messages.error(request, "Order not found.")
     return redirect("Orders:Order_dash")
 
 #ADMIN_CUSTOMER_ORDERS

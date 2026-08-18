@@ -1,4 +1,5 @@
 from django.shortcuts import render,redirect
+from django.contrib import messages
 from UOM.models import UOM,UOMConversionMatrix
 
 # Create your views here.
@@ -10,8 +11,13 @@ def uom_register(request):
             name = request.POST.get("name").upper().strip()
             description = request.POST.get("description")
 
+            if UOM.objects(name=name).first():
+                messages.warning(request, f"UOM '{name}' already exists.")
+                return redirect("UOM:unit_of_measurement")
+
             uom = UOM(name=name, description=description)
             uom.save()
+            messages.success(request, f"UOM '{name}' added successfully.")
 
             return redirect("UOM:conversion_matrix")
     return redirect("UOM:unit_of_measurement")
@@ -27,7 +33,7 @@ def conversion_register(request):
             factor = float(request.POST.get("factor"))
 
             if from_uom_id == to_uom_id:
-                # messages.warning(request, "From and To units must be different.")
+                messages.warning(request, "From and To units must be different.")
                 return redirect("UOM:conversion_register")
 
             from_uom = UOM.objects.get(id=from_uom_id)
@@ -38,11 +44,11 @@ def conversion_register(request):
             if existing:
                 existing.factor = factor  # update factor if needed
                 existing.save()
-                # messages.info(request, "Conversion updated successfully.")
+                messages.info(request, f"Conversion {from_uom.name} → {to_uom.name} updated successfully.")
             else:
                 conversion = UOMConversionMatrix(from_uom=from_uom, to_uom=to_uom, factor=factor)
                 conversion.save()
-                # messages.success(request, "Conversion added successfully.")
+                messages.success(request, f"Conversion {from_uom.name} → {to_uom.name} added successfully.")
 
             return redirect("UOM:conversion_register")
 

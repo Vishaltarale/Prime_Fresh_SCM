@@ -9,6 +9,10 @@ register = template.Library()
 def get_attribute(obj, attr):
     return getattr(obj, attr, '')
 
+@register.filter
+def humanize_field(value):
+    return str(value).replace('_', ' ')
+
 def login_required_custom(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):

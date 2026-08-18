@@ -7,7 +7,11 @@ class ProductItem(EmbeddedDocument):
     product_name = StringField(required=True)
     quantity = IntField(required=True)
     price = FloatField(required=True)
-    uom = StringField(required=True) 
+    uom = StringField(required=True)
+
+    @property
+    def line_total(self):
+        return self.quantity * self.price
 
 
 from Location.models import Warehouse

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ grn.grn_number }} | Prime Fresh SCM{% endblock %}
+{% block navbar_title %}GRN Detail{% endblock %}
+
+{% block content %}
+
+<!-- ── Header ── -->
+<div class="relative overflow-hidden rounded-2xl p-6 mb-8 shadow-xl"
+     style="background:linear-gradient(135deg,#0f0c29 0%,#1a1045 50%,#0d1b3e 100%)">
+  <div class="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
+       style="background:radial-gradient(circle at 70% 20%,rgba(16,185,129,0.18),transparent 60%);transform:translate(20%,-30%)"></div>
+  <div class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-3 mb-2">
+        <span class="font-mono text-sm font-bold px-3 py-1 rounded-lg"
+              style="background:rgba(124,58,237,0.25);color:#c4b5fd">{{ grn.grn_number }}</span>
+        {% if grn.status == 'Draft' %}
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">Draft</span>
+        {% elif grn.status == 'Confirmed' %}
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">Confirmed</span>
+        {% else %}
+          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-400/20 text-red-300 border border-red-400/30">Rejected</span>
+        {% endif %}
+      </div>
+      <p class="text-slate-400 text-sm">Received on {{ grn.grn_date|date:"d M Y, H:i" }} by {{ grn.received_by }}</p>
+    </div>
+    <div class="flex gap-3 flex-shrink-0">
+      {% if grn.status == 'Draft' %}
+      <form method="POST" action="{% url 'mysite:grn_confirm' grn.id %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all shadow-lg"
+                style="background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 4px 16px rgba(16,185,129,0.35)">
+          <i class="fas fa-check"></i> Confirm & Update Stock
+        </button>
+      </form>
+      <form method="POST" action="{% url 'mysite:grn_reject' grn.id %}">
+        {% csrf_token %}
+        <button type="submit"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-red-400/40 text-red-300 hover:bg-red-500/15 transition-all">
+          <i class="fas fa-times"></i> Reject
+        </button>
+      </form>
+      {% endif %}
+      <a href="{% url 'mysite:grn_list' %}"
+         class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-white/20 text-white/70 hover:bg-white/10 transition-all">
+        <i class="fas fa-arrow-left text-xs"></i> Back
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Meta Cards ── -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 pf-stagger">
+
+  <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Source Type</p>
+    <div class="flex items-center gap-2 mt-2">
+      {% if grn.source_type == 'Supplier' %}
+      <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-100">
+        <i class="fas fa-truck text-blue-600 text-xs"></i>
+      </span>
+      <span class="font-semibold text-slate-700">Supplier</span>
+      {% else %}
+      <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-100">
+        <i class="fas fa-seedling text-emerald-600 text-xs"></i>
+      </span>
+      <span class="font-semibold text-slate-700">Farmer</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">From</p>
+    <p class="font-semibold text-slate-700 mt-2 text-sm">
+      {{ grn.supplier.supplier_name|default:grn.farmer.full_name|default:"—" }}
+    </p>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Warehouse</p>
+    <p class="font-semibold text-slate-700 mt-2 text-sm">{{ grn.warehouse.warehouse_name|default:"—" }}</p>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+    <p class="font-bold text-xl grad-text mt-1">₹{{ grn.total_amount|floatformat:2 }}</p>
+  </div>
+
+</div>
+
+<!-- ── Line Items ── -->
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-slate-100">
+    <h3 class="font-bold text-slate-800 flex items-center gap-2">
+      <span class="w-6 h-6 rounded-lg flex items-center justify-center"
+            style="background:linear-gradient(135deg,#06b6d4,#4f46e5)">
+        <i class="fas fa-list text-white text-xs"></i>
+      </span>
+      Line Items ({{ grn.items|length }})
+    </h3>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-100 bg-slate-50/60">
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">#</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Product</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">UOM</th>
+          <th class="text-right py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Ordered</th>
+          <th class="text-right py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Received</th>
+          <th class="text-right py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Unit Price</th>
+          <th class="text-right py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Line Total</th>
+          <th class="text-left py-3 px-5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Remarks</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        {% for item in grn.items %}
+        <tr class="hover:bg-violet-50/20 transition-colors">
+          <td class="py-3 px-5 text-slate-400 text-xs">{{ forloop.counter }}</td>
+          <td class="py-3 px-5">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                   style="background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(6,182,212,.07))">
+                <i class="fas fa-seedling text-violet-500 text-xs"></i>
+              </div>
+              <span class="font-medium text-slate-700">{{ item.product.name|default:"—" }}</span>
+            </div>
+          </td>
+          <td class="py-3 px-5 text-slate-500">{{ item.uom|default:"—" }}</td>
+          <td class="py-3 px-5 text-right text-slate-700">{{ item.ordered_qty }}</td>
+          <td class="py-3 px-5 text-right font-semibold text-slate-800">{{ item.received_qty }}</td>
+          <td class="py-3 px-5 text-right text-slate-700">₹{{ item.unit_price|floatformat:2 }}</td>
+          <td class="py-3 px-5 text-right font-semibold" style="color:#7c3aed">
+            ₹{% widthratio item.received_qty 1 item.unit_price %}
+          </td>
+          <td class="py-3 px-5 text-slate-400 text-xs">{{ item.remarks|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="py-8 text-center text-slate-400 text-sm">No line items.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="bg-slate-50/60 border-t-2 border-slate-200">
+          <td colspan="6" class="py-3 px-5 text-right font-bold text-slate-700 text-sm">Grand Total</td>
+          <td class="py-3 px-5 text-right font-bold text-lg" style="color:#7c3aed">
+            ₹{{ grn.total_amount|floatformat:2 }}
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- ── Notes ── -->
+{% if grn.notes %}
+<div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+  <h3 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-2">
+    <i class="fas fa-sticky-note text-violet-400 text-xs"></i> Notes
+  </h3>
+  <p class="text-sm text-slate-600">{{ grn.notes }}</p>
+</div>
+{% endif %}
+
+{% endblock %}

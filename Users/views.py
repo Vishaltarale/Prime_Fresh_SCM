@@ -10,20 +10,27 @@ def user_register(request):
         full_name = request.POST.get("full_name")
         email = request.POST.get("email")
         phone = request.POST.get("phone")
+        role = request.POST.get("role")
         password1 = request.POST.get("password1")
         password2 = request.POST.get("password2")
 
-        if password1 == password2:
-            user = User1(
-                full_name=full_name,
-                email=email,
-                phone=phone,
-                password=password1
-            )
-            user.save()
-            return redirect('Users:login_user')  # Redirect to login page after success
+        if password1 != password2:
+            return render(request, "user_reg.html", {"error": "Passwords do not match."})
 
-    return render(request, "user_register.html")
+        if User1.objects(email=email).first():
+            return render(request, "user_reg.html", {"error": "An account with this email already exists."})
+
+        user = User1(
+            full_name=full_name,
+            email=email,
+            phone=phone,
+            role=role,
+            password=password1
+        )
+        user.save()
+        return redirect('Users:login_user')
+
+    return render(request, "user_reg.html")
 
 #USER_LOGIN
 def login_user(request):
@@ -34,14 +41,13 @@ def login_user_save(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # Authenticate user from MongoDB
         user = User1.objects(email=email, password=password).first()
 
         if user:
             request.session['user_email'] = user.email
-            return redirect('mysite:index') 
+            return redirect('mysite:index')
 
-        return redirect("Users:login_user")
+        return render(request, "user_login.html", {"error": "Invalid email or password."})
 
     return render(request, "user_login.html")
 
@@ -51,5 +57,10 @@ def user_logout(request):
     return redirect("Users:login_user")
 
 def user_profile(request):
-    data = User1.objects.all()
-    return render(request,'user_profile.html',{'data':data})
+    email = request.session.get('user_email')
+    if not email:
+        return redirect('Users:login_user')
+    user = User1.objects(email=email).first()
+    if not user:
+        return redirect('Users:login_user')
+    return render(request, 'user_profile.html', {'user': user})

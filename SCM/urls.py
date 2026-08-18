@@ -20,6 +20,7 @@ from django_mongoengine import mongo_admin
 
 urlpatterns = [
     path('mongo-admin/', mongo_admin.site.urls),
+    path('api/', include('api.urls')),
     path('',include('mysite.urls')),
     path('Orders/',include('Orders.urls')),
     path('Customer/',include('Customer.urls')),

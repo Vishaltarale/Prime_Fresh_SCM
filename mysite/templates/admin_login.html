@@ -1,63 +1,394 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | Prime Fresh SCM</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Animated gradient ── */
+    @keyframes bgShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    .fade-in-up {
-      animation: fadeInUp 0.5s ease-out;
+    .animated-bg {
+      background: linear-gradient(-45deg, #08091a, #0e1030, #1e1b4b, #2d1b69, #0f0c29, #130f35);
+      background-size: 400% 400%;
+      animation: bgShift 14s ease infinite;
+    }
+
+    /* ── Floating glow orbs ── */
+    @keyframes orb1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(40px,-30px) scale(1.1); }
+      66%      { transform: translate(-20px,20px) scale(0.95); }
+    }
+    @keyframes orb2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(-50px,30px) scale(1.15); }
+    }
+    @keyframes orb3 {
+      0%,100% { transform: translate(0,0); }
+      50%      { transform: translate(20px,-40px); }
+    }
+    .orb { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+    .orb-1 { width: 400px; height: 400px; top: -120px; right: -80px;
+      background: radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%);
+      animation: orb1 10s ease-in-out infinite; }
+    .orb-2 { width: 280px; height: 280px; bottom: 5%; left: -80px;
+      background: radial-gradient(circle, rgba(139,92,246,0.25), transparent 70%);
+      animation: orb2 13s ease-in-out infinite; }
+    .orb-3 { width: 180px; height: 180px; top: 45%; left: 38%;
+      background: radial-gradient(circle, rgba(167,139,250,0.18), transparent 70%);
+      animation: orb3 8s ease-in-out infinite; }
+    .orb-4 { width: 100px; height: 100px; top: 18%; right: 25%;
+      background: radial-gradient(circle, rgba(196,181,253,0.2), transparent 70%);
+      animation: orb1 6s ease-in-out infinite reverse; }
+
+    /* ── Dot grid ── */
+    .dot-grid {
+      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    /* ── Card slide-up ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(48px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+    .card-enter { animation: slideUp 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* ── Logo bounce ── */
+    @keyframes logoBounce {
+      from { opacity: 0; transform: scale(0.6) rotate(-15deg); }
+      to   { opacity: 1; transform: scale(1)   rotate(0deg); }
+    }
+    .logo-enter { animation: logoBounce 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.12s both; }
+
+    /* ── Feature items stagger ── */
+    @keyframes featureIn {
+      from { opacity: 0; transform: translateX(-24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .fi { animation: featureIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+    .fi:nth-child(1) { animation-delay: 0.3s; }
+    .fi:nth-child(2) { animation-delay: 0.44s; }
+    .fi:nth-child(3) { animation-delay: 0.58s; }
+    .fi:nth-child(4) { animation-delay: 0.72s; }
+
+    /* ── Input focus ── */
+    .form-input {
+      transition: all 0.22s ease;
+    }
+    .form-input:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.18) !important;
+      background: #fff !important;
+      outline: none;
+    }
+
+    /* ── Button glow pulse ── */
+    @keyframes btnGlow {
+      0%,100% { box-shadow: 0 4px 20px rgba(99,102,241,0.4); }
+      50%      { box-shadow: 0 4px 36px rgba(99,102,241,0.7), 0 0 60px rgba(139,92,246,0.2); }
+    }
+    .btn-login {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      transition: all 0.22s ease;
+    }
+    .btn-login:hover {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      transform: translateY(-2px);
+      animation: btnGlow 2s ease-in-out infinite;
+    }
+    .btn-login:active { transform: translateY(0); animation: none; }
+
+    /* ── Shake on error ── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-7px); }
+      40%      { transform: translateX(7px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.42s ease; }
+
+    /* ── Brand panel glows ── */
+    .brand-panel {
+      background: linear-gradient(155deg, #0b0c20 0%, #12143a 40%, #1e1b4b 75%, #2a1a5e 100%);
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-100 via-black-100 to-purple-100 min-h-screen flex items-center justify-center">
 
-  <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-200 fade-in-up">
-    <div class="text-center mb-8">
-      <h2 class="text-3xl font-extrabold text-gray-800 animate-pulse">Admin Login</h2>
-      <p class="text-gray-500 mt-1 text-sm">Access your SCM dashboard</p>
+<body class="animated-bg min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+
+  <!-- Glow orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+
+  <!-- Dot grid overlay -->
+  <div class="absolute inset-0 dot-grid pointer-events-none"></div>
+
+  <div class="w-full max-w-5xl relative z-10">
+    <div class="grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden"
+         style="box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06)">
+
+      <!-- ── Left: Brand Panel ── -->
+      <div class="brand-panel hidden lg:flex flex-col justify-between p-10 relative overflow-hidden">
+        <!-- Inner glows -->
+        <div class="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none"
+             style="background:radial-gradient(circle at 70% 20%, rgba(99,102,241,0.2), transparent 65%); transform:translate(35%,-35%)"></div>
+        <div class="absolute bottom-0 left-0 w-56 h-56 rounded-full pointer-events-none"
+             style="background:radial-gradient(circle, rgba(139,92,246,0.15), transparent 65%); transform:translate(-35%,35%)"></div>
+
+        <!-- Logo -->
+        <div class="relative">
+          <div class="logo-enter flex items-center gap-3.5 mb-10">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl flex-shrink-0"
+                 style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 8px 32px rgba(99,102,241,0.5)">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 3C10 7 4 8 4 13a8 8 0 0016 0c0-5-6-6-8-10z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13v5"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white font-bold text-xl leading-tight font-display">Prime Fresh</p>
+              <p class="text-indigo-400 text-xs font-semibold tracking-widest uppercase mt-0.5">SCM Platform</p>
+            </div>
+          </div>
+
+          <h2 class="text-3xl font-bold font-display text-white leading-tight mb-4">
+            Supply Chain<br>
+            <span style="background:linear-gradient(135deg,#a5b4fc,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
+              Made Simple
+            </span>
+          </h2>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Complete visibility and control over your fresh produce supply chain — from farm to customer.
+          </p>
+        </div>
+
+        <!-- Features -->
+        <div class="space-y-4 relative">
+          <div class="fi flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background:rgba(99,102,241,0.15);border:1px solid rgba(129,140,248,0.25)">
+              <svg class="w-5 h-5" style="color:#818cf8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white text-sm font-semibold">Real-time Analytics</p>
+              <p class="text-slate-500 text-xs">Live dashboards & reports</p>
+            </div>
+          </div>
+          <div class="fi flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background:rgba(139,92,246,0.15);border:1px solid rgba(167,139,250,0.25)">
+              <svg class="w-5 h-5" style="color:#a78bfa" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white text-sm font-semibold">Inventory Management</p>
+              <p class="text-slate-500 text-xs">Track stock across warehouses</p>
+            </div>
+          </div>
+          <div class="fi flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background:rgba(196,181,253,0.12);border:1px solid rgba(196,181,253,0.2)">
+              <svg class="w-5 h-5" style="color:#c4b5fd" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white text-sm font-semibold">People Management</p>
+              <p class="text-slate-500 text-xs">Employees, farmers & suppliers</p>
+            </div>
+          </div>
+          <div class="fi flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.2)">
+              <svg class="w-5 h-5" style="color:#ddd6fe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-white text-sm font-semibold">Order Processing</p>
+              <p class="text-slate-500 text-xs">End-to-end order lifecycle</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-10 pt-6 border-t border-white/[0.08]">
+          <p class="text-slate-600 text-xs">&copy; 2024 Prime Fresh SCM. All rights reserved.</p>
+        </div>
+      </div>
+
+      <!-- ── Right: Login Form ── -->
+      <div class="bg-white flex flex-col justify-center p-8 sm:p-10 lg:p-12">
+
+        <!-- Mobile logo -->
+        <div class="flex items-center gap-3 mb-8 lg:hidden">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+               style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 3C10 7 4 8 4 13a8 8 0 0016 0c0-5-6-6-8-10z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 13v5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-slate-800 font-bold text-lg font-display leading-tight">Prime Fresh SCM</p>
+            <p class="text-xs font-bold" style="color:#6366f1">Admin Panel</p>
+          </div>
+        </div>
+
+        <div class="card-enter">
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold font-display text-slate-800 mb-2">Welcome back</h1>
+            <p class="text-slate-500 text-sm">Sign in to access your admin dashboard</p>
+          </div>
+
+          <!-- Error -->
+          {% if error %}
+          <div class="flex items-center gap-2.5 px-4 py-3 mb-6 rounded-xl text-red-700 text-sm shake"
+               style="background:#fff1f2;border:1px solid #fecdd3">
+            <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ error }}
+          </div>
+          {% endif %}
+
+          <form method="POST" action="{% url 'mysite:admin_login_dash' %}" id="loginForm">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div class="mb-5">
+              <label for="username" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Username
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                  <svg class="w-4.5 h-4.5 text-slate-400" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                  </svg>
+                </div>
+                <input type="text" id="username" name="username" required autocomplete="username"
+                       placeholder="Enter your username"
+                       class="form-input w-full pl-10 pr-4 py-3 text-sm text-slate-800 placeholder-slate-400
+                              border border-slate-200 rounded-xl bg-slate-50 transition-all"/>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-5">
+              <div class="flex items-center justify-between mb-2">
+                <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Password
+                </label>
+                <button type="button" class="text-xs font-bold transition-colors"
+                        style="color:#6366f1" onmouseover="this.style.color='#4f46e5'" onmouseout="this.style.color='#6366f1'">
+                  Forgot password?
+                </button>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                  <svg style="width:18px;height:18px" class="text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                </div>
+                <input type="password" id="password" name="password" required autocomplete="current-password"
+                       placeholder="Enter your password"
+                       class="form-input w-full pl-10 pr-12 py-3 text-sm text-slate-800 placeholder-slate-400
+                              border border-slate-200 rounded-xl bg-slate-50 transition-all"/>
+                <button type="button" onclick="togglePassword()"
+                        class="absolute inset-y-0 right-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
+                  <svg id="eyeIcon" style="width:18px;height:18px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Remember me -->
+            <div class="flex items-center gap-2.5 mb-6">
+              <input type="checkbox" id="remember" name="remember"
+                     class="w-4 h-4 rounded cursor-pointer" style="accent-color:#6366f1">
+              <label for="remember" class="text-sm text-slate-600 cursor-pointer">Keep me signed in</label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" id="submitBtn"
+                    class="btn-login w-full flex items-center justify-center gap-2.5 py-3.5 px-6
+                           text-white font-bold text-sm rounded-xl shadow-lg
+                           focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    style="focus-ring-color:#6366f1">
+              <svg class="w-4 h-4" id="submitIcon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+              </svg>
+              <span id="submitText">Sign In to Admin</span>
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="flex items-center gap-3 my-6">
+            <div class="flex-1 h-px bg-slate-100"></div>
+            <span class="text-xs text-slate-400 font-medium">or</span>
+            <div class="flex-1 h-px bg-slate-100"></div>
+          </div>
+
+          <!-- Register link -->
+          <p class="text-center text-sm text-slate-500">
+            Need an account?
+            <a href="{% url 'mysite:admin_register' %}"
+               class="font-bold transition-colors"
+               style="color:#6366f1"
+               onmouseover="this.style.color='#4f46e5'"
+               onmouseout="this.style.color='#6366f1'">
+              Create account →
+            </a>
+          </p>
+        </div>
+      </div>
+
     </div>
-
-    <form method="POST" action="{% url "mysite:admin_login_dash" %}">
-      {% csrf_token %}
-
-      <div class="relative mb-6">
-        <input type="text" name="username" id="username" required
-               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
-               placeholder="Username" />
-        <label for="username"
-               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
-          Username
-        </label>
-      </div>
-
-      <div class="relative mb-6">
-        <input type="password" name="password" id="password" required
-               class="peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-transparent"
-               placeholder="Password" />
-        <label for="password"
-               class="absolute left-4 top-2 text-sm text-gray-500 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-600">
-          Password
-        </label>
-      </div>
-
-      <button type="submit"
-              class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-2 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
-        Login
-      </button>
-      <div class="text-center mt-4">
-      <p class="text-sm text-gray-600">
-        I don't have account? Create account
-        <a href="{% url 'mysite:admin_register' %}" class="text-blue-600 hover:underline">Login</a>
-      </p>
-</div>
-    </form>
   </div>
 
+  <script>
+    function togglePassword() {
+      const p = document.getElementById('password');
+      const ic = document.getElementById('eyeIcon');
+      const show = p.type === 'password';
+      p.type = show ? 'text' : 'password';
+      ic.innerHTML = show
+        ? `<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>`
+        : `<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function() {
+      const btn  = document.getElementById('submitBtn');
+      const text = document.getElementById('submitText');
+      btn.disabled = true;
+      btn.style.opacity = '0.8';
+      text.textContent = 'Signing in…';
+    });
+  </script>
 </body>
 </html>

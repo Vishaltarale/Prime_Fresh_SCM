@@ -6,10 +6,6 @@ from .import views
 app_name = 'Location'
 
 urlpatterns = [
-    #Office
-    path('office', views.office,name="office"),
-    path("office_register",views.office_register,name="office_register"),
-
     #Location
     path('warehouse',views.warehouse,name="warehouse"),
     path("warehouse_register",views.warehouse_register,name="warehouse_register"),

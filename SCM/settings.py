@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t5+p4sunt84gx_ira9-h#5mq2sv*@1d5w4-e(9aw&x63j--y_b'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-t5+p4sunt84gx_ira9-h#5mq2sv*@1d5w4-e(9aw&x63j--y_b')
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h]
 
 
 # Application definition
@@ -47,10 +47,14 @@ INSTALLED_APPS = [
     'UOM',
     'Location',
     'Users','settings',
+    'rest_framework',
+    'corsheaders',
+    'api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -58,6 +62,32 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# New React web/native clients run on separate dev origins; existing
+# server-rendered Django views are unaffected by CORS (same-origin).
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authentication.MongoJWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'SIGNING_KEY': SECRET_KEY,
+}
 
 ROOT_URLCONF = 'SCM.urls'
 
@@ -71,6 +101,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'mysite.context_processors.react_web_url',
             ],
         },
     },
@@ -80,15 +111,14 @@ WSGI_APPLICATION = 'SCM.wsgi.application'
 
 MONGODB_DATABASES = {
     "default": {
-        "name": "prime_fresh",
-        "host": "mongodb+srv://vishal:11223344@cluster0.ostbq.mongodb.net/prime_fresh?retryWrites=true&w=majority&appName=Cluster0",
-        "username": "vishal",
-        "password": "11223344",
+        "name": os.environ.get('MONGODB_NAME', 'prime_fresh'),
+        "host": os.environ.get('MONGODB_HOST', 'mongodb+srv://vishal:7409@cluster0.zqe8phl.mongodb.net/?appName=Cluster0'),
+        "username": os.environ.get('MONGODB_USERNAME', 'vishal'),
+        "password": os.environ.get('MONGODB_PASSWORD', '7409'),
         "tz_aware": True,
         "authentication_source": "admin"
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -133,8 +163,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-RAZORPAY_KEY_ID = 'your_test_key_id'
-RAZORPAY_KEY_SECRET = 'your_test_key_secret'
+REACT_WEB_URL = os.environ.get('REACT_WEB_URL', 'http://localhost:5173')
+
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'your_test_key_id')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'your_test_key_secret')
 
 
 
@@ -142,5 +174,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'vishaltarale055@gmail.com'         # your Gmail
-EMAIL_HOST_PASSWORD = "lyrllnhycsywomtq"
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'vishaltarale055@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'lyrllnhycsywomtq')

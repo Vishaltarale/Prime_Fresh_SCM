@@ -73,6 +73,7 @@ def product_register(request):
             )
             product.save()
 
+            messages.success(request, f"Product '{name}' registered successfully.")
             return redirect("product_Items:products")  # or wherever your product list is
     return redirect("product_Items:products")
 
@@ -85,9 +86,13 @@ def subcategory_register(request):
     if request.method == "POST":
             name = request.POST.get("name")
             category_id = request.POST.get("category")
-            
+
             category = Category.objects.get(id=category_id)
-            
+
+            if Subcategory.objects(name=name, category=category).first():
+                messages.warning(request, f"Subcategory '{name}' already exists under {category.name}.")
+                return redirect("product_Items:subcategory_register")
+
             subcategory = Subcategory(name=name, category=category)
             subcategory.save()
 

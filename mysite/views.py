@@ -1,5 +1,6 @@
 from django.shortcuts import render,HttpResponse,redirect,get_object_or_404
 from django.contrib.auth.models import User
+from django.contrib import messages
 from .models import Student,FruitInventory
 from Orders.models import Order
 from mysite.models import Employee,Farmer,Supplier,Customer
@@ -12,7 +13,7 @@ import base64
 from collections import defaultdict
 from .models import FruitInventory
 from Orders.models import Order
-from Location.models import Warehouse,OfficeLocation
+from Location.models import Warehouse
 from mysite.models import admin1,Supplier
 from Location.models import Warehouse
 
@@ -48,14 +49,18 @@ def admin_save(request):
         password2 = request.POST.get("password2")
 
         if password1 == password2:
-            admin1(
-                username=username,
-                email=email,
-                password=password1
-            ).save()
-            return redirect("mysite:admin_login")
+            from mongoengine.errors import NotUniqueError
+            try:
+                admin1(
+                    username=username,
+                    email=email,
+                    password=password1
+                ).save()
+                return redirect("mysite:admin_login")
+            except NotUniqueError:
+                return render(request, "admin_register.html", {"error": "Email or Username already exists."})
         else:
-            return redirect("mysite:admin_register")
+            return render(request, "admin_register.html", {"error": "Passwords do not match."})
     return render(request, "admin_register.html")
 
 #ADMIN_LOGIN
@@ -64,14 +69,19 @@ def admin_login(request):
 
 def admin_login_dash(request):
     if request.method == "POST":
-        email = request.POST.get("username")
+        username = request.POST.get("username")
         password = request.POST.get("password")
 
-        data = admin1.objects(email=email, password=password).first()
+        # Try matching by username first, fall back to email
+        data = admin1.objects(username=username, password=password).first()
+        if not data:
+            data = admin1.objects(email=username, password=password).first()
         
         if data:
-            request.session['email'] = email
+            request.session['email'] = data.email
             return redirect("mysite:admin_index")
+        else:
+            return render(request, "admin_login.html", {"error": "Invalid username or password."})
         
     return render(request, "admin_login.html")
 
@@ -90,7 +100,6 @@ def admin_index(request):
             'customer_count': Customer.objects.count(),
             'supplier_count': Supplier.objects.count(),
             'farmer_count': Farmer.objects.count(),
-            'office_count': OfficeLocation.objects.count(),
             'warehouse_count': Warehouse.objects.count(),
             'orders' : Order.objects.count(),
             'products' : Product.objects.count(),
@@ -331,6 +340,7 @@ def employee_register(request):
                 address=address
             )
             employee.save()
+            messages.success(request, f"Employee '{full_name}' registered successfully.")
             return redirect('mysite:admin_index')
     return render(request, "employee.html")
 
@@ -362,8 +372,9 @@ def farmer_register(request):
                 verified=False  # default
             )
             farmer.save()
+            messages.success(request, f"Farmer '{full_name}' registered successfully.")
             return redirect("mysite:admin_index")
-    return render(request, "farmer_registration.html")
+    return render(request, "farmer.html")
 
 #SUPPLIERRGISTRATION
 def supplier(request):
@@ -392,6 +403,7 @@ def supplier_register(request):
                 verified=False  # default status
             )
             supplier.save()
+            messages.success(request, f"Supplier '{company_name}' registered successfully.")
             return redirect("mysite:admin_index")
     return render(request, "supplier.html")
 
@@ -420,6 +432,7 @@ def customer_register(request):
             )
             customer.save()
 
+            messages.success(request, f"Customer '{full_name}' registered successfully.")
             return redirect("mysite:admin_index")
     return render(request, "customer.html")
 
@@ -429,7 +442,6 @@ MODEL_MAP = {
     'customer': Customer,
     'supplier': Supplier,
     'farmer': Farmer,
-    'office': OfficeLocation,
     'warehouse': Warehouse,
     'Orders' : Order,
     'Product' : Product
@@ -460,12 +472,6 @@ def list_entity(request, entity):
             'data': Farmer.objects.all(),
             'headers': ['Name', 'Email', 'Phone','addrees','village','District','State','Registration_date','Actions'],
             'fields': ['full_name', 'email', 'phone','address', 'village','district','state','registration_date','actions']
-        },
-        'office': {
-            'title': 'Offices',
-            'data': OfficeLocation.objects.all(),
-            'headers': ['Office Name', 'Address', 'City', 'State', 'Pincode','Actions'],
-            'fields': ['office_name', 'address', 'city', 'state', 'pincode','actions']
         },
         'warehouse': {
             'title': 'Warehouses',
@@ -509,6 +515,7 @@ def edit_entity(request, entity, object_id):
             if hasattr(instance, field):
                 setattr(instance, field, request.POST[field])
         instance.save()
+        messages.success(request, f"{entity.capitalize()} updated successfully.")
         return redirect('mysite:list_entity', entity=entity)
 
     return render(request, 'edit_entity_form.html', {
@@ -522,6 +529,10 @@ def delete_entity(request, entity, object_id):
     if not Model:
         return render(request, '404.html', status=404)
 
-    instance = get_object_or_404(Model, id=object_id)
+    instance = Model.objects(id=object_id).first()
+    if not instance:
+        return render(request, '404.html', status=404)
+
     instance.delete()
+    messages.error(request, f"{entity.capitalize()} deleted permanently.", extra_tags="critical")
     return redirect('mysite:list_entity', entity=entity)
