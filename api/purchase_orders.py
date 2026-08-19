@@ -20,6 +20,7 @@ from rest_framework import status as http_status
 from rest_framework.pagination import PageNumberPagination
 
 from .permissions import IsCatalogStaff
+from .notify import notify_status
 from .po_models import PurchaseOrder, POItem, POPaymentRecord, POPaymentEntry
 from product_Items.models import Product
 from Location.models import Warehouse
@@ -213,6 +214,12 @@ class POSendView(APIView):
             email_sent = False
             email_error = str(exc)
 
+        notify_status(
+            'po_status', 'PO sent to supplier',
+            f'{po.po_number} was sent to {po.supplier.supplier_name} for pricing.',
+            severity='info', po_id=po.id,
+        )
+
         payload = _serialize_po(po)
         payload['email_sent'] = email_sent
         if not email_sent:
@@ -236,6 +243,11 @@ class POConfirmView(APIView):
         po.confirmed_at = datetime.datetime.utcnow()
         po.approved_by = request.user.email
         po.save()
+        notify_status(
+            'po_status', 'PO confirmed',
+            f'{po.po_number} ({po.supplier.supplier_name}) was approved by {request.user.email}.',
+            severity='info', po_id=po.id,
+        )
         return Response(_serialize_po(po))
 
 
@@ -252,6 +264,11 @@ class PORejectView(APIView):
         po.status = 'Rejected'
         po.approved_by = request.user.email
         po.save()
+        notify_status(
+            'po_status', 'PO rejected',
+            f'{po.po_number} ({po.supplier.supplier_name}) was rejected by {request.user.email}.',
+            severity='warning', po_id=po.id,
+        )
         return Response(_serialize_po(po))
 
 
@@ -290,6 +307,11 @@ class POPublicView(APIView):
         po.status = 'Awaiting Approval'
         po.responded_at = datetime.datetime.utcnow()
         po.save()
+        notify_status(
+            'po_status', 'Supplier responded — approval needed',
+            f'{po.supplier.supplier_name} confirmed pricing for {po.po_number}. It now needs your approval.',
+            severity='warning', po_id=po.id,
+        )
         return Response(_serialize_po(po))
 
 

@@ -43,13 +43,21 @@ export function OrderCreatePage() {
     }).finally(() => setLoadingLookups(false));
   }, []);
 
-  const productsInWarehouse = products.filter((p) => p.warehouse?.id === warehouseId);
+  // Only products that actually have a confirmed-GRN stock line in this
+  // warehouse are sellable from it — a product stocked only in another
+  // warehouse (or not received anywhere yet) shouldn't show up here.
+  const productsInWarehouse = products
+    .map((p) => ({ product: p, stockLine: p.stock.find((s) => s.warehouse.id === warehouseId) }))
+    .filter((row): row is { product: CatalogProduct; stockLine: NonNullable<typeof row.stockLine> } => !!row.stockLine);
   const total = (items ?? []).reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
 
   function pickProduct(index: number, productId: string) {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
-    setValue(`items.${index}.price`, product.price_per_unit);
+    const stockLine = product.stock.find((s) => s.warehouse.id === warehouseId);
+    // Prefer the actual landed cost for this warehouse; fall back to the
+    // catalog reference price only if this stock line never recorded one.
+    setValue(`items.${index}.price`, stockLine?.price_per_unit ?? product.price_per_unit);
     setValue(`items.${index}.uom`, product.uom?.name ?? '');
   }
 
@@ -123,7 +131,9 @@ export function OrderCreatePage() {
                         disabled={!warehouseId}
                       >
                         <option value="">Select…</option>
-                        {productsInWarehouse.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.sku}) — {p.quantity_available} in stock</option>)}
+                        {productsInWarehouse.map(({ product: p, stockLine }) => (
+                          <option key={p.id} value={p.id}>{p.name} ({p.sku}) — {stockLine.quantity_available} in stock</option>
+                        ))}
                       </select>
                     </td>
                     <td style={{ padding: 8 }}>

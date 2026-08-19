@@ -39,7 +39,9 @@ export function OrderCreateScreen({ navigation }: Props) {
     }).finally(() => setLoadingLookups(false));
   }, []);
 
-  const productsInWarehouse = products.filter((p) => p.warehouse?.id === warehouse);
+  const productsInWarehouse = products
+    .map((p) => ({ product: p, stockLine: p.stock.find((s) => s.warehouse.id === warehouse) }))
+    .filter((row): row is { product: CatalogProduct; stockLine: NonNullable<typeof row.stockLine> } => !!row.stockLine);
   const total = items.reduce((sum, it) => sum + (Number(it.quantity) || 0) * (Number(it.price) || 0), 0);
 
   function updateItem(index: number, patch: Partial<OrderItemInput>) {
@@ -48,7 +50,8 @@ export function OrderCreateScreen({ navigation }: Props) {
 
   function pickProduct(index: number, productId: string) {
     const product = products.find((p) => p.id === productId);
-    updateItem(index, { product: productId, price: product?.price_per_unit ?? 0, uom: product?.uom?.name ?? '' });
+    const stockLine = product?.stock.find((s) => s.warehouse.id === warehouse);
+    updateItem(index, { product: productId, price: stockLine?.price_per_unit ?? product?.price_per_unit ?? 0, uom: product?.uom?.name ?? '' });
   }
 
   function addItem() { setItems((prev) => [...prev, { ...emptyItem }]); }
@@ -102,7 +105,7 @@ export function OrderCreateScreen({ navigation }: Props) {
                 label={`Product #${index + 1}`}
                 value={item.product}
                 onChange={(v) => pickProduct(index, v)}
-                options={productsInWarehouse.map((p) => ({ label: `${p.name} (${p.sku}) — ${p.quantity_available} in stock`, value: p.id }))}
+                options={productsInWarehouse.map(({ product: p, stockLine }) => ({ label: `${p.name} (${p.sku}) — ${stockLine.quantity_available} in stock`, value: p.id }))}
               />
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 <Input label="Quantity" keyboardType="numeric" style={{ flex: 1 }} value={String(item.quantity)} onChangeText={(v) => updateItem(index, { quantity: Number(v) || 0 })} />

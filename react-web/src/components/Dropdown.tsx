@@ -25,6 +25,7 @@ export function Dropdown({ trigger, children, align = 'right' }: DropdownProps) 
       </div>
       {open && (
         <div
+          className="dropdown-enter"
           style={{
             position: 'absolute',
             top: '100%',
@@ -52,7 +53,9 @@ export function DropdownItem({ children, onClick }: { children: ReactNode; onCli
   return (
     <div
       onClick={onClick}
-      style={{ padding: '10px 14px', fontSize: 14, cursor: 'pointer' }}
+      style={{ padding: '10px 14px', fontSize: 14, cursor: 'pointer', transition: 'background 0.15s var(--ease-out), padding-left 0.15s var(--ease-out)' }}
+      onMouseOver={(e) => (e.currentTarget.style.paddingLeft = '18px')}
+      onMouseOut={(e) => (e.currentTarget.style.paddingLeft = '14px')}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >

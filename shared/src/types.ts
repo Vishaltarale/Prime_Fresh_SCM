@@ -200,15 +200,86 @@ export interface DashboardSummary {
   recent_orders: Array<{ id: string; customer_name: string; status: string; total_amount: number; order_date: string | null }>;
 }
 
+// ── Analytics ──────────────────────────────────────────────────────────
+
+export interface NameValue {
+  name: string;
+  value: number;
+}
+
+export interface Candle {
+  month: string;
+  open: number;
+  close: number;
+  high: number;
+  low: number;
+  count: number;
+}
+
+export interface AnalyticsSummary {
+  sales_candles: Candle[];
+  purchase_order_candles: Candle[];
+  order_status_distribution: NameValue[];
+  category_stock_distribution: NameValue[];
+  warehouse_stock_distribution: NameValue[];
+  payment_status_distribution: NameValue[];
+  top_products_by_value: NameValue[];
+  supplier_spend_distribution: NameValue[];
+  supplier_qty_distribution: NameValue[];
+}
+
 // ── Reports ────────────────────────────────────────────────────────────
 
 export type ReportType = 'inventory' | 'orders' | 'suppliers' | 'warehouses' | 'sales' | 'low-stock';
+
+// ── Notifications ──────────────────────────────────────────────────────
+
+export type NotificationCategory = 'low_stock' | 'po_status' | 'grn_status' | 'payment_status' | 'general';
+export type NotificationSeverity = 'info' | 'warning' | 'critical';
+
+export interface AppNotification {
+  id: string;
+  category: NotificationCategory;
+  severity: NotificationSeverity;
+  title: string;
+  message: string;
+  warehouse: NamedRef | null;
+  product: NamedRef | null;
+  po_id: string | null;
+  grn_id: string | null;
+  resolved: boolean;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationList {
+  results: AppNotification[];
+  unread_count: number;
+}
 
 export interface ReportData {
   title: string;
   headers: string[];
   rows: Array<Array<string | number>>;
   summary?: string;
+  /** Parallel to `rows` — lets the UI open a detail modal per row (PO for Purchase Orders/Supplier Payments, warehouse for Warehouses). */
+  row_meta?: Array<{ po_id: string } | { warehouse_id: string } | null>;
+  /** Per-PO product line items — the export views' "Details" tab/sheet; not rendered in the on-screen table. */
+  details?: Array<{ po_number: string; supplier: string; headers: string[]; rows: Array<Array<string | number>> }>;
+}
+
+export interface WarehouseStockItem {
+  product: string;
+  sku: string;
+  quantity_available: number;
+  price_per_unit: number;
+  is_low: boolean;
+}
+
+export interface WarehouseStockDetail {
+  warehouse: { id: string; name: string; city: string };
+  threshold: number;
+  items: WarehouseStockItem[];
 }
 
 // ── Catalog (Category/Subcategory/UOM/Conversion/Product) ─────────────────
@@ -240,6 +311,15 @@ export interface Conversion {
 
 export type ProductSourceType = 'supplier' | 'farmer';
 
+// One line per warehouse the product has actually been received into (via a
+// confirmed GRN) — a product can carry stock in several warehouses at once,
+// each with its own quantity and landed cost.
+export interface ProductStockLine {
+  warehouse: NamedRef;
+  quantity_available: number;
+  price_per_unit: number | null;
+}
+
 export interface CatalogProduct {
   id: string;
   name: string;
@@ -247,8 +327,10 @@ export interface CatalogProduct {
   category: NamedRef | null;
   subcategory: NamedRef | null;
   uom: NamedRef | null;
-  warehouse: NamedRef | null;
   price_per_unit: number;
+  /** Per-warehouse breakdown — empty until a GRN has been confirmed for this product. */
+  stock: ProductStockLine[];
+  /** Sum of stock[].quantity_available across all warehouses. */
   quantity_available: number;
   description: string;
   source_type: ProductSourceType | null;

@@ -31,10 +31,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export function Input({ label, error, style, ...rest }: InputProps) {
+export function Input({ label, error, style, className, ...rest }: InputProps) {
   return (
     <FieldWrapper label={label} error={error}>
-      <input style={{ ...controlStyle, ...style, borderColor: error ? 'var(--color-danger)' : 'var(--color-border)' }} {...rest} />
+      <input
+        className={`input-app ${className ?? ''}`}
+        style={{ ...controlStyle, ...style, borderColor: error ? 'var(--color-danger)' : 'var(--color-border)' }}
+        {...rest}
+      />
     </FieldWrapper>
   );
 }
@@ -44,10 +48,14 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
 }
 
-export function Select({ label, error, style, children, ...rest }: SelectProps) {
+export function Select({ label, error, style, className, children, ...rest }: SelectProps) {
   return (
     <FieldWrapper label={label} error={error}>
-      <select style={{ ...controlStyle, ...style, borderColor: error ? 'var(--color-danger)' : 'var(--color-border)' }} {...rest}>
+      <select
+        className={`input-app ${className ?? ''}`}
+        style={{ ...controlStyle, ...style, borderColor: error ? 'var(--color-danger)' : 'var(--color-border)' }}
+        {...rest}
+      >
         {children}
       </select>
     </FieldWrapper>

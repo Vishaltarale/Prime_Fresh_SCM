@@ -4,6 +4,7 @@ import type { Role } from '@shared/types';
 import { ENTITY_NAV, ROLE_ACCESS } from '@shared/constants';
 import { useAuth } from '../context/AuthContext';
 import { Dropdown, DropdownItem } from './Dropdown';
+import { NotificationBell } from './NotificationBell';
 import logoFull from '../assets/logo-full.png';
 import logoIcon from '../assets/logo-icon.png';
 
@@ -36,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Units of Measurement', path: '/catalog/uom', icon: '📐', roles: ROLE_ACCESS.catalogManage },
   { label: 'Products', path: '/catalog/products', icon: '🛒', roles: ROLE_ACCESS.catalogManage },
   { label: 'Reports', path: '/reports', icon: '📊', roles: ROLE_ACCESS.reports },
+  { label: 'Analytics', path: '/analytics', icon: '📈', roles: ROLE_ACCESS.analytics },
   { label: 'My Profile', path: '/profile', icon: '👤' },
 ];
 
@@ -85,7 +87,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         }}
       >
         <div style={{ padding: '18px 20px', display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
-          <div style={logoBadgeStyle}>
+          <div className="logo-badge" style={logoBadgeStyle}>
             <img src={logoFull} alt="Prime Fresh" style={{ display: 'block', height: 30, width: 'auto', margin: '0 auto' }} />
           </div>
         </div>
@@ -95,6 +97,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               key={item.label}
               to={item.path}
               end={item.path === '/'}
+              className={({ isActive }) => `nav-link-app${isActive ? ' active' : ''}`}
               style={({ isActive }) => navLinkStyle(isActive)}
             >
               <span>{item.icon}</span> {item.label}
@@ -113,22 +116,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <button
               onClick={() => setSidebarOpen((o) => !o)}
               aria-label="Toggle navigation"
+              className="btn-app"
               style={hamburgerStyle}
             >
               ☰
             </button>
-            <img src={logoIcon} alt="Prime Fresh" style={{ height: 28, width: 'auto' }} />
+            <img src={logoIcon} alt="Prime Fresh" className="logo-badge" style={{ height: 28, width: 'auto' }} />
           </div>
         ) : (
           <div />
         )}
-        <Dropdown trigger={<span style={{ fontWeight: 600, fontSize: 14 }}>{user?.full_name} ▾</span>}>
-          <DropdownItem onClick={() => navigate('/profile')}>My Profile</DropdownItem>
-          <DropdownItem onClick={() => { logout(); navigate('/login'); }}>Sign out</DropdownItem>
-        </Dropdown>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {isStaff && <NotificationBell />}
+          <Dropdown trigger={<span style={{ fontWeight: 600, fontSize: 14 }}>{user?.full_name} ▾</span>}>
+            <DropdownItem onClick={() => navigate('/profile')}>My Profile</DropdownItem>
+            <DropdownItem onClick={() => { logout(); navigate('/login'); }}>Sign out</DropdownItem>
+          </Dropdown>
+        </div>
       </header>
 
       <main
+        key={location.pathname}
+        className="page-enter"
         style={{
           ...mainStyle,
           marginLeft: isMobile ? 0 : SIDEBAR_WIDTH,
@@ -180,7 +189,7 @@ const navbarStyle: React.CSSProperties = {
   padding: '0 24px',
   background: 'linear-gradient(90deg, var(--color-primary-light), var(--color-primary) 45%, var(--color-primary-dark))',
   color: '#fff',
-  boxShadow: '0 2px 8px rgba(76, 29, 149, 0.18)',
+  boxShadow: '0 2px 8px rgba(121, 134, 203, 0.18)',
   zIndex: 200,
 };
 
@@ -203,16 +212,11 @@ const mainStyle: React.CSSProperties = {
 };
 
 function navLinkStyle(isActive: boolean): React.CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '10px 14px',
-    borderRadius: 'var(--radius-md)',
-    marginBottom: 4,
-    fontSize: 14,
-    fontWeight: 600,
-    color: isActive ? 'var(--color-primary-dark)' : 'rgba(255,255,255,0.85)',
-    background: isActive ? '#fff' : 'transparent',
-  };
+  // Only set `background` for the active state — leaving it unset (rather
+  // than 'transparent') for inactive links lets the CSS :hover rule in
+  // index.css actually take effect, since inline styles always beat
+  // stylesheet rules regardless of specificity/pseudo-classes.
+  return isActive
+    ? { color: 'var(--color-primary-dark)', background: '#fff' }
+    : { color: 'rgba(255,255,255,0.85)' };
 }

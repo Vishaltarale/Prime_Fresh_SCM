@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
+  "outputDirectory": "staticfiles",
+  "env": {
+    "DJANGO_SECRET_KEY": "@DJANGO_SECRET_KEY",
+    "DJANGO_DEBUG": "False",
+    "DJANGO_ALLOWED_HOSTS": "@DJANGO_ALLOWED_HOSTS",
+    "DATABASE_URL": "@DATABASE_URL",
+    "MONGODB_URI": "@MONGODB_URI"
+  },
+  "functions": {
+    "manage.py": {
+      "runtime": "python3.11",
+      "handler": "SCM.wsgi.application"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

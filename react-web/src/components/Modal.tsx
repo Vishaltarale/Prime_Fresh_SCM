@@ -11,11 +11,11 @@ interface ModalProps {
 export function Modal({ open, title, onClose, children, footer }: ModalProps) {
   if (!open) return null;
   return (
-    <div style={overlayStyle} onClick={onClose}>
-      <div style={panelStyle} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay-enter" style={overlayStyle} onClick={onClose}>
+      <div className="modal-panel-enter" style={panelStyle} onClick={(e) => e.stopPropagation()}>
         <div style={headerStyle}>
           <h3 style={{ margin: 0, fontSize: 18 }}>{title}</h3>
-          <button onClick={onClose} style={closeBtnStyle} aria-label="Close">✕</button>
+          <button onClick={onClose} className="btn-app" style={closeBtnStyle} aria-label="Close">✕</button>
         </div>
         <div style={{ padding: '16px 20px' }}>{children}</div>
         {footer && <div style={footerStyle}>{footer}</div>}

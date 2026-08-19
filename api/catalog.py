@@ -1,12 +1,17 @@
 """
 Product/Category/Subcategory/UOM module — unlike the generic entities registry,
 these carry real foreign keys (subcategory->category, product->{category,
-subcategory,uom,warehouse,supplier|farmer}, conversion->{from_uom,to_uom}) and
-entity-specific business rules (UOM name normalization, upsert-by-pair on
-conversions, friendly duplicate-category message) mirrored from
-product_Items/views.py and UOM/views.py.
+subcategory,uom}, conversion->{from_uom,to_uom}) and entity-specific business
+rules (UOM name normalization, upsert-by-pair on conversions, friendly
+duplicate-category message) mirrored from product_Items/views.py and
+UOM/views.py.
+
+Products created here are catalog references only (no warehouse/quantity/
+source) — they exist so staff can pick them on a Purchase Order. A product
+only becomes located, quantified, sourced stock once a PO raised against it
+has its GRN confirmed (see GRNConfirmView in api/views.py).
 """
-from mongoengine.errors import NotUniqueError, ValidationError as MongoValidationError
+from mongoengine.errors import NotUniqueError, ValidationError as MongoValidationError, DoesNotExist
 from mongoengine.queryset.visitor import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,8 +21,6 @@ from rest_framework.pagination import PageNumberPagination
 
 from product_Items.models import Category, Subcategory, Product
 from UOM.models import UOM, UOMConversionMatrix
-from Location.models import Warehouse
-from mysite.models import Supplier, Farmer
 
 
 class CatalogPagination(PageNumberPagination):
@@ -233,21 +236,58 @@ class ConversionDetailView(APIView):
 
 # ── Product ──────────────────────────────────────────────────────────────
 
+def _safe_ref(doc, field_name):
+    """
+    Reads a MongoEngine ReferenceField, returning None if it points at a
+    document that's been deleted (a dangling DBRef) instead of raising —
+    one stale reference shouldn't 500 an entire list endpoint.
+    """
+    try:
+        return getattr(doc, field_name)
+    except DoesNotExist:
+        return None
+
+
+def _serialize_stock_line(line):
+    warehouse = None
+    try:
+        warehouse = line.warehouse
+    except DoesNotExist:
+        pass
+    if not warehouse:
+        return None
+    return {
+        'warehouse': {'id': str(warehouse.id), 'name': warehouse.warehouse_name},
+        'quantity_available': line.quantity_available,
+        'price_per_unit': line.price_per_unit,
+    }
+
+
 def _serialize_product(p):
+    category = _safe_ref(p, 'category')
+    subcategory = _safe_ref(p, 'subcategory')
+    uom = _safe_ref(p, 'uom')
+    supplier = _safe_ref(p, 'supplier')
+    farmer = _safe_ref(p, 'farmer')
+    stock = [line for line in (_serialize_stock_line(s) for s in p.stock) if line]
     return {
         'id': str(p.id),
         'name': p.name,
         'sku': p.sku,
-        'category': {'id': str(p.category.id), 'name': p.category.name} if p.category else None,
-        'subcategory': {'id': str(p.subcategory.id), 'name': p.subcategory.name} if p.subcategory else None,
-        'uom': {'id': str(p.uom.id), 'name': p.uom.name} if p.uom else None,
-        'warehouse': {'id': str(p.warehouse.id), 'name': p.warehouse.warehouse_name} if p.warehouse else None,
+        'category': {'id': str(category.id), 'name': category.name} if category else None,
+        'subcategory': {'id': str(subcategory.id), 'name': subcategory.name} if subcategory else None,
+        'uom': {'id': str(uom.id), 'name': uom.name} if uom else None,
         'price_per_unit': p.price_per_unit,
-        'quantity_available': p.quantity_available,
+        # Per-warehouse breakdown — a product received into multiple
+        # warehouses shows one line per warehouse, each with its own
+        # quantity and landed cost. quantity_available is the sum, kept for
+        # any UI that just wants a single "how many total" number.
+        'stock': stock,
+        'quantity_available': p.total_quantity,
         'description': p.description or '',
-        'source_type': 'supplier' if p.supplier else ('farmer' if p.farmer else None),
-        'supplier': {'id': str(p.supplier.id), 'name': p.supplier.supplier_name} if p.supplier else None,
-        'farmer': {'id': str(p.farmer.id), 'name': p.farmer.full_name} if p.farmer else None,
+        'source_type': 'supplier' if supplier else ('farmer' if farmer else None),
+        'supplier': {'id': str(supplier.id), 'name': supplier.supplier_name} if supplier else None,
+        'farmer': {'id': str(farmer.id), 'name': farmer.full_name} if farmer else None,
         'created_at': p.created_at,
     }
 
@@ -269,6 +309,15 @@ class CatalogProductListCreateView(APIView):
         return paginator.get_paginated_response([_serialize_product(p) for p in page])
 
     def post(self, request):
+        """
+        Creates a catalog reference only — name/SKU/category/subcategory/UOM/
+        a reference price. No warehouse, quantity, or supplier/farmer here:
+        this product isn't stock anywhere yet, it's just an entry admins/
+        inventory managers can pick from a Purchase Order dropdown. It only
+        becomes real, warehouse-located, sourced stock once a PO is raised
+        against it and the resulting GRN is confirmed (see GRNConfirmView in
+        api/views.py, which is what actually sets warehouse/quantity/source).
+        """
         data = request.data
         errors = {}
 
@@ -282,37 +331,18 @@ class CatalogProductListCreateView(APIView):
         category = _ref_or_none(Category, data.get('category'))
         subcategory = _ref_or_none(Subcategory, data.get('subcategory'))
         uom = _ref_or_none(UOM, data.get('uom'))
-        warehouse = _ref_or_none(Warehouse, data.get('warehouse'))
         if not category:
             errors['category'] = 'A valid category is required.'
         if not subcategory:
             errors['subcategory'] = 'A valid subcategory is required.'
         if not uom:
             errors['uom'] = 'A valid UOM is required.'
-        if not warehouse:
-            errors['warehouse'] = 'A valid warehouse is required.'
-
-        source_type = data.get('source_type')
-        supplier = farmer = None
-        if source_type == 'supplier':
-            supplier = _ref_or_none(Supplier, data.get('supplier'))
-            if not supplier:
-                errors['supplier'] = 'A valid supplier is required for this source type.'
-        elif source_type == 'farmer':
-            farmer = _ref_or_none(Farmer, data.get('farmer'))
-            if not farmer:
-                errors['farmer'] = 'A valid farmer is required for this source type.'
 
         try:
             price_per_unit = float(data.get('price_per_unit'))
         except (TypeError, ValueError):
             errors['price_per_unit'] = 'Must be a number.'
             price_per_unit = None
-        try:
-            quantity_available = int(data.get('quantity_available', 0) or 0)
-        except (TypeError, ValueError):
-            errors['quantity_available'] = 'Must be a whole number.'
-            quantity_available = None
 
         if errors:
             return Response(errors, status=http_status.HTTP_400_BAD_REQUEST)
@@ -320,8 +350,8 @@ class CatalogProductListCreateView(APIView):
         try:
             product = Product(
                 name=name, sku=sku, category=category, subcategory=subcategory, uom=uom,
-                warehouse=warehouse, price_per_unit=price_per_unit, quantity_available=quantity_available,
-                description=data.get('description', ''), supplier=supplier, farmer=farmer,
+                price_per_unit=price_per_unit,
+                description=data.get('description', ''),
             ).save()
         except NotUniqueError:
             return Response({'sku': 'A product with this SKU already exists.'}, status=http_status.HTTP_400_BAD_REQUEST)

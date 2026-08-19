@@ -33,13 +33,17 @@ class DashboardSummaryView(APIView):
         category_qty = Counter()
         for p in products:
             category_name = p.category.name if p.category else 'Uncategorized'
-            category_qty[category_name] += p.quantity_available or 0
+            category_qty[category_name] += p.total_quantity
         inventory_by_category = [{'category': k, 'quantity': v} for k, v in category_qty.items()]
 
+        # A product with stock in two warehouses contributes to both — sum
+        # per stock line, not per product, or one warehouse's count would
+        # absorb the other's.
         warehouse_stock = Counter()
         for p in products:
-            wh_name = p.warehouse.warehouse_name if p.warehouse else 'Unassigned'
-            warehouse_stock[wh_name] += p.quantity_available or 0
+            for line in p.stock:
+                wh_name = line.warehouse.warehouse_name if line.warehouse else 'Unassigned'
+                warehouse_stock[wh_name] += line.quantity_available or 0
         stock_by_warehouse = [{'warehouse': k, 'quantity': v} for k, v in warehouse_stock.items()]
 
         recent_orders = sorted(orders, key=lambda o: o.order_date or '', reverse=True)[:5]
@@ -56,7 +60,7 @@ class DashboardSummaryView(APIView):
                 'farmers': Farmer.objects.count(),
                 'suppliers': Supplier.objects.count(),
                 'customers': Customer.objects.count(),
-                'low_stock_products': Product.objects(quantity_available__lte=LOW_STOCK_THRESHOLD).count(),
+                'low_stock_products': sum(1 for p in products if p.total_quantity <= LOW_STOCK_THRESHOLD),
                 'pos_awaiting_approval': PurchaseOrder.objects(status='Awaiting Approval').count(),
                 'pos_confirmed': PurchaseOrder.objects(status='Confirmed').count(),
             },

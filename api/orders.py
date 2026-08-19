@@ -33,6 +33,7 @@ from Location.models import Warehouse
 from product_Items.models import Product
 from UOM.models import UOM, UOMConversionMatrix
 from .permissions import has_role
+from .notify import sync_low_stock_alert
 
 # Orders module access: Admin/Warehouse Manager (full, any order) or Customer
 # (own orders only — enforced per-method below, not just at the gate).
@@ -126,15 +127,16 @@ class OrderListCreateView(APIView):
         total_amount = 0.0
         for idx, raw in enumerate(items_data):
             product = _ref_or_none(Product, raw.get('product'))
-            if not product or product.warehouse.id != warehouse.id:
+            stock_line = product.get_stock(warehouse) if product else None
+            if not product or not stock_line:
                 return Response({'items': f'Row {idx + 1}: product not found in the selected warehouse.'}, status=http_status.HTTP_400_BAD_REQUEST)
             try:
                 qty = int(raw.get('quantity'))
                 price = float(raw.get('price'))
             except (TypeError, ValueError):
                 return Response({'items': f'Row {idx + 1}: invalid quantity or price.'}, status=http_status.HTTP_400_BAD_REQUEST)
-            if product.quantity_available < qty:
-                return Response({'items': f'"{product.name}" has insufficient stock (available: {product.quantity_available}).'}, status=http_status.HTTP_400_BAD_REQUEST)
+            if stock_line.quantity_available < qty:
+                return Response({'items': f'"{product.name}" has insufficient stock in this warehouse (available: {stock_line.quantity_available}).'}, status=http_status.HTTP_400_BAD_REQUEST)
 
             items.append(ProductItem(product_name=product.name, quantity=qty, price=price, uom=raw.get('uom', product.uom.name)))
             total_amount += qty * price
@@ -192,7 +194,7 @@ class OrderDetailView(APIView):
             total_amount = 0.0
             for idx, raw in enumerate(items_data):
                 product = _ref_or_none(Product, raw.get('product'))
-                if not product or product.warehouse.id != warehouse.id:
+                if not product or not product.get_stock(warehouse):
                     return Response({'items': f'Row {idx + 1}: product not found in the selected warehouse.'}, status=http_status.HTTP_400_BAD_REQUEST)
 
                 uom_name = raw.get('uom') or product.uom.name
@@ -222,10 +224,11 @@ class OrderDetailView(APIView):
 
         if becoming_completed:
             for item in items:
-                product = Product.objects(name=item.product_name, warehouse=warehouse).first()
-                if product and product.quantity_available < item.quantity:
+                product = Product.objects(name=item.product_name).first()
+                stock_line = product.get_stock(warehouse) if product else None
+                if stock_line and stock_line.quantity_available < item.quantity:
                     return Response(
-                        {'items': f'Not enough stock for {item.product_name} (available: {product.quantity_available}, required: {item.quantity}).'},
+                        {'items': f'Not enough stock for {item.product_name} in this warehouse (available: {stock_line.quantity_available}, required: {item.quantity}).'},
                         status=http_status.HTTP_400_BAD_REQUEST,
                     )
 
@@ -240,10 +243,12 @@ class OrderDetailView(APIView):
 
         if becoming_completed:
             for item in items:
-                product = Product.objects(name=item.product_name, warehouse=warehouse).first()
-                if product:
-                    product.quantity_available -= int(item.quantity)
+                product = Product.objects(name=item.product_name).first()
+                stock_line = product.get_stock(warehouse) if product else None
+                if stock_line:
+                    stock_line.quantity_available -= int(item.quantity)
                     product.save()
+                    sync_low_stock_alert(product, warehouse)
 
         return Response(_serialize_order(order))
 

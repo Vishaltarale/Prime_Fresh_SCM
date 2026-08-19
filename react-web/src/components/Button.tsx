@@ -14,10 +14,11 @@ const variantStyles: Record<Variant, React.CSSProperties> = {
   ghost: { background: 'transparent', color: 'var(--color-primary)', border: '1px solid transparent' },
 };
 
-export function Button({ variant = 'primary', loading, disabled, children, style, ...rest }: ButtonProps) {
+export function Button({ variant = 'primary', loading, disabled, children, style, className, ...rest }: ButtonProps) {
   return (
     <button
       disabled={disabled || loading}
+      className={`btn-app ${className ?? ''}`}
       style={{
         ...base,
         ...variantStyles[variant],

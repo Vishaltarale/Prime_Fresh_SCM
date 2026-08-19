@@ -12,6 +12,7 @@ from .serializers import (
 )
 from .models import User
 from .permissions import IsCatalogStaff, IsSupplierOrFarmer, get_linked_entity
+from .notify import sync_low_stock_alert, notify_status
 from mysite.grn_models import GRN
 from Location.models import Warehouse
 from mysite.models import Supplier, Farmer
@@ -172,8 +173,24 @@ class GRNConfirmView(APIView):
         for item in grn.items:
             product = item.product
             if product:
-                product.quantity_available += item.received_qty
+                # Adds to this GRN's warehouse specifically — a product
+                # received into two different warehouses across two GRNs
+                # ends up with two separate stock lines, each with its own
+                # quantity and landed cost, not one shared bucket.
+                product.receive_stock(grn.warehouse, item.received_qty, item.unit_price)
+                # Source tracking: tag the product with whoever it was
+                # actually just received from, so the Products page "Source"
+                # column and the Suppliers report reflect real purchase
+                # history instead of only whatever was picked (or left
+                # blank) at product-creation time.
+                if grn.source_type == 'Supplier' and grn.supplier:
+                    product.supplier = grn.supplier
+                    product.farmer = None
+                elif grn.source_type == 'Farmer' and grn.farmer:
+                    product.farmer = grn.farmer
+                    product.supplier = None
                 product.save()
+                sync_low_stock_alert(product, grn.warehouse)
 
         if grn.purchase_order:
             po = grn.purchase_order
@@ -187,6 +204,12 @@ class GRNConfirmView(APIView):
 
         grn.status = 'Confirmed'
         grn.save()
+        source_name = grn.supplier.supplier_name if grn.supplier else (grn.farmer.full_name if grn.farmer else 'source')
+        notify_status(
+            'grn_status', 'GRN confirmed',
+            f'{grn.grn_number} from {source_name} was confirmed into {grn.warehouse.warehouse_name}.',
+            severity='info', grn_id=grn.id,
+        )
         return Response(GRNSerializer(grn).data)
 
 
@@ -202,4 +225,5 @@ class GRNRejectView(APIView):
 
         grn.status = 'Rejected'
         grn.save()
+        notify_status('grn_status', 'GRN rejected', f'{grn.grn_number} was rejected.', severity='warning', grn_id=grn.id)
         return Response(GRNSerializer(grn).data)

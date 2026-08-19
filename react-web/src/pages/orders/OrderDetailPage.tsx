@@ -56,7 +56,9 @@ export function OrderDetailPage() {
       setProducts(prodRes.data.results);
 
       const matchedItems = orderRes.data.items.map((item) => {
-        const match = prodRes.data.results.find((p) => p.name === item.product_name && p.warehouse?.id === orderRes.data.warehouse?.id);
+        const match = prodRes.data.results.find(
+          (p) => p.name === item.product_name && p.stock.some((s) => s.warehouse.id === orderRes.data.warehouse?.id),
+        );
         return { product: match?.id ?? '', quantity: item.quantity, price: item.price, uom: item.uom };
       });
       reset({
@@ -70,13 +72,16 @@ export function OrderDetailPage() {
     }).finally(() => setLoading(false));
   }, [id, reset]);
 
-  const productsInWarehouse = products.filter((p) => p.warehouse?.id === warehouseId);
+  const productsInWarehouse = products
+    .map((p) => ({ product: p, stockLine: p.stock.find((s) => s.warehouse.id === warehouseId) }))
+    .filter((row): row is { product: CatalogProduct; stockLine: NonNullable<typeof row.stockLine> } => !!row.stockLine);
   const total = (items ?? []).reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
 
   function pickProduct(index: number, productId: string) {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
-    setValue(`items.${index}.price`, product.price_per_unit);
+    const stockLine = product.stock.find((s) => s.warehouse.id === warehouseId);
+    setValue(`items.${index}.price`, stockLine?.price_per_unit ?? product.price_per_unit);
     setValue(`items.${index}.uom`, product.uom?.name ?? '');
   }
 
@@ -237,7 +242,7 @@ export function OrderDetailPage() {
                         style={{ padding: 8, borderRadius: 6, border: '1px solid var(--color-border)' }}
                       >
                         <option value="">Select…</option>
-                        {productsInWarehouse.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
+                        {productsInWarehouse.map(({ product: p }) => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
                       </select>
                     </td>
                     <td style={{ padding: 8 }}><input type="number" min={1} {...register(`items.${index}.quantity` as const, { valueAsNumber: true })} style={{ width: 90, padding: 8, borderRadius: 6, border: '1px solid var(--color-border)' }} /></td>

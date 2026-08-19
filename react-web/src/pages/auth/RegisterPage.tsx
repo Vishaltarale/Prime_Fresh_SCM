@@ -54,33 +54,46 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout title="Create account" subtitle="Register a new Prime Fresh SCM account">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <Input label="Full name" required value={form.full_name} onChange={(e) => update('full_name', e.target.value)} />
-        <Input label="Email" type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
-        <Input label="Phone" required value={form.phone} onChange={(e) => update('phone', e.target.value)} />
-        <Select label="I am a…" value={form.role} onChange={(e) => update('role', e.target.value as Role)}>
-          <optgroup label="Customer / Partner">
-            {EXTERNAL_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-          </optgroup>
-          <optgroup label="Staff">
-            {STAFF_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-          </optgroup>
-        </Select>
+    <AuthLayout title="Create account" subtitle="Register a new Prime Fresh SCM account" wide>
+      <form onSubmit={handleSubmit}>
+        <div className="auth-register-grid">
+          <Input label="Full name" required value={form.full_name} onChange={(e) => update('full_name', e.target.value)} />
+          <Input label="Email" type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
+          <Input label="Phone" required value={form.phone} onChange={(e) => update('phone', e.target.value)} />
+          <Select label="I am a…" value={form.role} onChange={(e) => update('role', e.target.value as Role)}>
+            <optgroup label="Customer / Partner">
+              {EXTERNAL_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+            </optgroup>
+            <optgroup label="Staff">
+              {STAFF_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+            </optgroup>
+          </Select>
 
-        {profileFields.map((field) => (
-          <Input
-            key={field}
-            label={FIELD_LABELS[field]}
-            required
-            value={(form[field as keyof RegisterInput] as string) ?? ''}
-            onChange={(e) => update(field as keyof RegisterInput, e.target.value)}
-          />
-        ))}
+          {profileFields.map((field, i) => (
+            <div key={field} style={i === profileFields.length - 1 && profileFields.length % 2 === 1 ? { gridColumn: '1 / -1' } : undefined}>
+              <Input
+                label={FIELD_LABELS[field]}
+                required
+                value={(form[field as keyof RegisterInput] as string) ?? ''}
+                onChange={(e) => update(field as keyof RegisterInput, e.target.value)}
+              />
+            </div>
+          ))}
 
-        <Input label="Password" type="password" required minLength={8} value={form.password} onChange={(e) => update('password', e.target.value)} />
-        {error && <span style={{ fontSize: 13, color: 'var(--color-danger)' }}>{error}</span>}
-        <Button type="submit" loading={loading}>Create account</Button>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Input label="Password" type="password" required minLength={8} value={form.password} onChange={(e) => update('password', e.target.value)} />
+          </div>
+
+          {error && (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <span style={{ fontSize: 13, color: 'var(--color-danger)' }}>{error}</span>
+            </div>
+          )}
+
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Button type="submit" loading={loading} style={{ width: '100%' }}>Create account</Button>
+          </div>
+        </div>
       </form>
       <p style={{ marginTop: 16, fontSize: 13, textAlign: 'center', color: 'var(--color-text-secondary)' }}>
         Already registered? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Sign in</Link>

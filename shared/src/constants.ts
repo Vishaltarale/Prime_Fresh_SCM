@@ -16,6 +16,7 @@ export const ROLE_ACCESS = {
   myOrders: ['Customer'] as Role[],
   registrations: ['Admin'] as Role[],
   reports: ['Admin', 'Warehouse Manager'] as Role[],
+  analytics: ['Admin', 'Warehouse Manager'] as Role[],
   // Purchase Orders: same "admin or inventory manager or warehouse provider" group as GRN.
   purchaseOrders: ['Admin', 'Inventory Officer', 'Warehouse Manager'] as Role[],
 };
@@ -71,8 +72,14 @@ export const API_ENDPOINTS = {
   orderInvoice: (id: string) => `/orders/${id}/invoice/`,
 
   dashboard: '/dashboard/',
+  analytics: '/analytics/',
+
+  notifications: '/notifications/',
+  notificationsReadAll: '/notifications/read-all/',
+  notificationRead: (id: string) => `/notifications/${id}/read/`,
 
   report: (type: string) => `/reports/${type}/`,
+  warehouseStockDetail: (warehouseId: string) => `/reports/warehouse-stock/${warehouseId}/`,
   reportExportPdf: (type: string) => `/reports/${type}/export/pdf/`,
   reportExportExcel: (type: string) => `/reports/${type}/export/excel/`,
 } as const;

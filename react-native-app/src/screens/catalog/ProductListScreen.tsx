@@ -56,9 +56,15 @@ export function ProductListScreen({ navigation }: Props) {
               <Text style={styles.cardTitle}>{p.name}</Text>
               <Text style={styles.cardSub}>{p.sku}</Text>
             </View>
-            <Text style={styles.cardSub}>{p.category?.name} · {p.warehouse?.name}</Text>
+            <Text style={styles.cardSub}>{p.category?.name}</Text>
             <Text style={styles.cardPrice}>₹{p.price_per_unit.toFixed(2)} / {p.uom?.name}</Text>
-            <Text style={styles.cardSub}>Qty: {p.quantity_available}</Text>
+            {p.stock.length === 0 ? (
+              <Text style={styles.cardSub}>Not received yet</Text>
+            ) : (
+              p.stock.map((line) => (
+                <Text key={line.warehouse.id} style={styles.cardSub}>{line.warehouse.name}: {line.quantity_available}</Text>
+              ))
+            )}
             <Button title="Delete" variant="danger" onPress={() => confirmDelete(p)} style={{ marginTop: 4, alignSelf: 'flex-start' }} />
           </Card>
         )}

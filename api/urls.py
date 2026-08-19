@@ -9,11 +9,18 @@ from . import reports
 from . import dashboard
 from . import profile
 from . import purchase_orders
+from . import analytics
+from . import notifications
 
 app_name = 'api'
 
 urlpatterns = [
     path('dashboard/', dashboard.DashboardSummaryView.as_view(), name='dashboard_summary'),
+    path('analytics/', analytics.AnalyticsSummaryView.as_view(), name='analytics_summary'),
+
+    path('notifications/', notifications.NotificationListView.as_view(), name='notifications'),
+    path('notifications/read-all/', notifications.NotificationMarkAllReadView.as_view(), name='notifications_read_all'),
+    path('notifications/<str:notification_id>/read/', notifications.NotificationMarkReadView.as_view(), name='notification_read'),
 
     path('purchase-orders/', purchase_orders.POListCreateView.as_view(), name='po_list_create'),
     path('purchase-orders/confirmed/', purchase_orders.POConfirmedForGRNView.as_view(), name='po_confirmed_for_grn'),
@@ -29,6 +36,7 @@ urlpatterns = [
     path('orders/<str:order_id>/', orders.OrderDetailView.as_view(), name='order_detail'),
     path('orders/<str:order_id>/invoice/', orders.OrderInvoicePdfView.as_view(), name='order_invoice'),
 
+    path('reports/warehouse-stock/<str:warehouse_id>/', reports.WarehouseStockDetailView.as_view(), name='warehouse_stock_detail'),
     path('reports/<str:report_type>/', reports.ReportDataView.as_view(), name='report_data'),
     path('reports/<str:report_type>/export/pdf/', reports.ReportExportPdfView.as_view(), name='report_export_pdf'),
     path('reports/<str:report_type>/export/excel/', reports.ReportExportExcelView.as_view(), name='report_export_excel'),

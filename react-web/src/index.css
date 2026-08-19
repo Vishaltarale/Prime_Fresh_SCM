@@ -1,7 +1,7 @@
 :root {
-  --color-primary: #6D28D9;
-  --color-primary-dark: #4C1D95;
-  --color-primary-light: #A78BFA;
+  --color-primary: #7986CB;
+  --color-primary-dark: #303F9F;
+  --color-primary-light: #C5CAE9;
   --color-accent: #4F46E5;
   --color-success: #16A34A;
   --color-warning: #D97706;
@@ -30,9 +30,14 @@
   --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
 
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -49,6 +54,177 @@ button { font-family: inherit; }
 input, select, textarea { font-family: inherit; }
 
 #root { min-height: 100vh; }
+
+/* ---------- Accessibility: respect reduced-motion preference ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Keyboard focus: a visible, animated ring on every interactive element ---------- */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  transition: outline-offset 0.15s var(--ease-out);
+}
+
+/* ---------- Shared keyframes ---------- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleFadeIn {
+  from { opacity: 0; transform: scale(0.94) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes floatParticle {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(var(--drift-x, 12px), var(--drift-y, -18px)); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ---------- Page transition: every route mounts with a soft entrance ---------- */
+.page-enter {
+  animation: fadeInUp 0.38s var(--ease-out) both;
+}
+
+/* ---------- Scroll-reveal (see components/Reveal.tsx) ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Buttons: hover lift + tactile press ---------- */
+.btn-app {
+  transition: transform 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out), filter 0.16s var(--ease-out);
+  will-change: transform;
+}
+
+.btn-app:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(121, 134, 203, 0.22);
+}
+
+.btn-app:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
+  filter: brightness(0.96);
+  transition-duration: 0.08s;
+}
+
+/* ---------- Cards: gentle hover lift ---------- */
+.card-hover {
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ---------- 3D tilt (see components/Tilt.tsx) ---------- */
+.tilt-wrap {
+  perspective: 900px;
+}
+
+.tilt-inner {
+  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-inner.tilting {
+  transition: transform 0.05s linear;
+}
+
+/* ---------- Inputs: focus glow ---------- */
+.input-app {
+  transition: border-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out), transform 0.18s var(--ease-out);
+}
+
+.input-app:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(121, 134, 203, 0.14);
+  transform: translateY(-1px);
+}
+
+/* ---------- Sidebar nav links: animated hover ---------- */
+.nav-link-app {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.18s var(--ease-out), color 0.18s var(--ease-out), transform 0.18s var(--ease-out), padding-left 0.18s var(--ease-out);
+}
+
+.nav-link-app:not(.active):hover {
+  background: rgba(255, 255, 255, 0.14);
+  padding-left: 18px;
+}
+
+.nav-link-app:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Table row hover ---------- */
+.row-hover {
+  transition: background 0.15s var(--ease-out);
+}
+
+.row-hover:hover {
+  background: var(--color-bg);
+}
+
+/* ---------- Dropdown menu entrance ---------- */
+.dropdown-enter {
+  animation: scaleFadeIn 0.18s var(--ease-out) both;
+  transform-origin: top right;
+}
+
+/* ---------- Modal entrance ---------- */
+.modal-overlay-enter {
+  animation: overlayFadeIn 0.2s var(--ease-out) both;
+}
+
+.modal-panel-enter {
+  animation: scaleFadeIn 0.28s var(--ease-spring) both;
+}
+
+/* ---------- Logo: subtle hover response ---------- */
+.logo-badge {
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-out);
+}
+
+.logo-badge:hover {
+  transform: scale(1.04) rotate(-1deg);
+  box-shadow: var(--shadow-md);
+}
 
 .sidebar-nav {
   scrollbar-width: thin;
@@ -70,4 +246,87 @@ input, select, textarea { font-family: inherit; }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---------- Page scrollbar (themed, matches sidebar treatment) ----------
+   The app's <main> flows normally (see AppLayout) and the document itself
+   scrolls, so the theme applies at the body level. */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary-light) transparent;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(121, 134, 203, 0.25);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-bg);
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(121, 134, 203, 0.4);
+}
+
+/* ---------- Login/register: animated gradient + floating particle backdrop ---------- */
+.auth-bg {
+  background: linear-gradient(120deg, var(--color-primary-dark), var(--color-accent), var(--color-primary));
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card-enter {
+  animation: scaleFadeIn 0.5s var(--ease-spring) both;
+}
+
+.auth-card-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(121, 134, 203, 0.35) transparent;
+}
+
+.auth-card-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.auth-card-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.auth-card-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(121, 134, 203, 0.3);
+  border-radius: var(--radius-pill);
+}
+
+.auth-card-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(121, 134, 203, 0.45);
+}
+
+.auth-register-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+}
+
+.auth-register-grid label {
+  font-size: 12px !important;
+}
+
+.auth-register-grid input,
+.auth-register-grid select {
+  padding: 8px 10px !important;
+  font-size: 13px !important;
+}
+
+@media (max-width: 560px) {
+  .auth-register-grid {
+    grid-template-columns: 1fr;
+  }
 }

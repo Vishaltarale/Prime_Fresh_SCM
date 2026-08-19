@@ -7,6 +7,7 @@ import { AppLayout } from './components/AppLayout';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { AnalyticsPage } from './pages/AnalyticsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { GrnListPage } from './pages/grn/GrnListPage';
 import { GrnCreatePage } from './pages/grn/GrnCreatePage';
@@ -75,6 +76,8 @@ export default function App() {
 
             <Route path="/reports" element={<Protected roles={['Admin', 'Warehouse Manager']}><ReportsPage /></Protected>} />
             <Route path="/reports/:type" element={<Protected roles={['Admin', 'Warehouse Manager']}><ReportsPage /></Protected>} />
+
+            <Route path="/analytics" element={<Protected roles={['Admin', 'Warehouse Manager']}><AnalyticsPage /></Protected>} />
 
             <Route path="/orders" element={<Protected roles={['Admin', 'Warehouse Manager', 'Customer']}><OrderDashPage /></Protected>} />
             <Route path="/orders/all" element={<Protected roles={['Admin', 'Warehouse Manager']}><OrderDashPage allOrders /></Protected>} />
